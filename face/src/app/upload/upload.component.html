@@ -1,1 +1,12 @@
-<p>upload works!</p>
+<div class="upload-container">
+    <h2>Upload an Image for Analysis</h2>
+    <form (submit)="onUpload()">
+      <input type="file" (change)="onFileSelected($event)" accept="image/*" />
+      <button type="submit" [disabled]="!selectedFile">Upload</button>
+    </form>
+    <div *ngIf="imagePreview">
+      <h3>Image Preview:</h3>
+      <img [src]="imagePreview" alt="Selected Image" width="300" />
+    </div>
+  </div>
+  
