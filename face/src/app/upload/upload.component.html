@@ -8,5 +8,11 @@
       <h3>Image Preview:</h3>
       <img [src]="imagePreview" alt="Selected Image" width="300" />
     </div>
+    < <div *ngIf="paletteColors.length">
+        <h3>Dominant Colors:</h3>
+        <div class="color-palette">
+          <div *ngFor="let color of paletteColors" [ngStyle]="{'background-color': color}" class="color-box"></div>
+        </div>
+      </div>
   </div>
   
