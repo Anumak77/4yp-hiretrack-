@@ -54,7 +54,7 @@ The main functions that HireTrack will provide are:
 
 ### Justification
 
-> Why/when/where/how will it be useful?
+HireTrack will be useful throughout the job search process by helping candidates identify suitable roles, optimize their CVs, and stay organized. It’s particularly helpful when managing multiple applications, ensuring users focus on positions aligned with their skills. The platform can be used anywhere, from home or on-the-go, with features like application tracking, CV comparisons and calendar integration. By streamlining searches and offering insights, HireTrack reduces the frustration of rejections and improves the efficiency and success of job applications.
 
 ### Programming language(s)
 
