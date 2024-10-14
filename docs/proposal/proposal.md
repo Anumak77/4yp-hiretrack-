@@ -37,7 +37,12 @@ Hiretrack aims to develop an AI-powered platform that helps users optimize their
 
 ### Outline
 
-> Outline the proposed project.
+- AI-Powered CV Optimization: Compare CVs with job postings using BERT, TF-IDF, and cosine similarity, with personalized suggestions for improvements.
+- Job Tracking & Analytics: Track applications, visualize progress, and get data-driven insights.
+- Calendar Integration: Manage deadlines and interviews with Google Calendar sync.
+- Collaborative CV Editing: Share CVs for real-time feedback from mentors or colleagues.
+- Job Search API Integration: Pull listings from platforms like Google Jobs and Glassdoor.
+- Secure & Scalable Design: Built with Django, React, and Firebase for a smooth user experience.
 
 ### Background
 
@@ -64,7 +69,22 @@ HireTrack will be useful throughout the job search process by helping candidates
 
 ### Programming tools / Tech stack
 
-> Describe the compiler, database, web server, etc., and any other software tools you plan to use.
+##### Backend (Django and Java Integration)
+
+- Django (Python framework): For handling backend services such as user authentication, CV storage, API integration, etc.
+- Postman: For API testing.
+- Firebase or PostgreSQL: For storing CVs, user data, and managing authentication (Firebase also supports real-time syncing across devices).
+- TF-IDF and cosine similarity usinf scikit learn
+##### Frontend Options (JavaScript with Java Focus)
+- React.js
+##### AI/ML Tools (for Skill Matching and CV Suggestions)
+- GPT-3 or GPT-4 API (for personalized CV suggestions): You can use OpenAI's API to integrate GPT with your backend for generating personalized recommendations.
+- BERT (Bidirectional Encoder Representations from Transformers): Use BERT for NLP-based skill matching; it can be implemented either in Python (via Django) 
+- Apache Lucene (Java): For text indexing and cosine similarity in Java.
+##### Collaboration and Version Control:
+- Git: For version control and collaborative coding.
+- GitHub or GitLab: For repository hosting, issue tracking, and project management.
+
 
 ### Hardware
 
@@ -72,7 +92,11 @@ N/A
 
 ### Learning Challenges
 
-> List the main new things (technologies, languages, tools, etc) that you will have to learn.
+- Implementing AI Models: Applying BERT, TF-IDF, and cosine similarity effectively.
+- API Integration: Connecting with Google Jobs, Glassdoor, and Google Calendar APIs.
+- Real-Time Collaboration: Enabling smooth, multi-user CV editing and feedback.
+- Data Security & Scalability: Ensuring secure file uploads and reliable user authentication.
+- Frontend-Backend Communication: Building a seamless interface with Django and React.
 
 ### Breakdown of work
 
