@@ -26,53 +26,53 @@
 
 ### Outline
 
-- AI-Powered CV Optimization: Compare CVs with job postings using BERT, TF-IDF, and cosine similarity, with personalized suggestions for improvements.
-- Job Tracking & Analytics: Track applications, visualize progress, and get data-driven insights.
-- Calendar Integration: Manage deadlines and interviews with Google Calendar sync.
-- Collaborative CV Editing: Share CVs for real-time feedback from mentors or colleagues.
-- Job Search API Integration: Pull listings from platforms like Google Jobs and Glassdoor.
-- Secure & Scalable Design: Built with Django, React, and Firebase for a smooth user experience.
+>- AI-Powered CV Optimization: Compare CVs with job postings using BERT, TF-IDF, and cosine similarity, with personalized suggestions for improvements.
+>- Job Tracking & Analytics: Track applications, visualize progress, and get data-driven insights.
+>- Calendar Integration: Manage deadlines and interviews with Google Calendar sync.
+>- Collaborative CV Editing: Share CVs for real-time feedback from mentors or colleagues.
+>- Job Search API Integration: Pull listings from platforms like Google Jobs and Glassdoor.
+>- Secure & Scalable Design: Built with Django, React, and Firebase for a smooth user experience.
 
 ### Background
 
-As 4th-year students preparing to enter the job market, we’ve found the application process to be exhausting and frustrating, especially when it comes to finding suitable job postings. Too often, we spend time reviewing a graduate position only to discover at the end that it requires specific coding languages or experience we don’t have. With HireTrack, we aim to address these challenges by streamlining job searches and helping candidates focus on the opportunities best aligned with their skills and aspirations. It is also difficult to keep track of assessments and upcoming interviews so we have come up with the idea of HireTrack based on our own experiences and the experiences of other students.
+>As 4th-year students preparing to enter the job market, we’ve found the application process to be exhausting and >frustrating, especially when it comes to finding suitable job postings. Too often, we spend time reviewing a >graduate position only to discover at the end that it requires specific coding languages or experience we don’t >have. With HireTrack, we aim to address these challenges by streamlining job searches and helping candidates ?>focus on the opportunities best aligned with their skills and aspirations. It is also difficult to keep track of >assessments and upcoming interviews so we have come up with the idea of HireTrack based on our own experiences >and the experiences of other students.
 
 ### Achievements
 
-The main functions that HireTrack will provide are:
-- A place to upload, edit and compare your CV with a job posting to see compatibility
-- A search functionality to find job postings that are suitable for your CV
-- A tracker to monitor your application progress across companies
-- An analytics dashboard to examine the trends in your application experience 
-- A calendar that updates you on interviews and asessment dates 
+>The main functions that HireTrack will provide are:
+>- A place to upload, edit and compare your CV with a job posting to see compatibility
+>- A search functionality to find job postings that are suitable for your CV
+>- A tracker to monitor your application progress across companies
+>- An analytics dashboard to examine the trends in your application experience 
+>- A calendar that updates you on interviews and asessment dates 
 
 ### Justification
 
-HireTrack will be useful throughout the job search process by helping candidates identify suitable roles, optimize their CVs, and stay organized. It’s particularly helpful when managing multiple applications, ensuring users focus on positions aligned with their skills. The platform can be used anywhere, from home or on-the-go, with features like application tracking, CV comparisons and calendar integration. By streamlining searches and offering insights, HireTrack reduces the frustration of rejections and improves the efficiency and success of job applications.
+>HireTrack will be useful throughout the job search process by helping candidates identify suitable roles, >optimize their CVs, and stay organized. It’s particularly helpful when managing multiple applications, ensuring >users focus on positions aligned with their skills. The platform can be used anywhere, from home or on-the-go, >with features like application tracking, CV comparisons and calendar integration. By streamlining searches and >offering insights, HireTrack reduces the frustration of rejections and improves the efficiency and success of job >applications.
 
 ### Programming language(s)
 
-- Java 
-- Javascript
-- Python
+>- Java 
+>- Javascript
+>- Python
 
 ### Programming tools / Tech stack
 
 ##### Backend (Django and Java Integration)
 
-- Django (Python framework): For handling backend services such as user authentication, CV storage, API integration, etc.
-- Postman: For API testing.
-- Firebase or PostgreSQL: For storing CVs, user data, and managing authentication (Firebase also supports real-time syncing across devices).
-- TF-IDF and cosine similarity usinf scikit learn
+>- Django (Python framework): For handling backend services such as user authentication, CV storage, API integration, etc.
+>- Postman: For API testing.
+>- Firebase or PostgreSQL: For storing CVs, user data, and managing authentication (Firebase also supports real-time syncing across devices).
+>- TF-IDF and cosine similarity usinf scikit learn
 ##### Frontend Options (JavaScript with Java Focus)
-- React.js
+>- React.js
 ##### AI/ML Tools (for Skill Matching and CV Suggestions)
-- GPT-3 or GPT-4 API (for personalized CV suggestions): You can use OpenAI's API to integrate GPT with your backend for generating personalized recommendations.
-- BERT (Bidirectional Encoder Representations from Transformers): Use BERT for NLP-based skill matching; it can be implemented either in Python (via Django) 
-- Apache Lucene (Java): For text indexing and cosine similarity in Java.
+>- GPT-3 or GPT-4 API (for personalized CV suggestions): You can use OpenAI's API to integrate GPT with your backend for generating personalized recommendations.
+>- BERT (Bidirectional Encoder Representations from Transformers): Use BERT for NLP-based skill matching; it can be implemented either in Python (via Django) 
+>- Apache Lucene (Java): For text indexing and cosine similarity in Java.
 ##### Collaboration and Version Control:
-- Git: For version control and collaborative coding.
-- GitHub or GitLab: For repository hosting, issue tracking, and project management.
+>- Git: For version control and collaborative coding.
+>- GitHub or GitLab: For repository hosting, issue tracking, and project management.
 
 
 ### Hardware
