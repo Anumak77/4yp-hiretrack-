@@ -22,7 +22,7 @@
 
 ### Introduction
 
-Hiretrack aims to develop an AI-powered platform that helps users optimize their CVs by comparing them with job descriptions, highlighting key skills, and providing a tools to analyze and keept track of application processes. Using techniques like BERT, TF-IDF, and cosine similarity, the platform will offer insights into how well a CV aligns with job postings. It will also streamline job search management with tools for tracking applications, visualizing progress and scheduling events through calendar integration. With external job posting APIs and a secure, user-friendly interface built on Django, React, and Firebase, the platform will empower users to enhance their applications and improve their chances of success.
+>Hiretrack aims to develop an AI-powered platform that helps users optimize their CVs by comparing them with job >descriptions, highlighting key skills, and providing a tools to analyze and keept track of application processes. >Using techniques like BERT, TF-IDF, and cosine similarity, the platform will offer insights into how well a CV >aligns with job postings. It will also streamline job search management with tools for tracking applications, >visualizing progress and scheduling events through calendar integration. With external job posting APIs and a >secure, user-friendly interface built on Django, React, and Firebase, the platform will empower users to enhance >their applications and improve their chances of success.
 
 ### Outline
 
