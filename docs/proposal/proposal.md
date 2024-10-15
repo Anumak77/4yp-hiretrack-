@@ -21,11 +21,9 @@
 
 
 ### Introduction
-
 >Hiretrack aims to develop an AI-powered platform that helps users optimize their CVs by comparing them with job >descriptions, highlighting key skills, and providing a tools to analyze and keept track of application processes. >Using techniques like BERT, TF-IDF, and cosine similarity, the platform will offer insights into how well a CV >aligns with job postings. It will also streamline job search management with tools for tracking applications, >visualizing progress and scheduling events through calendar integration. With external job posting APIs and a >secure, user-friendly interface built on Django, React, and Firebase, the platform will empower users to enhance >their applications and improve their chances of success.
 
 ### Outline
-
 >- AI-Powered CV Optimization: Compare CVs with job postings using BERT, TF-IDF, and cosine similarity, with personalized suggestions for improvements.
 >- Job Tracking & Analytics: Track applications, visualize progress, and get data-driven insights.
 >- Calendar Integration: Manage deadlines and interviews with Google Calendar sync.
@@ -34,11 +32,9 @@
 >- Secure & Scalable Design: Built with Django, React, and Firebase for a smooth user experience.
 
 ### Background
-
 >As 4th-year students preparing to enter the job market, we’ve found the application process to be exhausting and >frustrating, especially when it comes to finding suitable job postings. Too often, we spend time reviewing a >graduate position only to discover at the end that it requires specific coding languages or experience we don’t >have. With HireTrack, we aim to address these challenges by streamlining job searches and helping candidates ?>focus on the opportunities best aligned with their skills and aspirations. It is also difficult to keep track of >assessments and upcoming interviews so we have come up with the idea of HireTrack based on our own experiences >and the experiences of other students.
 
 ### Achievements
-
 >The main functions that HireTrack will provide are:
 >- A place to upload, edit and compare your CV with a job posting to see compatibility
 >- A search functionality to find job postings that are suitable for your CV
@@ -47,19 +43,15 @@
 >- A calendar that updates you on interviews and asessment dates 
 
 ### Justification
-
 >HireTrack will be useful throughout the job search process by helping candidates identify suitable roles, >optimize their CVs, and stay organized. It’s particularly helpful when managing multiple applications, ensuring >users focus on positions aligned with their skills. The platform can be used anywhere, from home or on-the-go, >with features like application tracking, CV comparisons and calendar integration. By streamlining searches and >offering insights, HireTrack reduces the frustration of rejections and improves the efficiency and success of job >applications.
 
 ### Programming language(s)
-
 >- Java 
 >- Javascript
 >- Python
 
 ### Programming tools / Tech stack
-
 ##### Backend (Django and Java Integration)
-
 >- Django (Python framework): For handling backend services such as user authentication, CV storage, API integration, etc.
 >- Postman: For API testing.
 >- Firebase or PostgreSQL: For storing CVs, user data, and managing authentication (Firebase also supports real-time syncing across devices).
@@ -78,7 +70,6 @@
 >N/A
 
 ### Learning Challenges
-
 >- Implementing AI Models: Applying BERT, TF-IDF, and cosine similarity effectively.
 >- API Integration: Connecting with Google Jobs, Glassdoor, and Google Calendar APIs.
 >- Real-Time Collaboration: Enabling smooth, multi-user CV editing and feedback.
@@ -87,16 +78,14 @@
 
 ### Breakdown of work
 
-#### Phase A
+>#### Phase A
 >- **Backend Setup (Django)**:
 >Build a Django backend to handle user management (sign-up, login) and basic CV handling.
 >Set up a secure file upload system for CVs (e.g., in PDF or Word format).
 >Store CV data in a database (Firebase or Django ORM).
-
 >- **Job Posting Integration**:
 >Integrate APIs like Google Jobs or Glassdoor to fetch job listings.
 >Provide a list of relevant job postings based on simple keyword searches.
-
 >- **Fallback Plan**:
 >If the external API (e.g., Glassdoor) fails, allow users to manually enter job details or upload job postings in >a structured format (like a form with fields for job title, description, etc.).
 >- **CV Management**:
@@ -108,12 +97,10 @@
 >Provide basic filters for employers, such as location, job title, or industry.
 
 >#### Phase B 
-
 >- **Advanced CV-Job Matching**: (Cosine Similarity)
 >Implement a feature using TF-IDF and cosine similarity to compare job descriptions with user CVs.
 >Highlight similarities and differences between job postings and CVs.
 >Provide a “match score” based on how well the CV fits the job requirements.
-
 >- **Job Application Tracker**:
 >Enable users to track their job applications with a spreadsheet-like interface.
 >Allow users to manually update the status of their applications (e.g., applied, rejected, interview scheduled).
@@ -137,7 +124,6 @@
 >Use GPT to analyze CVs and provide personalized suggestions for improvement.
 >Tailor recommendations based on job descriptions, highlighting how users can better present relevant skills or >experience.
 >Suggest action verbs, skill enhancements, and formatting improvements to help users make their CV more attractive >to employers.
-
 >- **Collaborative CV Building**
 >Allow users to share their CV with mentors, professors, or colleagues for feedback.
 >Provide real-time commenting and suggestion tools within the app, similar to Google Docs’ collaboration features.
@@ -147,7 +133,6 @@
 
 
 #### Siri Nandipaty
-
 >##### Phase A:
 >- Backend Setup (Django)
 >- Secure CV Upload and Storage
@@ -162,7 +147,6 @@
 >- GPT-Powered CV Suggestions (Backend)
 
 #### Anushree Umak
-
 >##### Phase A:
 >- Frontend Setup (React or Vue.js)
 >- CV Management UI (Upload, View, Edit)
