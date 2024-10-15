@@ -55,8 +55,8 @@
 ##### Frontend Options (JavaScript with Java Focus)
 >- React.js
 ##### AI/ML Tools (for Skill Matching and CV Suggestions)
->- GPT-3 or GPT-4 API (for personalized CV suggestions): You can use OpenAI's API to integrate GPT with your backend for generating personalized recommendations.
->- BERT (Bidirectional Encoder Representations from Transformers): Use BERT for NLP-based skill matching; it can be implemented either in Python (via Django) 
+>- GPT-3 or GPT-4 API (for personalized CV suggestions): OpenAI's API to integrate GPT with the backend for generating personalized recommendations.
+>- BERT (Bidirectional Encoder Representations from Transformers): BERT for NLP-based skill matching; it will be implemented either in Python (via Django) 
 >- Apache Lucene (Java): For text indexing and cosine similarity in Java.
 ##### Collaboration and Version Control:
 >- Git: For version control and collaborative coding.
