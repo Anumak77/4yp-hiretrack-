@@ -1,9 +1,5 @@
 # School of Computing &mdash; Year 4 Project Proposal Form
-
-> Edit (then commit and push) this document to complete your proposal form.
-> Make use of figures / diagrams where appropriate.
->
-> Do not rename this file.
+3
 
 ## SECTION A
 
@@ -95,7 +91,6 @@
 >Build a basic search functionality that allows employers or recruiters to search the platform’s CV database.
 >Use simple keyword matching to return relevant CVs.
 >Provide basic filters for employers, such as location, job title, or industry.
-
 >#### Phase B 
 >- **Advanced CV-Job Matching**: (Cosine Similarity)
 >Implement a feature using TF-IDF and cosine similarity to compare job descriptions with user CVs.
@@ -117,8 +112,6 @@
 >Integrate Google Calendar API to sync with users' calendars and send reminders for upcoming events.
 >- **Fallback Plan**:
 >If the Google Calendar API fails, allow users to export calendar data to other formats (e.g., .ics files) or >manually manage their events in the app.
-
-
 >#### Phase C. 
 >- **GPT-Powered CV Suggestions**:
 >Use GPT to analyze CVs and provide personalized suggestions for improvement.
