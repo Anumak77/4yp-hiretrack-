@@ -51,7 +51,7 @@
 >- Django (Python framework): For handling backend services such as user authentication, CV storage, API integration, etc.
 >- Postman: For API testing.
 >- Firebase or PostgreSQL: For storing CVs, user data, and managing authentication (Firebase also supports real-time syncing across devices).
->- TF-IDF and cosine similarity usinf scikit learn
+>- TF-IDF and cosine similarity using scikit learn
 ##### Frontend Options (JavaScript with Java Focus)
 >- React.js
 ##### AI/ML Tools (for Skill Matching and CV Suggestions)
