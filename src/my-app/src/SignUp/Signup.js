@@ -1,90 +1,156 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import {  createUserWithEmailAndPassword  } from 'firebase/auth';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { auth } from '../firebase';
 
 const Signup = () => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+  const [email, setEmail] = useState('');
+  const [name, setName] = useState(''); // State for name
+  const [password, setPassword] = useState('');
 
-    const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('');
+  const onSubmit = async (e) => {
+    e.preventDefault();
 
-    const onSubmit = async (e) => {
-      e.preventDefault()
+    try {
+      // Create the user with email and password
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
 
-      await createUserWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
-            // Signed in
-            const user = userCredential.user;
-            console.log(user);
-            navigate("/login")
-            // ...
-        })
-        .catch((error) => {
-            const errorCode = error.code;
-            const errorMessage = error.message;
-            console.log(errorCode, errorMessage);
-            // ..
-        });
+      // Update the user's profile with the displayName
+      await updateProfile(user, { displayName: name });
 
-
+      console.log(`User: ${name}, Email: ${user.email}`);
+      navigate('/login'); // Navigate to login after signup
+    } catch (error) {
+      console.error('Error during signup:', error.message);
     }
+  };
 
   return (
-    <main >        
-        <section>
-            <div>
-                <div>                  
-                    <h1> FocusApp </h1>                                                                            
-                    <form>                                                                                            
-                        <div>
-                            <label htmlFor="email-address">
-                                Email address
-                            </label>
-                            <input
-                                type="email"
-                                label="Email address"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}  
-                                required                                    
-                                placeholder="Email address"                                
-                            />
-                        </div>
+    <main
+      style={{
+        height: '100vh',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#f8c8dc', // Light pink background
+      }}
+    >
+      <section
+        style={{
+          background: 'white',
+          padding: '30px 40px',
+          borderRadius: '8px',
+          boxShadow: '0px 4px 12px rgba(200, 120, 140, 0.3)', // Pink-themed shadow
+          maxWidth: '400px',
+          width: '100%',
+        }}
+      >
+        <div>
+          <h1
+            style={{
+              fontSize: '24px',
+              fontWeight: 'bold',
+              textAlign: 'center',
+              marginBottom: '20px',
+              color: '#ff69b4', // Pink text for header
+            }}
+          >
+            HireTrack
+          </h1>
 
-                        <div>
-                            <label htmlFor="password">
-                                Password
-                            </label>
-                            <input
-                                type="password"
-                                label="Create password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)} 
-                                required                                 
-                                placeholder="Password"              
-                            />
-                        </div>                                             
-
-                        <button
-                            type="submit" 
-                            onClick={onSubmit}                        
-                        >  
-                            Sign up                                
-                        </button>
-
-                    </form>
-
-                    <p>
-                        Already have an account?{' '}
-                        <NavLink to="/login" >
-                            Sign in
-                        </NavLink>
-                    </p>                   
-                </div>
+          <form>
+            <div style={{ marginBottom: '15px' }}>
+              <label htmlFor="name" style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+                Name
+              </label>
+              <input
+                id="name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Enter your name"
+                required
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  borderRadius: '4px',
+                  border: '1px solid #ccc',
+                }}
+              />
             </div>
-        </section>
-    </main>
-  )
-}
 
-export default Signup
+            <div style={{ marginBottom: '15px' }}>
+              <label htmlFor="email-address" style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+                Email address
+              </label>
+              <input
+                type="email"
+                id="email-address"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Email address"
+                required
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  borderRadius: '4px',
+                  border: '1px solid #ccc',
+                }}
+              />
+            </div>
+
+            <div style={{ marginBottom: '15px' }}>
+              <label htmlFor="password" style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+                Password
+              </label>
+              <input
+                type="password"
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Password"
+                required
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  borderRadius: '4px',
+                  border: '1px solid #ccc',
+                }}
+              />
+            </div>
+
+            <div style={{ textAlign: 'center' }}>
+              <button
+                type="submit"
+                onClick={onSubmit}
+                style={{
+                  padding: '10px 20px',
+                  backgroundColor: '#ff69b4', // Pink button background
+                  color: '#f5f5f5', // Softer light gray text
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  marginTop: '10px',
+                  boxShadow: '0px 4px 8px rgba(200, 120, 140, 0.3)', // Pink-themed shadow
+                }}
+              >
+                Sign up
+              </button>
+            </div>
+          </form>
+
+          <p style={{ marginTop: '15px', textAlign: 'center' }}>
+            Already have an account?{' '}
+            <NavLink to="/login" style={{ color: '#e0559a', textDecoration: 'none' }}>
+              Sign in
+            </NavLink>
+          </p>
+        </div>
+      </section>
+    </main>
+  );
+};
+
+export default Signup;
