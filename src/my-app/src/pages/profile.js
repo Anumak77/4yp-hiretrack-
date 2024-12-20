@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
-import { auth, storage } from '../firebase';
-import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { firebaseapp } from '../components/firebaseconfigs';
+import { getAuth } from 'firebase/auth';
+import { convertToBase64 } from '../components/utils';
+import { savePdfToFirestore } from '../components/utils';
+import { fetchPdfFromFirestore } from '../components/utils';
 
 const Profile = () => {
   const [name, setName] = useState('Guest'); // Default to "Guest" if no name is available
@@ -10,6 +13,7 @@ const Profile = () => {
   const [successMessage, setSuccessMessage] = useState('');
   const [uploadProgress, setUploadProgress] = useState(0);
   const [cvUrl, setCvUrl] = useState(''); // To store the uploaded file's download URL
+  const auth = getAuth(firebaseapp);
 
   useEffect(() => {
     // Fetch the user's name from Firebase Auth
@@ -22,11 +26,7 @@ const Profile = () => {
 
   const handleFileChange = (e) => {
     const uploadedFile = e.target.files[0];
-    const validTypes = [
-      'application/pdf',
-      'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    ];
+    const validTypes = ['application/pdf'];
 
     if (uploadedFile && validTypes.includes(uploadedFile.type)) {
       setFile(uploadedFile);
@@ -34,40 +34,32 @@ const Profile = () => {
       setSuccessMessage('');
     } else {
       setFile(null);
-      setSuccessMessage('');
-      setErrorMessage('Please upload a valid file type (PDF/DOCX).');
+      setErrorMessage('Please upload a valid PDF file.');
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!file) {
-      setErrorMessage('Please select a CV to upload.');
+      setErrorMessage('Please select a PDF to upload.');
       return;
     }
 
-    const storageRef = ref(storage, `cvs/${auth.currentUser.uid}/${file.name}`);
-    const uploadTask = uploadBytesResumable(storageRef, file);
-
-    uploadTask.on(
-      'state_changed',
-      (snapshot) => {
-        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        setUploadProgress(progress.toFixed(0)); // Display as percentage
-      },
-      (error) => {
-        setErrorMessage('Error uploading file: ' + error.message);
-      },
-      async () => {
-        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-        setCvUrl(downloadURL);
-        setSuccessMessage('CV uploaded successfully!');
-        setErrorMessage('');
-        console.log('File available at:', downloadURL);
-      }
-    );
+    try {
+      await savePdfToFirestore(file);
+      setSuccessMessage('PDF uploaded successfully!');
+    } catch (error) {
+      setErrorMessage('Error uploading PDF.');
+    }
   };
+
+  const displayPdf = async () => {
+    const pdfData = await fetchPdfFromFirestore();
+    const pdfWindow = window.open();
+    pdfWindow.document.write(`<iframe width='100%' height='100%' src="${pdfData}"></iframe>`);
+  };
+  
 
   return (
     <main
@@ -147,6 +139,7 @@ const Profile = () => {
           >
             Upload CV
           </button>
+          <button onClick={displayPdf}>View Uploaded CV</button>
         </form>
 
         {uploadProgress > 0 && (

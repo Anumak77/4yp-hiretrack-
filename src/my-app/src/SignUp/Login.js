@@ -1,28 +1,43 @@
 import React, { useState } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../firebase';
+import { getAuth } from 'firebase/auth';
 import { NavLink, useNavigate } from 'react-router-dom';
+import { firebaseapp } from "../components/firebaseconfigs";
 
 const Login = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState(''); // State to handle error messages
+  const [loading, setLoading] = useState(false); // State to handle loading
+  const auth = getAuth(firebaseapp);
 
-  const onLogin = (e) => {
+  const onLogin = async (e) => {
     e.preventDefault();
-    signInWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        // Signed in
-        const user = userCredential.user;
-        navigate('/profile');
-        console.log(user);
-      })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        console.log(errorCode, errorMessage);
-      });
+    setLoading(true);
+    setError('');
+
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      console.log('Logged in:', user);
+      navigate('/profile'); // Redirect to the profile page on success
+    } catch (error) {
+      // Handle errors and set user-friendly messages
+      if (error.code === 'auth/wrong-password') {
+        setError('Incorrect password. Please try again.');
+      } else if (error.code === 'auth/user-not-found') {
+        setError('No user found with this email address.');
+      } else {
+        setError('Failed to log in. Please try again later.');
+      }
+      console.error('Login Error:', error.message);
+    } finally {
+      setLoading(false); // Stop loading after login attempt
+    }
   };
+
 
   return (
     <>

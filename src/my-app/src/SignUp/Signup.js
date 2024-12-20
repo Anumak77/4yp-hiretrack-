@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
+import { getAuth } from 'firebase/auth';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { auth } from '../firebase';
+import { firebaseapp } from '../components/firebaseconfigs';
 
 const Signup = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [name, setName] = useState(''); // State for name
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const auth = getAuth(firebaseapp);
+  
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -22,8 +26,15 @@ const Signup = () => {
 
       console.log(`User: ${name}, Email: ${user.email}`);
       navigate('/login'); // Navigate to login after signup
-    } catch (error) {
-      console.error('Error during signup:', error.message);
+    } catch (err) {
+      if (err.code === 'auth/weak-password') {
+        setError('The password is too weak.');
+      } else if (err.code === 'auth/email-already-in-use') {
+        setError('The email address is already in use.');
+      } else {
+        setError(err.message);
+        console.error('Error during signup:', err.message);
+      }
     }
   };
 
