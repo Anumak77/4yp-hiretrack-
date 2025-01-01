@@ -1,5 +1,6 @@
 import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
+import {axios} from 'axios';
 
 export const savePdfToFirestore = async (file) => {
     try {
@@ -49,6 +50,23 @@ export const fetchPdfFromFirestore = async () => {
       throw new Error('No CV found for user');
     }
   };
+  
+  export const analyzeSimilarity = async (text2) => {
+    try {
+      const text1 = await fetchPdfFromFirestore();
+  
+      const response = await axios.post('http://localhost:5000/similarity', {
+        text1,
+        text2,
+      });
+  
+      return response.data.similarity; 
+    } catch (error) {
+      console.error('Error analyzing similarity:', error);
+      throw error;
+    }
+  };
+  
 
 
   
