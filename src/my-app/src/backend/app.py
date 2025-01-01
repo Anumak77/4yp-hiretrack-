@@ -76,5 +76,21 @@ def similarity():
     response = top_matches.to_dict(orient='records')
     return jsonify({"matches": response}), 200
 
+@app.route('/compare_with_description', methods=['POST'])
+def compare_with_description():
+    data = request.json
+    job_description = data.get('job_description') 
+    cv_base64 = data.get('cv')  
+
+    if not job_description or not cv_base64:
+        return jsonify({"error": "Job description and CV are required"}), 400
+
+    user_cv_text = decode_pdf(cv_base64)
+
+    vectorizer = TfidfVectorizer().fit_transform([user_cv_text, job_description])
+    similarity_score = cosine_similarity(vectorizer[0], vectorizer[1])[0][0]
+
+    return jsonify({"cosine similarity": similarity_score}), 200
+
 if __name__ == '__main__':
     app.run(port=5000)
