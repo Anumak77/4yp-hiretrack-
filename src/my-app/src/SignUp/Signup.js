@@ -7,7 +7,7 @@ import { firebaseapp } from '../components/firebaseconfigs';
 const Signup = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
-  const [name, setName] = useState(''); // State for name
+  const [name, setName] = useState(''); 
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const auth = getAuth(firebaseapp);
@@ -17,15 +17,13 @@ const Signup = () => {
     e.preventDefault();
 
     try {
-      // Create the user with email and password
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // Update the user's profile with the displayName
       await updateProfile(user, { displayName: name });
 
       console.log(`User: ${name}, Email: ${user.email}`);
-      navigate('/login'); // Navigate to login after signup
+      navigate('/login');
     } catch (err) {
       if (err.code === 'auth/weak-password') {
         setError('The password is too weak.');
@@ -39,43 +37,14 @@ const Signup = () => {
   };
 
   return (
-    <main
-      style={{
-        height: '100vh',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#f8c8dc', // Light pink background
-      }}
-    >
-      <section
-        style={{
-          background: 'white',
-          padding: '30px 40px',
-          borderRadius: '8px',
-          boxShadow: '0px 4px 12px rgba(200, 120, 140, 0.3)', // Pink-themed shadow
-          maxWidth: '400px',
-          width: '100%',
-        }}
-      >
+    <main style={{ height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: '#f8c8dc'}} >
+      <section style={{ background: 'white', padding: '30px 40px', borderRadius: '8px', boxShadow: '0px 4px 12px rgba(200, 120, 140, 0.3)',maxWidth: '400px', width: '100%'}} >
         <div>
-          <h1
-            style={{
-              fontSize: '24px',
-              fontWeight: 'bold',
-              textAlign: 'center',
-              marginBottom: '20px',
-              color: '#ff69b4', // Pink text for header
-            }}
-          >
-            HireTrack
-          </h1>
+          <h1 style={{ fontSize: '24px', fontWeight: 'bold', textAlign: 'center', marginBottom: '20px', color: '#ff69b4'}} > HireTrack </h1>
 
           <form>
             <div style={{ marginBottom: '15px' }}>
-              <label htmlFor="name" style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-                Name
-              </label>
+              <label htmlFor="name" style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}> Name </label>
               <input
                 id="name"
                 type="text"
@@ -83,12 +52,7 @@ const Signup = () => {
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Enter your name"
                 required
-                style={{
-                  width: '100%',
-                  padding: '10px',
-                  borderRadius: '4px',
-                  border: '1px solid #ccc',
-                }}
+                style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ccc'}}
               />
             </div>
 
@@ -103,12 +67,7 @@ const Signup = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Email address"
                 required
-                style={{
-                  width: '100%',
-                  padding: '10px',
-                  borderRadius: '4px',
-                  border: '1px solid #ccc',
-                }}
+                style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ccc'}}
               />
             </div>
 
@@ -123,12 +82,7 @@ const Signup = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Password"
                 required
-                style={{
-                  width: '100%',
-                  padding: '10px',
-                  borderRadius: '4px',
-                  border: '1px solid #ccc',
-                }}
+                style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ccc'}}
               />
             </div>
 
@@ -136,16 +90,7 @@ const Signup = () => {
               <button
                 type="submit"
                 onClick={onSubmit}
-                style={{
-                  padding: '10px 20px',
-                  backgroundColor: '#ff69b4', // Pink button background
-                  color: '#f5f5f5', // Softer light gray text
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  marginTop: '10px',
-                  boxShadow: '0px 4px 8px rgba(200, 120, 140, 0.3)', // Pink-themed shadow
-                }}
+                style={{ padding: '10px 20px', backgroundColor: '#ff69b4', color: '#f5f5f5', border: 'none', borderRadius: '4px', cursor: 'pointer', marginTop: '10px', boxShadow: '0px 4px 8px rgba(200, 120, 140, 0.3)' }}
               >
                 Sign up
               </button>

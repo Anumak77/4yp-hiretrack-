@@ -1,6 +1,6 @@
 import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
-import {axios} from 'axios';
+import axios from 'axios';
 
 export const savePdfToFirestore = async (file) => {
     try {

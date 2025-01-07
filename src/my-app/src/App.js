@@ -1,5 +1,6 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import Navbar from './components/Navbar';
 import Login from './SignUp/Login';
 import Signup from './SignUp/Signup';
@@ -11,9 +12,29 @@ import RecruiterSearch from './pages/recruiter-search';
 function App() {
   return (
     <Router>
-      <Navbar />
+      <MainApp />
+    </Router>
+  );
+}
+
+function MainApp() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const auth = getAuth();
+    onAuthStateChanged(auth, (user) => {
+      setIsAuthenticated(!!user);
+    });
+  }, []);
+
+  const location = useLocation();
+  const hideNavbar = location.pathname === '/login' || location.pathname === '/signup';
+
+  return (
+    <>
+      {!hideNavbar && <Navbar />}
       <Routes>
-        <Route path="/" element={<Login />} />
+        <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/profile" element={<Profile />} />
@@ -22,7 +43,7 @@ function App() {
         <Route path="/recruiter-search" element={<RecruiterSearch />} />
         <Route path="*" element={<h1>404 - Page Not Found</h1>} />
       </Routes>
-    </Router>
+    </>
   );
 }
 
