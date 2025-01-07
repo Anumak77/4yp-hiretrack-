@@ -1,11 +1,12 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+import profileIcon from '../images/profile_icon.png'; 
 
 const Navbar = () => {
   return (
     <nav
       style={{
-        backgroundColor: '#ff69b4', // Updated background color
+        backgroundColor: '#ff69b4',
         padding: '10px 20px',
         boxShadow: '#f5f5f5',
         position: 'sticky',
@@ -16,22 +17,13 @@ const Navbar = () => {
       <ul
         style={{
           display: 'flex',
-          justifyContent: 'space-between', // Ensures proper alignment
+          justifyContent: 'space-between', 
           alignItems: 'center',
           listStyle: 'none',
           margin: 0,
           padding: 0,
         }}
       >
-        <li style={{ margin: '0 10px' }}>
-          <NavLink
-            to="/profile"
-            style={{ textDecoration: 'none', color: 'white', fontSize: '16px' }}
-            activeStyle={{ fontWeight: 'bold', textDecoration: 'underline' }}
-          >
-            Profile
-          </NavLink>
-        </li>
         <li style={{ margin: '0 10px' }}>
           <NavLink
             to="/cv-management"
@@ -60,12 +52,17 @@ const Navbar = () => {
           </NavLink>
         </li>
         <li style={{ margin: '0 10px' }}>
-          <NavLink
-            to="/signout"
-            style={{ textDecoration: 'none', color: 'white', fontSize: '16px' }}
-            activeStyle={{ fontWeight: 'bold', textDecoration: 'underline' }}
-          >
-            Sign Out
+          <NavLink to="/profile" > 
+          <img
+              src={profileIcon}
+              alt="Profile Icon"
+              style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: '50%',
+                cursor: 'pointer',
+              }}
+            />
           </NavLink>
         </li>
       </ul>
