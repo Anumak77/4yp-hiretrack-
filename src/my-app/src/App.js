@@ -8,6 +8,9 @@ import Profile from './pages/profile';
 import CVManagement from './pages/cv-management';
 import JobTracker from './pages/job-tracker';
 import RecruiterSearch from './pages/recruiter-search';
+import Dashboard from './pages/dashboard';
+
+
 
 function App() {
   return (
@@ -41,6 +44,7 @@ function MainApp() {
         <Route path="/cv-management" element={<CVManagement />} />
         <Route path="/job-tracker" element={<JobTracker />} />
         <Route path="/recruiter-search" element={<RecruiterSearch />} />
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="*" element={<h1>404 - Page Not Found</h1>} />
       </Routes>
     </>

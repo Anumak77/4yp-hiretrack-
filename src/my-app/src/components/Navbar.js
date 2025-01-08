@@ -33,6 +33,17 @@ const Navbar = () => {
             CV Management
           </NavLink>
         </li>
+
+        <li style={{ margin: '0 10px' }}>
+          <NavLink
+            to="/dashboard"
+            style={{ textDecoration: 'none', color: 'white', fontSize: '16px' }}
+            activeStyle={{ fontWeight: 'bold', textDecoration: 'underline' }}
+          >
+            Dashboard
+          </NavLink>
+        </li>
+
         <li style={{ margin: '0 10px' }}>
           <NavLink
             to="/job-tracker"

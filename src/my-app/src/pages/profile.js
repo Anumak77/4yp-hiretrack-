@@ -60,7 +60,7 @@ const Profile = () => {
     <main
       style={{ height: '100vh', backgroundColor: '#f8c8dc', display: 'flex', justifyContent: 'center', alignItems: 'center' }} >
       <section
-        style={{mbackgroundColor: 'white', padding: '30px', borderRadius: '12px', boxShadow: '0px 6px 16px rgba(200, 120, 140, 0.3)', textAlign: 'center', maxWidth: '500px', width: '100%' }} >
+        style={{backgroundColor: 'white', padding: '30px', borderRadius: '12px', boxShadow: '0px 6px 16px rgba(200, 120, 140, 0.3)', textAlign: 'center', maxWidth: '500px', width: '100%' }} >
         <h1
           style={{ fontSize: '28px', fontWeight: 'bold', marginBottom: '20px', color: '#ff69b4' }}>
           Hey, welcome back {name}!
