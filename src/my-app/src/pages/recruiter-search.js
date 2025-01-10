@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { recruiters } from '../mockData.js';
+import recruiters from '../mockData.json';
 
 const RecruiterSearch = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -23,61 +23,84 @@ const RecruiterSearch = () => {
     <main
       style={{
         minHeight: '100vh',
-        backgroundColor: '#f8c8dc',
+        backgroundColor: '#ffe6f2',
+        padding: '40px 20px',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
         flexDirection: 'column',
-        padding: '20px',
       }}
     >
       <section
         style={{
-          backgroundColor: 'white',
-          padding: '30px',
+          backgroundColor: '#fff',
+          padding: '20px',
           borderRadius: '12px',
-          boxShadow: '0px 6px 16px rgba(200, 120, 140, 0.3)',
-          textAlign: 'center',
-          maxWidth: '800px',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+          maxWidth: '900px',
           width: '100%',
+          textAlign: 'center',
         }}
       >
-        <h1 style={{ color: '#ff69b4', marginBottom: '20px' }}>Recruiter Search</h1>
+        <h1 style={{ color: '#ff69b4', marginBottom: '20px', fontSize: '28px' }}>Recruiter Search</h1>
 
-        {/* Search input */}
         <input
           type="text"
-          placeholder="Search by name, job title, or location"
+          placeholder="Search by job title, company name, or location"
           value={searchTerm}
           onChange={handleSearchChange}
           style={{
             width: '100%',
-            padding: '10px',
+            padding: '12px',
             marginBottom: '20px',
             borderRadius: '8px',
-            border: '1px solid #ccc',
+            border: '1px solid #ddd',
+            fontSize: '16px',
           }}
         />
 
-        {/* Results table */}
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr style={{ backgroundColor: '#ff69b4', color: 'white' }}>
-              <th style={{ padding: '10px', border: '1px solid #ddd' }}>Title</th>
-              <th style={{ padding: '10px', border: '1px solid #ddd' }}>Location</th>
-              <th style={{ padding: '10px', border: '1px solid #ddd' }}>Job Description</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredRecruiters.map((recruiter, index) => (
-              <tr key={index} style={{ backgroundColor: index % 2 === 0 ? '#f9f9f9' : '#ffffff' }}>
-                <td style={{ padding: '10px', border: '1px solid #ddd' }}>{recruiter.TITLE}</td>
-                <td style={{ padding: '10px', border: '1px solid #ddd' }}>{recruiter.LOCATION}</td>
-                <td style={{ padding: '10px', border: '1px solid #ddd' }}>{recruiter['JOB DESCRIPTION']}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
+          {filteredRecruiters.map((recruiter, index) => (
+            <div
+              key={index}
+              style={{
+                backgroundColor: '#fff',
+                padding: '20px',
+                margin: '10px',
+                borderRadius: '12px',
+                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+                width: 'calc(50% - 20px)',
+                minWidth: '280px',
+              }}
+            >
+              <h2 style={{ color: '#ff69b4', fontSize: '20px', marginBottom: '10px' }}>{recruiter['Job Title']}</h2>
+              <p style={{ color: '#666', fontSize: '16px', marginBottom: '10px' }}>
+                <strong>Company:</strong> {recruiter['Company Name']}
+              </p>
+              <p style={{ color: '#666', fontSize: '16px', marginBottom: '10px' }}>
+                <strong>Location:</strong> {recruiter['Location']}
+              </p>
+              <p style={{ color: '#999', fontSize: '14px', marginBottom: '20px' }}>
+                <strong>Application Deadline:</strong> {recruiter['Application Deadline']}
+              </p>
+              <button
+                style={{
+                  padding: '10px 20px',
+                  backgroundColor: '#ff69b4',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontSize: '16px',
+                  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+                }}
+                onClick={() => alert('bro huh')}
+              >
+                More Info
+              </button>
+            </div>
+          ))}
+        </div>
       </section>
     </main>
   );

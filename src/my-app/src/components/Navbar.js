@@ -63,6 +63,15 @@ const Navbar = () => {
           </NavLink>
         </li>
         <li style={{ margin: '0 10px' }}>
+          <NavLink
+            to="/recruiter-search-1v"
+            style={{ textDecoration: 'none', color: 'white', fontSize: '16px' }}
+            activeStyle={{ fontWeight: 'bold', textDecoration: 'underline' }}
+          >
+            Recruiter Search v1
+          </NavLink>
+        </li>
+        <li style={{ margin: '0 10px' }}>
           <NavLink to="/profile" > 
           <img
               src={profileIcon}

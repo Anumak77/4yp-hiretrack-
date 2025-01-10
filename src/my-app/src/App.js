@@ -6,9 +6,12 @@ import Login from './SignUp/Login';
 import Signup from './SignUp/Signup';
 import Profile from './pages/profile';
 import CVManagement from './pages/cv-management';
-import JobTracker from './pages/job-tracker';
+import JobDetails from './pages/job-details';
 import RecruiterSearch from './pages/recruiter-search';
+import RecruiterSearch1v from './pages/RecruiterSearchWithMoreInfo';
 import Dashboard from './pages/dashboard';
+import JobTracker from './pages/JobTracker';
+
 
 
 
@@ -43,7 +46,9 @@ function MainApp() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/cv-management" element={<CVManagement />} />
         <Route path="/job-tracker" element={<JobTracker />} />
+        <Route path="/job-details" element={<JobDetails />} />
         <Route path="/recruiter-search" element={<RecruiterSearch />} />
+        <Route path="/recruiter-search-1v" element={<RecruiterSearch1v />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="*" element={<h1>404 - Page Not Found</h1>} />
       </Routes>
