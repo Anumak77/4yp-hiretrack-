@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // For navigation
-import recruiters from '../mockData.json'; // Your cleaned JSON data
+import { useNavigate } from 'react-router-dom'; 
+import recruiters from '../mockData.json'; 
 
 const RecruiterSearchWithMoreInfo = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredRecruiters, setFilteredRecruiters] = useState(recruiters);
   const navigate = useNavigate();
 
-  // Handle search input
   const handleSearchChange = (e) => {
     const term = e.target.value.toLowerCase();
     setSearchTerm(term);
@@ -22,7 +21,6 @@ const RecruiterSearchWithMoreInfo = () => {
     setFilteredRecruiters(filtered);
   };
 
-  // Navigate to job details page
   const handleMoreInfoClick = (recruiter) => {
     navigate('/job-details', { state: recruiter });
   };
@@ -34,18 +32,18 @@ const RecruiterSearchWithMoreInfo = () => {
         backgroundColor: '#ffe6f2',
         display: 'flex',
         justifyContent: 'center',
-        alignItems: 'center',
-        padding: '20px',
+        alignItems: 'flex-start', 
+        padding: '20px 10px', 
       }}
     >
       <section
         style={{
           backgroundColor: '#fff',
-          padding: '30px',
+          padding: '20px',
           borderRadius: '12px',
           boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-          maxWidth: '1100px',
           width: '100%',
+          maxWidth: '1200px', 
         }}
       >
         <h1 style={{ color: '#ff69b4', marginBottom: '20px', textAlign: 'center' }}>Recruiter Search</h1>
@@ -63,12 +61,13 @@ const RecruiterSearchWithMoreInfo = () => {
             borderRadius: '8px',
             border: '1px solid #ddd',
             fontSize: '16px',
+            boxSizing: 'border-box', 
           }}
         />
 
         {/* Job Table */}
         <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
             <thead>
               <tr style={{ backgroundColor: '#ff69b4', color: 'white' }}>
                 <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Job Title</th>
