@@ -59,12 +59,13 @@ const Profile = () => {
   const handleLogout = () => {
     signOut(auth)
       .then(() => {
-        window.location.href = 'http://localhost:3000/login';
+        window.location.href = '/login';
       })
       .catch((error) => {
         setErrorMessage('Error signing out.');
       });
   };
+  
 
   return (
     <main

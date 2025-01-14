@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom'; 
 import recruiters from '../mockData.json'; 
 
-const RecruiterSearchWithMoreInfo = () => {
+const JobSearch = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredRecruiters, setFilteredRecruiters] = useState(recruiters);
   const navigate = useNavigate();
@@ -46,9 +46,8 @@ const RecruiterSearchWithMoreInfo = () => {
           maxWidth: '1200px', 
         }}
       >
-        <h1 style={{ color: '#ff69b4', marginBottom: '20px', textAlign: 'center' }}>Recruiter Search</h1>
+        <h1 style={{ color: '#ff69b4', marginBottom: '20px', textAlign: 'center' }}>Job Search</h1>
 
-        {/* Search Input */}
         <input
           type="text"
           placeholder="Search by job title, company name, or location"
@@ -109,4 +108,4 @@ const RecruiterSearchWithMoreInfo = () => {
   );
 };
 
-export default RecruiterSearchWithMoreInfo;
+export default JobSearch;

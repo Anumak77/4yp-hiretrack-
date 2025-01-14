@@ -7,12 +7,12 @@ import Signup from './SignUp/Signup';
 import Profile from './pages/profile';
 import CVManagement from './pages/cv-management';
 import JobDetails from './pages/job-details';
-import RecruiterSearch1v from './pages/RecruiterSearchWithMoreInfo';
-
+import JobSearch from './pages/JobSearch';
 import DashJobseeker from './pages/dashboard-jobseeker';
 import DashRecruiter from './pages/dashboard-recruiter';
 import JobTrackerJobseeker from './pages/JobTracker-jobseeker';
 import JobTrackerRecruiter from './pages/JobTracker-recruiter';
+import RecruiterSearch from './pages/RecruiterSearch';
 
 
 
@@ -50,8 +50,8 @@ function MainApp() {
         <Route path="/cv-management" element={<CVManagement />} />
         <Route path="/job-details" element={<JobDetails />} />
 
-        <Route path="/recruiter-search-1v" element={<RecruiterSearch1v />} />
-
+        <Route path="/job-search" element={<JobSearch />} /> 
+        <Route path="/recruiter-search" element={<RecruiterSearch />} />
         <Route path="/dashboard_jobseeker" element={<DashJobseeker />} />
         <Route path="/dashboard-recruiter" element={<DashRecruiter />} />
         <Route path="/jobtracker-jobseeker" element={<JobTrackerJobseeker />} />

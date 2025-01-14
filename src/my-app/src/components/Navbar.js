@@ -24,7 +24,7 @@ const Navbar = () => {
           padding: 0,
         }}
       >
-        <li style={{ margin: '0 10px' }}>
+        {/* <li style={{ margin: '0 10px' }}>
           <NavLink
             to="/cv-management"
             style={{ textDecoration: 'none', color: 'white', fontSize: '16px' }}
@@ -32,7 +32,7 @@ const Navbar = () => {
           >
             CV Management
           </NavLink>
-        </li>
+        </li> */}
 
         <li style={{ margin: '0 10px' }}>
           <NavLink
@@ -51,6 +51,16 @@ const Navbar = () => {
             activeStyle={{ fontWeight: 'bold', textDecoration: 'underline' }}
           >
             Job Tracker JobSeeker
+          </NavLink>
+        </li>
+
+        <li style={{ margin: '0 10px' }}>
+          <NavLink
+            to="/job-search"
+            style={{ textDecoration: 'none', color: 'white', fontSize: '16px' }}
+            activeStyle={{ fontWeight: 'bold', textDecoration: 'underline' }}
+          >
+            Job Search
           </NavLink>
         </li>
 
@@ -75,10 +85,11 @@ const Navbar = () => {
           </NavLink>
         </li>
 
-        
+      
+
         <li style={{ margin: '0 10px' }}>
           <NavLink
-            to="/recruiter-search-1v"
+            to="/recruiter-search"
             style={{ textDecoration: 'none', color: 'white', fontSize: '16px' }}
             activeStyle={{ fontWeight: 'bold', textDecoration: 'underline' }}
           >
