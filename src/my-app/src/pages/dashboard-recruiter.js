@@ -1,6 +1,6 @@
 import React from 'react';
 
-const dashboard = () => {
+const DashRecruiter = () => {
   return (
     <div>
       <h1>dashboard here</h1>
@@ -8,4 +8,4 @@ const dashboard = () => {
   );
 };
 
-export default dashboard;
+export default DashRecruiter;

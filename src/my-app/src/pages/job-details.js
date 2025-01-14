@@ -24,6 +24,7 @@ const JobDetails = () => {
     >
       <section
         style={{
+          position: 'relative',
           backgroundColor: 'white',
           padding: '30px',
           borderRadius: '12px',
@@ -33,6 +34,24 @@ const JobDetails = () => {
           width: '100%',
         }}
       >
+        <button
+          style={{
+            position: 'absolute',
+            top: '20px',
+            right: '20px',
+            padding: '10px 16px',
+            backgroundColor: '#ff69b4',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontSize: '16px',
+            fontWeight: 'bold',
+          }}
+        >
+          Apply for Job
+        </button>
+
         <h1 style={{ color: '#ff69b4', marginBottom: '20px' }}>Job Details</h1>
 
         <p>

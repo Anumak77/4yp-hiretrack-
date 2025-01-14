@@ -8,8 +8,12 @@ import Profile from './pages/profile';
 import CVManagement from './pages/cv-management';
 import JobDetails from './pages/job-details';
 import RecruiterSearch1v from './pages/RecruiterSearchWithMoreInfo';
-import Dashboard from './pages/dashboard';
-import JobTracker from './pages/JobTracker';
+
+import DashJobseeker from './pages/dashboard-jobseeker';
+import DashRecruiter from './pages/dashboard-recruiter';
+import JobTrackerJobseeker from './pages/JobTracker-jobseeker';
+import JobTrackerRecruiter from './pages/JobTracker-recruiter';
+
 
 
 
@@ -44,11 +48,18 @@ function MainApp() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/cv-management" element={<CVManagement />} />
-        <Route path="/job-tracker" element={<JobTracker />} />
         <Route path="/job-details" element={<JobDetails />} />
+
         <Route path="/recruiter-search-1v" element={<RecruiterSearch1v />} />
-        <Route path="/dashboard" element={<Dashboard />} />
+
+        <Route path="/dashboard_jobseeker" element={<DashJobseeker />} />
+        <Route path="/dashboard-recruiter" element={<DashRecruiter />} />
+        <Route path="/jobtracker-jobseeker" element={<JobTrackerJobseeker />} />
+        <Route path="/jobtracker-recruiter" element={<JobTrackerRecruiter />} />
+
+        
         <Route path="*" element={<h1>404 - Page Not Found</h1>} />
+        
       </Routes>
     </>
   );

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { firebaseapp } from '../components/firebaseconfigs';
 import { getAuth } from 'firebase/auth';
 import { savePdfToFirestore, fetchPdfFromFirestore } from '../components/utils';
@@ -18,7 +18,7 @@ const Profile = () => {
         setName(user.displayName || 'Guest');
       }
     });
-  }, []);
+  }, [auth]);
 
   const handleFileChange = (e) => {
     const uploadedFile = e.target.files[0];
@@ -53,19 +53,52 @@ const Profile = () => {
   const displayPdf = async () => {
     const pdfData = await fetchPdfFromFirestore();
     const pdfWindow = window.open();
-    pdfWindow.document.write(`<iframe width='100%' height='100%' src="${pdfData}"></iframe>`);
+    pdfWindow.document.write(`<iframe width="100%" height="100%" src="${pdfData}"></iframe>`);
+  };
+
+  const handleLogout = () => {
+    signOut(auth)
+      .then(() => {
+        window.location.href = 'http://localhost:3000/login';
+      })
+      .catch((error) => {
+        setErrorMessage('Error signing out.');
+      });
   };
 
   return (
     <main
-      style={{ height: '100vh', backgroundColor: '#f8c8dc', display: 'flex', justifyContent: 'center', alignItems: 'center' }} >
+      style={{
+        height: '100vh',
+        backgroundColor: '#f8c8dc',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        flexDirection: 'column',
+      }}
+    >
       <section
-        style={{backgroundColor: 'white', padding: '30px', borderRadius: '12px', boxShadow: '0px 6px 16px rgba(200, 120, 140, 0.3)', textAlign: 'center', maxWidth: '500px', width: '100%' }} >
+        style={{
+          backgroundColor: 'white',
+          padding: '30px',
+          borderRadius: '12px',
+          boxShadow: '0px 6px 16px rgba(200, 120, 140, 0.3)',
+          textAlign: 'center',
+          maxWidth: '500px',
+          width: '100%',
+        }}
+      >
         <h1
-          style={{ fontSize: '28px', fontWeight: 'bold', marginBottom: '20px', color: '#ff69b4' }}>
+          style={{
+            fontSize: '28px',
+            fontWeight: 'bold',
+            marginBottom: '20px',
+            color: '#ff69b4',
+          }}
+        >
           Hey, welcome back {name}!
         </h1>
-        <p style={{ fontSize: '16px', color: '#555', marginBottom: '30px' }} >
+        <p style={{ fontSize: '16px', color: '#555', marginBottom: '30px' }}>
           Please upload your CV below
         </p>
         <form onSubmit={handleSubmit}>
@@ -73,7 +106,14 @@ const Profile = () => {
             type="file"
             accept=".pdf"
             onChange={handleFileChange}
-            style={{ marginBottom: '15px', padding: '10px', border: '1px solid #ddd', borderRadius: '8px', width: '100%', cursor: 'pointer' }}
+            style={{
+              marginBottom: '15px',
+              padding: '10px',
+              border: '1px solid #ddd',
+              borderRadius: '8px',
+              width: '100%',
+              cursor: 'pointer',
+            }}
           />
           {errorMessage && (
             <p style={{ color: 'red', marginBottom: '10px' }}>{errorMessage}</p>
@@ -86,7 +126,16 @@ const Profile = () => {
           <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
             <button
               type="submit"
-              style={{ padding: '10px 20px', backgroundColor: '#ff69b4', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', boxShadow: '0px 4px 12px rgba(200, 120, 140, 0.3)', transition: 'background-color 0.3s ease' }}
+              style={{
+                padding: '10px 20px',
+                backgroundColor: '#ff69b4',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                boxShadow: '0px 4px 12px rgba(200, 120, 140, 0.3)',
+                transition: 'background-color 0.3s ease',
+              }}
               onMouseOver={(e) => (e.target.style.backgroundColor = '#e0559a')}
               onMouseOut={(e) => (e.target.style.backgroundColor = '#ff69b4')}
             >
@@ -95,7 +144,15 @@ const Profile = () => {
             <button
               type="button"
               onClick={displayPdf}
-              style={{ padding: '10px 20px', backgroundColor: '#e0e0e0', color: '#555', border: 'none', borderRadius: '8px', cursor: 'pointer', boxShadow: '0px 4px 12px rgba(200, 120, 140, 0.3)' }}
+              style={{
+                padding: '10px 20px',
+                backgroundColor: '#e0e0e0',
+                color: '#555',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                boxShadow: '0px 4px 12px rgba(200, 120, 140, 0.3)',
+              }}
             >
               View Uploaded CV
             </button>
@@ -103,12 +160,20 @@ const Profile = () => {
         </form>
 
         {successMessage && (
-          <p style={{ color: 'green', marginTop: '20px', fontWeight: 'bold' }}>{successMessage}</p>
+          <p style={{ color: 'green', marginTop: '20px', fontWeight: 'bold' }}>
+            {successMessage}
+          </p>
         )}
 
         {cvUrl && (
           <div
-            style={{ marginTop: '20px', backgroundColor: '#f9f9f9', padding: '15px', borderRadius: '8px', border: '1px solid #ccc' }}
+            style={{
+              marginTop: '20px',
+              backgroundColor: '#f9f9f9',
+              padding: '15px',
+              borderRadius: '8px',
+              border: '1px solid #ccc',
+            }}
           >
             <p style={{ margin: '0' }}>
               <strong>Download your CV:</strong>{' '}
@@ -119,6 +184,22 @@ const Profile = () => {
           </div>
         )}
       </section>
+
+      <button
+        onClick={handleLogout}
+        style={{
+          marginTop: '20px',
+          padding: '10px 20px',
+          backgroundColor: '#ff69b4',
+          color: 'white',
+          border: 'none',
+          borderRadius: '8px',
+          cursor: 'pointer',
+          boxShadow: '0px 4px 12px rgba(255, 85, 85, 0.3)',
+        }}
+      >
+        Logout
+      </button>
     </main>
   );
 };

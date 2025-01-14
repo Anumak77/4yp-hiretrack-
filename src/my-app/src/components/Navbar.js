@@ -36,23 +36,46 @@ const Navbar = () => {
 
         <li style={{ margin: '0 10px' }}>
           <NavLink
-            to="/dashboard"
+            to="/dashboard_jobseeker"
             style={{ textDecoration: 'none', color: 'white', fontSize: '16px' }}
             activeStyle={{ fontWeight: 'bold', textDecoration: 'underline' }}
           >
-            Dashboard
+            Dashboard JobSeeker
           </NavLink>
         </li>
 
         <li style={{ margin: '0 10px' }}>
           <NavLink
-            to="/job-tracker"
+            to="/jobtracker-jobseeker"
             style={{ textDecoration: 'none', color: 'white', fontSize: '16px' }}
             activeStyle={{ fontWeight: 'bold', textDecoration: 'underline' }}
           >
-            Job Tracker
+            Job Tracker JobSeeker
           </NavLink>
         </li>
+
+        <li style={{ margin: '0 10px' }}>
+          <NavLink
+            to="/dashboard-recruiter"
+            style={{ textDecoration: 'none', color: 'white', fontSize: '16px' }}
+            activeStyle={{ fontWeight: 'bold', textDecoration: 'underline' }}
+          >
+            Dashboard Recruiter
+          </NavLink>
+        </li>
+
+
+        <li style={{ margin: '0 10px' }}>
+          <NavLink
+            to="/jobtracker-recruiter"
+            style={{ textDecoration: 'none', color: 'white', fontSize: '16px' }}
+            activeStyle={{ fontWeight: 'bold', textDecoration: 'underline' }}
+          >
+            Job Tracker Recruiter
+          </NavLink>
+        </li>
+
+        
         <li style={{ margin: '0 10px' }}>
           <NavLink
             to="/recruiter-search-1v"
