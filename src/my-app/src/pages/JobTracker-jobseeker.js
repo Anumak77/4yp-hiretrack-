@@ -44,7 +44,7 @@ const JobTrackerJobseeker = () => {
     datasets: [
       {
         label: 'Applications',
-        data: jobApplications.map(() => 1), // Each application counts as 1
+        data: jobApplications.map(() => 1), 
         backgroundColor: '#ff69b4',
       },
     ],
