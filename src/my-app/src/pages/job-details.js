@@ -4,9 +4,9 @@ import { useLocation, useNavigate } from 'react-router-dom';
 const JobDetails = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const recruiter = location.state;
+  const job = location.state;
 
-  if (!recruiter) {
+  if (!job) {
     return <p>No job details available.</p>;
   }
 
@@ -34,50 +34,28 @@ const JobDetails = () => {
           width: '100%',
         }}
       >
-        <button
-          style={{
-            position: 'absolute',
-            top: '20px',
-            right: '20px',
-            padding: '10px 16px',
-            backgroundColor: '#ff69b4',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            fontSize: '16px',
-            fontWeight: 'bold',
-          }}
-        >
-          Apply for Job
-        </button>
-
         <h1 style={{ color: '#ff69b4', marginBottom: '20px' }}>Job Details</h1>
 
-        <p>
-          <strong>Job Title:</strong> {recruiter['Job Title']}
-        </p>
-        <p>
-          <strong>Company Name:</strong> {recruiter['Company Name']}
-        </p>
-        <p>
-          <strong>Location:</strong> {recruiter['Location']}
-        </p>
-        <p>
-          <strong>Job Description:</strong> {recruiter['Job Description']}
-        </p>
-        <p>
-          <strong>Required Qualifications:</strong> {recruiter['Required Qualifications']}
-        </p>
-        <p>
-          <strong>Salary Details:</strong> {recruiter['Salary Details']}
-        </p>
-        <p>
-          <strong>Start Date:</strong> {recruiter['Start Date']}
-        </p>
-        <p>
-          <strong>Application Deadline:</strong> {recruiter['Application Deadline']}
-        </p>
+        <p><strong>Job Title:</strong> {job['Title'] || "N/A"}</p>
+        <p><strong>Company:</strong> {job['Company'] || "N/A"}</p>
+        <p><strong>Location:</strong> {job['Location'] || "N/A"}</p>
+        <p><strong>Job Description:</strong> {job['JobDescription'] || "N/A"}</p>
+        <p><strong>Job Requirements:</strong></p>
+<ul>
+  {job['JobRequirment']?.split(';').map((req, index) => (
+    <li key={index}>{req.trim()}</li>
+  ))}
+</ul>
+
+<p><strong>Required Qualifications:</strong></p>
+<ul>
+  {job['RequiredQual']?.split(';').map((qual, index) => (
+    <li key={index}>{qual.trim()}</li>
+  ))}
+</ul>
+
+        <p><strong>Start Date:</strong> {job['OpeningDate'] || "N/A"}</p>
+        <p><strong>Application Deadline:</strong> {job['Deadline'] || "N/A"}</p>
 
         <button
           onClick={() => navigate(-1)}
