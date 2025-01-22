@@ -199,7 +199,6 @@ const DashJobseeker = () => {
         </div>
       </div>
 
-      {/* Download Edited PDF */}
       {isEditing && (
         <button
           onClick={handleDownload}

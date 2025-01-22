@@ -9,7 +9,7 @@ const Profile = () => {
   const [file, setFile] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
-  const [cvUrl, setCvUrl] = useState('');
+  const [cvUrl] = useState('');
   const auth = getAuth(firebaseapp);
 
   useEffect(() => {
