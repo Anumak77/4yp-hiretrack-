@@ -5,7 +5,6 @@ import { Document, Page, pdfjs } from "react-pdf";
 import { jsPDF } from "jspdf";
 import { saveAs } from "file-saver";
 import * as pdfjsLib from "pdfjs-dist/webpack";
-
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   "pdfjs-dist/build/pdf.worker.min.js",
   import.meta.url
@@ -199,6 +198,23 @@ const DashJobseeker = () => {
           </div>
         </div>
       </div>
+
+      {/* Download Edited PDF */}
+      {isEditing && (
+        <button
+          onClick={handleDownload}
+          style={{
+            marginTop: "20px",
+            padding: "10px",
+            backgroundColor: "#007bff",
+            color: "white",
+            border: "none",
+            cursor: "pointer",
+          }}
+        >
+          Download Updated CV
+        </button>
+      )}
     </div>
   );
 };
