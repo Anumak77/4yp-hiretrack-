@@ -9,9 +9,9 @@ const Signup = () => {
   const [email, setEmail] = useState('');
   const [name, setName] = useState(''); 
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [setError] = useState('');
+  const [userType, setUserType] = useState('Job Seeker'); 
   const auth = getAuth(firebaseapp);
-  
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -22,7 +22,7 @@ const Signup = () => {
 
       await updateProfile(user, { displayName: name });
 
-      console.log(`User: ${name}, Email: ${user.email}`);
+      console.log(`User: ${name}, Email: ${user.email}, Role: ${userType}`);
       navigate('/login');
     } catch (err) {
       if (err.code === 'auth/weak-password') {
@@ -38,7 +38,7 @@ const Signup = () => {
 
   return (
     <main style={{ height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: '#f8c8dc'}} >
-      <section style={{ background: 'white', padding: '30px 40px', borderRadius: '8px', boxShadow: '0px 4px 12px rgba(200, 120, 140, 0.3)',maxWidth: '400px', width: '100%'}} >
+      <section style={{ background: 'white', padding: '30px 40px', borderRadius: '8px', boxShadow: '0px 4px 12px rgba(200, 120, 140, 0.3)', maxWidth: '400px', width: '100%'}} >
         <div>
           <h1 style={{ fontSize: '24px', fontWeight: 'bold', textAlign: 'center', marginBottom: '20px', color: '#ff69b4'}} > HireTrack </h1>
 
@@ -103,6 +103,20 @@ const Signup = () => {
               Sign in
             </NavLink>
           </p>
+
+          {/* User Type Selection */}
+          <div style={{ marginTop: '20px', textAlign: 'center' }}>
+            <p style={{ fontWeight: 'bold', marginBottom: '10px' }}>Are you a:</p>
+            <button
+              onClick={() => setUserType(userType === 'Job Seeker' ? 'Recruiter' : 'Job Seeker')}
+              style={{ padding: '8px 15px', backgroundColor: '#e0559a', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', boxShadow: '0px 3px 6px rgba(200, 120, 140, 0.3)' }}
+            >
+              {userType === 'Job Seeker' ? 'Switch to Recruiter' : 'Switch to Job Seeker'}
+            </button>
+            <p style={{ marginTop: '10px', fontWeight: 'bold', color: '#e0559a' }}>
+              Selected Role: {userType}
+            </p>
+          </div>
         </div>
       </section>
     </main>
