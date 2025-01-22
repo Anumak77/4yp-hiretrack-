@@ -9,7 +9,7 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [setLoading] = useState(false);
   const auth = getAuth(firebaseapp);
 
   const onLogin = async (e) => {
