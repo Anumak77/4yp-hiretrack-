@@ -10,6 +10,8 @@ const JobDetails = () => {
     return <p>No job details available.</p>;
   }
 
+  
+
   return (
     <main
       style={{
@@ -70,6 +72,48 @@ const JobDetails = () => {
           }}
         >
           Go Back
+        </button>
+        <button
+          onClick={() => navigate(-1)}
+          style={{
+            marginTop: '20px',
+            padding: '10px 20px',
+            backgroundColor: '#ff69b4',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer',
+          }}
+        >
+          Save Job 
+        </button>
+        <button
+          onClick={() => navigate(-1)}
+          style={{
+            marginTop: '20px',
+            padding: '10px 20px',
+            backgroundColor: '#ff69b4',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer',
+          }}
+        >
+          Apply for Job 
+        </button>
+        <button
+          onClick={() => navigate(-1)}
+          style={{
+            marginTop: '20px',
+            padding: '10px 20px',
+            backgroundColor: '#ff69b4',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer',
+          }}
+        >
+          Get Match Score 
         </button>
       </section>
     </main>

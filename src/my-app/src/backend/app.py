@@ -6,12 +6,14 @@ import PyPDF2
 from rapidfuzz import process
 import pandas as pd 
 from io import BytesIO
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
 jobs_df = pd.read_csv('Online_Job_Posting_Database.csv')
-jobs_df['JobRequirement'] = jobs_df['requirement'].fillna('')
-jobs_df['title'] = jobs_df['title'].fillna('')
+jobs_df['JobRequirment'] = jobs_df['JobRequirment'].fillna('')
+jobs_df['Title'] = jobs_df['Title'].fillna('')
 
 def decode_pdf(base64_pdf):
     pdf_bytes = base64.b64decode(base64_pdf.split(',')[1])
@@ -25,6 +27,7 @@ def decode_pdf(base64_pdf):
 #used fuzzy matching to filter out jobs as database is very large 
 @app.route('/filter', methods=['GET'])
 def filter_jobs():
+
     job_title = request.args.get('title', '').lower()
     if not job_title:
         return jsonify({"error": "Job title is required"}), 400
@@ -37,7 +40,6 @@ def filter_jobs():
     if filtered_jobs.empty:
         return jsonify({"message": "No jobs found for the given title"}), 404
 
-    return jsonify({"jobs": filtered_jobs.to_dict(orient='records')}), 200
 
 @app.route('/similarity', methods=['POST'])
 def similarity():
