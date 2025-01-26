@@ -1,5 +1,7 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import axios from 'axios'
+import { savePdfToFirestore, fetchPdfFromFirestore } from '../components/utils';
 
 const JobDetails = () => {
   const location = useLocation();
@@ -10,7 +12,28 @@ const JobDetails = () => {
     return <p>No job details available.</p>;
   }
 
+  const compareWithDescription = async () => {
+    try {
+      const cvBase64 = await fetchPdfFromFirestore();
+      const jobDescription = job['JobDescription']; // Ensure `job` is passed correctly
   
+      if (!cvBase64) {
+        alert('No CV found for the user. Please upload a CV.');
+        return;
+      }
+  
+      const response = await axios.post('http://127.0.0.1:5000/compare_with_description', {
+        JobDescription: jobDescription,
+        cv: cvBase64.split(',')[1], // Send only the data part of Base64
+      });
+  
+      const similarityScore = response.data['cosine similarity'];
+      alert(`Your match score with this job is: ${(similarityScore * 100).toFixed(2)}%`);
+    } catch (error) {
+      console.error('Error comparing CV with job description:', error);
+      alert('An error occurred. Please try again.');
+    }
+  };
 
   return (
     <main
@@ -102,7 +125,7 @@ const JobDetails = () => {
           Apply for Job 
         </button>
         <button
-          onClick={() => navigate(-1)}
+          onClick={compareWithDescription}
           style={{
             marginTop: '20px',
             padding: '10px 20px',
