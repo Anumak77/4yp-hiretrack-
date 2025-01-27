@@ -9,7 +9,7 @@ const Signup = () => {
   const [email, setEmail] = useState('');
   const [name, setName] = useState(''); 
   const [password, setPassword] = useState('');
-  const [setError] = useState('');
+  const [Error ,setError] = useState('');
   const [userType, setUserType] = useState('Job Seeker'); 
   const auth = getAuth(firebaseapp);
 
