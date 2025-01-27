@@ -57,6 +57,7 @@
     ]
   },
   "devDependencies": {
-    "webpack-dev-server": "^5.2.0"
+    "webpack-dev-server": "^5.2.0",
+    "worker-loader": "^3.0.8"
   }
 }
