@@ -62,6 +62,7 @@ def filter_jobs():
         return jsonify({"message": "No jobs found for the given title"}), 404
 '''
 
+#FIX THIS !!!!!
 @app.route('/similarity', methods=['POST'])
 def similarity():
     data = request.json

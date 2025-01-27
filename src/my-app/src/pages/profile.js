@@ -34,7 +34,7 @@ const Profile = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmitofFileChange = async (e) => {
     e.preventDefault();
 
     if (!file) {
@@ -102,7 +102,7 @@ const Profile = () => {
         <p style={{ fontSize: '16px', color: '#555', marginBottom: '30px' }}>
           Please upload your CV below
         </p>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmitofFileChange}>
           <input
             type="file"
             accept=".pdf"

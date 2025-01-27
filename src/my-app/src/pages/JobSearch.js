@@ -48,7 +48,7 @@ const JobSearch = () => {
     }
 
     const fuse = new Fuse(allData, {
-      keys: ['Title'], 
+      keys: ['Title', 'Company', 'Location'], 
       threshold: 0.4,  
     });
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios'
-import { savePdfToFirestore, fetchPdfFromFirestore } from '../components/utils';
+import { savePdfToFirestore, fetchPdfFromFirestore, saveJobToFirestore } from '../components/utils';
 
 const JobDetails = () => {
   const location = useLocation();
@@ -15,7 +15,7 @@ const JobDetails = () => {
   const compareWithDescription = async () => {
     try {
       const cvBase64 = await fetchPdfFromFirestore();
-      const jobDescription = job['JobDescription']; // Ensure `job` is passed correctly
+      const jobDescription = job['JobDescription']; 
   
       if (!cvBase64) {
         alert('No CV found for the user. Please upload a CV.');
@@ -34,6 +34,23 @@ const JobDetails = () => {
       alert('An error occurred. Please try again.');
     }
   };
+
+
+    const handleSubmitofJobUpload = async (e) => {
+      e.preventDefault();
+  
+      if (!job) {
+        console.log('Please select a PDF to upload.');
+        return;
+      }
+  
+      try {
+        await saveJobToFirestore(job);
+        console.log('job added succesfully');
+      } catch (error) {
+        console.log('error uploading job');
+      }
+    };
 
   return (
     <main
@@ -97,7 +114,7 @@ const JobDetails = () => {
           Go Back
         </button>
         <button
-          onClick={() => navigate(-1)}
+          onClick={handleSubmitofJobUpload}
           style={{
             marginTop: '20px',
             padding: '10px 20px',
