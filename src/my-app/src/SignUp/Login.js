@@ -3,13 +3,14 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 import { getAuth } from 'firebase/auth';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { firebaseapp } from "../components/firebaseconfigs";
+import '../components/style.css';
 
 const Login = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [setLoading] = useState(false);
+  const [Loading, setLoading] = useState(false);
   const auth = getAuth(firebaseapp);
 
   const onLogin = async (e) => {
@@ -37,28 +38,15 @@ const Login = () => {
   };
 
   return (
-    <main style={{ height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: '#f8c8dc' }} >
-      <section
-        style={{ background: 'white', padding: '30px 40px', borderRadius: '8px', boxShadow: '0px 4px 12px rgba(200, 120, 140, 0.3)', maxWidth: '400px', width: '100%'}}>
-        <h1
-          style={{ fontSize: '24px', fontWeight: 'bold', textAlign: 'center', marginBottom: '20px', color: '#ff69b4' }}>
-          HireTrack
-        </h1>
+    <main className="main-container">
+      <section className="section-container">
+        <h1 className="heading">HireTrack</h1>
 
-        {error && (
-          <p style={{ color: 'red', textAlign: 'center', marginBottom: '15px', fontSize: '14px'}}>
-            {error}
-          </p>
-        )}
+        {error && <p className="error-text">{error}</p>}
 
         <form>
-          <div style={{ marginBottom: '15px' }}>
-            <label
-              htmlFor="email-address"
-              style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}
-            >
-              Email address
-            </label>
+        <div style={{ padding: "10px 30px 20px 10px" }}>
+        <label htmlFor="email-address" className="label">Email address</label>
             <input
               id="email-address"
               type="email"
@@ -66,17 +54,12 @@ const Login = () => {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Email address"
               required
-              style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ccc' }}
+              className="input"
             />
           </div>
 
-          <div style={{ marginBottom: '15px' }}>
-            <label
-              htmlFor="password"
-              style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}
-            >
-              Password
-            </label>
+          <div style={{ padding: "10px 30px 30px 10px" }}>
+          <label htmlFor="password" className="label">Password </label>
             <input
               id="password"
               type="password"
@@ -84,26 +67,20 @@ const Login = () => {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Password"
               required
-              style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ccc' }}
-            />
+              className="input"
+            /> 
           </div>
 
-          <div style={{ textAlign: 'center' }}>
-            <button
-              type="submit"
-              onClick={onLogin}
-              style={{ padding: '10px 20px', backgroundColor: '#ff69b4', color: '#f5f5f5', border: 'none', borderRadius: '4px', cursor: 'pointer', marginTop: '10px', boxShadow: '0px 4px 8px rgba(200, 120, 140, 0.3)'}}
-            >
+          <div style={{ padding: "10px 10px 10px 10px" }}>
+            <button type="submit" onClick={onLogin} className="button">
               Login
             </button>
           </div>
         </form>
 
-        <p style={{ marginTop: '15px', textAlign: 'center' }}>
+        <p>
           No account yet?{' '}
-          <NavLink to="/signup" style={{ color: '#e0559a', textDecoration: 'none' }}>
-            Sign up
-          </NavLink>
+          <NavLink to="/signup" className="link">Sign up</NavLink>
         </p>
       </section>
     </main>

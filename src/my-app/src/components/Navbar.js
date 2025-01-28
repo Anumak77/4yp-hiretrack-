@@ -1,116 +1,54 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import profileIcon from '../images/profile_icon.png'; 
+import './style.css'; 
 
 const Navbar = () => {
   return (
-    <nav
-      style={{
-        backgroundColor: '#ff69b4',
-        padding: '10px 20px',
-        boxShadow: '#f5f5f5',
-        position: 'sticky',
-        top: '0',
-        zIndex: '1000',
-      }}
-    >
-      <ul
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between', 
-          alignItems: 'center',
-          listStyle: 'none',
-          margin: 0,
-          padding: 0,
-        }}
-      >
-        {/* <li style={{ margin: '0 10px' }}>
-          <NavLink
-            to="/cv-management"
-            style={{ textDecoration: 'none', color: 'white', fontSize: '16px' }}
-            activeStyle={{ fontWeight: 'bold', textDecoration: 'underline' }}
-          >
-            CV Management
-          </NavLink>
-        </li> */}
-
-        <li style={{ margin: '0 10px' }}>
-          <NavLink
-            to="/dashboard_jobseeker"
-            style={{ textDecoration: 'none', color: 'white', fontSize: '16px' }}
-            activeStyle={{ fontWeight: 'bold', textDecoration: 'underline' }}
-          >
+    <nav className="navbar">
+      <ul className="nav-menu">
+        <li className="nav-item">
+          <NavLink to="/dashboard_jobseeker" className="nav-link">
             Dashboard JobSeeker
           </NavLink>
         </li>
 
-        <li style={{ margin: '0 10px' }}>
-          <NavLink
-            to="/jobtracker-jobseeker"
-            style={{ textDecoration: 'none', color: 'white', fontSize: '16px' }}
-            activeStyle={{ fontWeight: 'bold', textDecoration: 'underline' }}
-          >
+        <li className="nav-item">
+          <NavLink to="/jobtracker-jobseeker" className="nav-link">
             Job Tracker JobSeeker
           </NavLink>
         </li>
 
-        <li style={{ margin: '0 10px' }}>
-          <NavLink
-            to="/job-search"
-            style={{ textDecoration: 'none', color: 'white', fontSize: '16px' }}
-            activeStyle={{ fontWeight: 'bold', textDecoration: 'underline' }}
-          >
+        <li className="nav-item">
+          <NavLink to="/job-search" className="nav-link">
             Job Search
           </NavLink>
         </li>
 
-        <li style={{ margin: '0 10px' }}>
-          <NavLink
-            to="/dashboard-recruiter"
-            style={{ textDecoration: 'none', color: 'white', fontSize: '16px' }}
-            activeStyle={{ fontWeight: 'bold', textDecoration: 'underline' }}
-          >
+        <li className="nav-item">
+          <NavLink to="/dashboard-recruiter" className="nav-link">
             Dashboard Recruiter
           </NavLink>
         </li>
 
-
-        <li style={{ margin: '0 10px' }}>
-          <NavLink
-            to="/jobtracker-recruiter"
-            style={{ textDecoration: 'none', color: 'white', fontSize: '16px' }}
-            activeStyle={{ fontWeight: 'bold', textDecoration: 'underline' }}
-          >
+        <li className="nav-item">
+          <NavLink to="/jobtracker-recruiter" className="nav-link">
             Job Tracker Recruiter
           </NavLink>
         </li>
 
-      
-
-        <li style={{ margin: '0 10px' }}>
-          <NavLink
-            to="/recruiter-search"
-            style={{ textDecoration: 'none', color: 'white', fontSize: '16px' }}
-            activeStyle={{ fontWeight: 'bold', textDecoration: 'underline' }}
-          >
+        <li className="nav-item">
+          <NavLink to="/recruiter-search" className="nav-link">
             Recruiter Search
           </NavLink>
         </li>
-        <li style={{ margin: '0 10px' }}>
-          <NavLink to="/profile" > 
-          <img
-              src={profileIcon}
-              alt="Profile Icon"
-              style={{
-                width: '32px',
-                height: '32px',
-                borderRadius: '50%',
-                cursor: 'pointer',
-              }}
-            />
-          </NavLink>
-        </li>
       </ul>
+
+      <div className="profile-container">
+        <NavLink to="/profile">
+          <img src={profileIcon} alt="Profile Icon" className="profile-icon" />
+        </NavLink>
+      </div>
     </nav>
   );
 };

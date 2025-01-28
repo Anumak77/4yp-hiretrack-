@@ -13,6 +13,7 @@
     "express": "^4.21.2",
     "file-saver": "^2.0.5",
     "firebase": "^11.0.1",
+    "fuse.js": "^7.0.0",
     "jspdf": "^2.5.2",
     "ng2-charts": "^8.0.0",
     "papaparse": "^5.4.1",
@@ -56,6 +57,7 @@
     ]
   },
   "devDependencies": {
-    "webpack-dev-server": "^5.2.0"
+    "webpack-dev-server": "^5.2.0",
+    "worker-loader": "^3.0.8"
   }
 }

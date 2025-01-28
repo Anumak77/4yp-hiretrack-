@@ -5,7 +5,6 @@ import Navbar from './components/Navbar';
 import Login from './SignUp/Login';
 import Signup from './SignUp/Signup';
 import Profile from './pages/profile';
-import CVManagement from './pages/cv-management';
 import JobDetails from './pages/job-details';
 import JobSearch from './pages/JobSearch';
 import DashJobseeker from './pages/dashboard-jobseeker';
@@ -47,7 +46,6 @@ function MainApp() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/profile" element={<Profile />} />
-        <Route path="/cv-management" element={<CVManagement />} />
         <Route path="/job-details" element={<JobDetails />} />
 
         <Route path="/job-search" element={<JobSearch />} /> 

@@ -1,38 +1,56 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ref, onValue } from 'firebase/database';
+import { initializeApp, getApps } from 'firebase/app';
+import { getDatabase } from 'firebase/database';
+import Fuse from 'fuse.js';
 
 const JobSearch = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredJobs, setFilteredJobs] = useState([]);
-  const [allJobs, setAllJobs] = useState([]);
+  const [allData, setAllData] = useState([]);
   const navigate = useNavigate();
 
+  const firebaseConfig = {
+    databaseURL: "https://hiretrack-7b035-default-rtdb.europe-west1.firebasedatabase.app/",
+  };
+
+  const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+  const database = getDatabase(app);
+
   useEffect(() => {
-    fetch('http://localhost:5001/jobs')
-      .then(response => response.json())
-      .then(data => {
-        if (Array.isArray(data)) {
-          const validJobs = data.filter(job => job['Title'] && job['Company']);
-          setAllJobs(validJobs);
-          setFilteredJobs(validJobs);
-        } else {
-          console.error("Invalid job data format:", data);
-        }
-      })
-      .catch(error => console.error("Error fetching jobs:", error));
+    const databaseRef = ref(database);
+
+    const unsubscribe = onValue(databaseRef, (snapshot) => {
+      if (snapshot.exists()) {
+        console.log("found in the database")
+        const data = snapshot.val();
+        const dataArray = Object.values(data);
+        console.log("First item in the database:", dataArray[0]);
+        setAllData(dataArray);
+      } else {
+        console.error("No data found in the database");
+      }
+    });
+    return () => unsubscribe();
   }, []);
 
-  const handleSearchChange = (e) => {
-    const term = e.target.value.toLowerCase();
-    setSearchTerm(term);
+  const handleSearch = (event) => {
+    const query = event.target.value;
+    setSearchTerm(query);
 
-    const filtered = allJobs.filter(job =>
-      Object.values(job)
-        .map(value => (value ? value.toString().toLowerCase() : ""))
-        .join(' ')
-        .includes(term)
-    );
+    if (query === "") {
+      window.alert("Please enter a search term to filter jobs.");
+      return;
+    }
 
+    const fuse = new Fuse(allData, {
+      keys: ['Title'],
+      threshold: 0.4,
+    });
+
+    const result = fuse.search(query);
+    const filtered = result.map(({ item }) => item);
     setFilteredJobs(filtered);
   };
 
@@ -41,78 +59,39 @@ const JobSearch = () => {
   };
 
   return (
-    <main style={{
-      minHeight: '100vh',
-      backgroundColor: '#ffe6f2',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'flex-start',
-      padding: '20px 10px',
-    }}>
-      <section style={{
-        backgroundColor: '#fff',
-        padding: '20px',
-        borderRadius: '12px',
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-        width: '100%',
-        maxWidth: '1200px',
-      }}>
-        <h1 style={{ color: '#ff69b4', marginBottom: '20px', textAlign: 'center' }}>Job Search</h1>
+    <main className="job-search-container">
+      <section className="job-search-section">
+        <h1 className="job-search-heading">Job Search</h1>
 
         <input
           type="text"
           placeholder="Search by job title, company name, or location"
           value={searchTerm}
-          onChange={handleSearchChange}
-          style={{
-            width: '100%',
-            padding: '12px',
-            marginBottom: '20px',
-            borderRadius: '8px',
-            border: '1px solid #ddd',
-            fontSize: '16px',
-            boxSizing: 'border-box',
-          }}
+          onChange={handleSearch}
+          className="job-search-input"
         />
 
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+        <div className="job-table-container">
+          <table className="job-table">
             <thead>
-              <tr style={{ backgroundColor: '#ff69b4', color: 'white' }}>
-                <th style={{ width: '25%', padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Job Title</th>
-                <th style={{ width: '20%', padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Company</th>
-                <th style={{ width: '20%', padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Location</th>
-                <th style={{ width: '15%', padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Deadline</th>
-                <th style={{ width: '10%', padding: '12px', border: '1px solid #ddd', textAlign: 'center' }}>More Info</th>
+              <tr>
+                <th>Job Title</th>
+                <th>Company</th>
+                <th>Location</th>
+                <th>Deadline</th>
+                <th>More Info</th>
               </tr>
             </thead>
             <tbody>
               {filteredJobs.length > 0 ? (
                 filteredJobs.slice(0, 100).map((job, index) => (
-                  <tr key={index} style={{ borderBottom: "1px solid #ddd" }}>
-                    <td style={{ padding: '10px', border: '1px solid #ddd', wordWrap: 'break-word' }}>
-                      {job['Title'] || "N/A"}
-                    </td>
-                    <td style={{ padding: '10px', border: '1px solid #ddd', wordWrap: 'break-word' }}>
-                      {job['Company'] || "N/A"}
-                    </td>
-                    <td style={{ padding: '10px', border: '1px solid #ddd', wordWrap: 'break-word' }}>
-                      {job['Location'] || "N/A"}
-                    </td>
-                    <td style={{ padding: '10px', border: '1px solid #ddd', wordWrap: 'break-word' }}>
-                      {job['Deadline'] || "N/A"}
-                    </td>
-                    <td style={{ padding: '10px', textAlign: "center" }}>
-                      <button 
-                        onClick={() => handleMoreInfoClick(job)}
-                        style={{
-                          backgroundColor: '#ff69b4',
-                          border: 'none',
-                          color: 'white',
-                          padding: '8px 12px',
-                          borderRadius: '6px',
-                          cursor: 'pointer'
-                        }}>
+                  <tr key={index}>
+                    <td>{job['Title'] || "N/A"}</td>
+                    <td>{job['Company'] || "N/A"}</td>
+                    <td>{job['Location'] || "N/A"}</td>
+                    <td>{job['Deadline'] || "N/A"}</td>
+                    <td>
+                      <button className="more-info-button" onClick={() => handleMoreInfoClick(job)}>
                         More Info
                       </button>
                     </td>
@@ -120,7 +99,7 @@ const JobSearch = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="5" style={{ textAlign: "center", padding: "20px" }}>
+                  <td colSpan="5" className="no-jobs-found">
                     No jobs found.
                   </td>
                 </tr>
