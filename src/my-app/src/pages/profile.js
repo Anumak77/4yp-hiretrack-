@@ -5,6 +5,7 @@ import { getAuth } from 'firebase/auth';
 import { savePdfToFirestore, fetchPdfFromFirestore } from '../components/utils';
 import '../components/style.css'; 
 
+
 const Profile = () => {
   const [name, setName] = useState('Guest');
   const [file, setFile] = useState(null);
@@ -71,7 +72,7 @@ const Profile = () => {
         <h1 className="profile__title">Hey, welcome back {name}!</h1>
         <p className="profile__subtitle">Please upload your CV below</p>
 
-        <form onSubmit={handleSubmit} className="profile__form">
+        <form onSubmit={handleSubmitofFileChange} className="profile__form">
           <input type="file" accept=".pdf" onChange={handleFileChange} />
           {errorMessage && <p className="profile__error">{errorMessage}</p>}
           {file && <p className="profile__selected">Selected file: <strong>{file.name}</strong></p>}
