@@ -1,7 +1,7 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { fetchPdfFromFirestore } from '../components/utils';
+import { fetchPdfFromFirestore, saveJobToFirestore } from '../components/utils';
 import '../components/style.css'; 
 
 const JobDetails = () => {
@@ -35,6 +35,23 @@ const JobDetails = () => {
       alert('An error occurred. Please try again.');
     }
   };
+
+
+    const handleSubmitofJobUpload = async (e) => {
+      e.preventDefault();
+  
+      if (!job) {
+        console.log('Please select a PDF to upload.');
+        return;
+      }
+  
+      try {
+        await saveJobToFirestore(job);
+        console.log('job added succesfully');
+      } catch (error) {
+        console.log('error uploading job');
+      }
+    };
 
   return (
     <main className="job-details__container">
