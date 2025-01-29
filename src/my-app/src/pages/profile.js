@@ -34,7 +34,7 @@ const Profile = () => {
     }
   };
 
-  const handleSubmitofFileChange = async (e) => {
+  const handleSubmitofFileChangeofFileChange = async (e) => {
     e.preventDefault();
     if (!file) {
       setErrorMessage('Please select a PDF to upload.');
@@ -71,7 +71,7 @@ const Profile = () => {
         <h1 className="profile__title">Hey, welcome back {name}!</h1>
         <p className="profile__subtitle">Please upload your CV below</p>
 
-        <form onSubmit={handleSubmit} className="profile__form">
+        <form onSubmit={handleSubmitofFileChange} className="profile__form">
           <input type="file" accept=".pdf" onChange={handleFileChange} />
           {errorMessage && <p className="profile__error">{errorMessage}</p>}
           {file && <p className="profile__selected">Selected file: <strong>{file.name}</strong></p>}

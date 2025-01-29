@@ -1,7 +1,7 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { fetchPdfFromFirestore } from '../components/utils';
+import { fetchPdfFromFirestore, saveJobToFirestore } from '../components/utils';
 import '../components/style.css'; 
 
 const JobDetails = () => {
@@ -16,6 +16,8 @@ const JobDetails = () => {
   const compareWithDescription = async () => {
     try {
       const cvBase64 = await fetchPdfFromFirestore();
+      const jobDescription = job['JobDescription']; 
+  
       const jobDescription = job['JobDescription'];
 
       if (!cvBase64) {
@@ -51,7 +53,24 @@ const JobDetails = () => {
       } catch (error) {
         console.log('error uploading job');
       }
-    };
+  };
+
+
+    const handleSubmitofJobUpload = async (e) => {
+      e.preventDefault();
+  
+      if (!job) {
+        console.log('Please select a PDF to upload.');
+        return;
+      }
+  
+      try {
+        await saveJobToFirestore(job);
+        console.log('job added succesfully');
+      } catch (error) {
+        console.log('error uploading job');
+      }
+      };
 
   return (
     <main className="job-details__container">
@@ -86,7 +105,7 @@ const JobDetails = () => {
         <p><strong>Application Deadline:</strong> {job['Deadline'] || "N/A"}</p>
 
         <div className="job-details__actions">
-          <button className="job-details__button" onClick={() => navigate(-1)}>Apply for Job</button>
+          <button className="job-details__button" onClick={handleSubmitofJobUpload}>Apply for Job</button>
           <button className="job-details__button" onClick={compareWithDescription}>Get Match Score</button>
         </div>
       </section>
