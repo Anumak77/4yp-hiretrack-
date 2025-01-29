@@ -5,6 +5,7 @@ import { getAuth } from 'firebase/auth';
 import { savePdfToFirestore, fetchPdfFromFirestore } from '../components/utils';
 import '../components/style.css'; 
 
+
 const Profile = () => {
   const [name, setName] = useState('Guest');
   const [file, setFile] = useState(null);
@@ -34,7 +35,7 @@ const Profile = () => {
     }
   };
 
-  const handleSubmitofFileChangeofFileChange = async (e) => {
+  const handleSubmitofFileChange = async (e) => {
     e.preventDefault();
     if (!file) {
       setErrorMessage('Please select a PDF to upload.');
