@@ -34,7 +34,7 @@ const Profile = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmitofFileChange = async (e) => {
     e.preventDefault();
     if (!file) {
       setErrorMessage('Please select a PDF to upload.');

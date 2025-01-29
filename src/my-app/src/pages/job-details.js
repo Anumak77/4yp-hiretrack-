@@ -36,6 +36,23 @@ const JobDetails = () => {
     }
   };
 
+
+    const handleSubmitofJobUpload = async (e) => {
+      e.preventDefault();
+  
+      if (!job) {
+        console.log('Please select a PDF to upload.');
+        return;
+      }
+  
+      try {
+        await saveJobToFirestore(job);
+        console.log('job added succesfully');
+      } catch (error) {
+        console.log('error uploading job');
+      }
+    };
+
   return (
     <main className="job-details__container">
       <section className="job-details__card">
