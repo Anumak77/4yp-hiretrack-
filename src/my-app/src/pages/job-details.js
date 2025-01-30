@@ -1,7 +1,7 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { fetchPdfFromFirestore, saveJobToFirestore } from '../components/utils';
+import { fetchPdfFromFirestore, saveJobToFirestore, applyJobToFirestore } from '../components/utils';
 import '../components/style.css'; 
 
 const JobDetails = () => {
@@ -37,7 +37,7 @@ const JobDetails = () => {
   };
 
 
-    const handleSubmitofJobUpload = async (e) => {
+    const handleSubmitofsaveJobUpload = async (e) => {
       e.preventDefault();
   
       if (!job) {
@@ -53,12 +53,29 @@ const JobDetails = () => {
       }
     };
 
+    const handleSubmitofapplyJobUpload = async (e) => {
+      e.preventDefault();
+  
+      if (!job) {
+        console.log('Please select a PDF to upload.');
+        return;
+      }
+  
+      try {
+        await applyJobToFirestore(job);
+        console.log('job added succesfully');
+      } catch (error) {
+        console.log('error uploading job');
+      }
+    };
+
+
   return (
     <main className="job-details__container">
       <section className="job-details__card">
         <div className="job-details__header">
           <button className="job-details__button" onClick={() => navigate(-1)}>Go Back</button>
-          <button className="job-details__button">Save Job</button>
+          <button className="job-details__button"onClick={handleSubmitofsaveJobUpload} >Save Job</button>
         </div>
 
         <h1 className="job-details__title">Job Details</h1>
@@ -86,7 +103,7 @@ const JobDetails = () => {
         <p><strong>Application Deadline:</strong> {job['Deadline'] || "N/A"}</p>
 
         <div className="job-details__actions">
-          <button className="job-details__button" onClick={() => navigate(-1)}>Apply for Job</button>
+          <button className="job-details__button" onClick={handleSubmitofapplyJobUpload}>Apply for Job</button>
           <button className="job-details__button" onClick={compareWithDescription}>Get Match Score</button>
         </div>
       </section>

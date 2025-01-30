@@ -74,7 +74,7 @@ export const fetchPdfFromFirestore = async () => {
   
       const firestore = getFirestore();
       const jobId = job.id || `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      const JobRef = doc(firestore, `users/${user.uid}/appliedjobs/${jobId}`);
+      const JobRef = doc(firestore, `users/${user.uid}/savedjobs/${jobId}`);
   
       await setDoc(JobRef, {
         ...job,
@@ -145,10 +145,4 @@ export const fetchPdfFromFirestore = async () => {
       console.error('Error fetching jobs from Firestore:', error);
       throw error;
     }
-  };
-  
-
-
-  
-  
-  
+  }; 
