@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { firebaseapp } from '../components/firebaseconfigs';
+import { getFirestore, doc, setDoc } from 'firebase/firestore';
 import '../components/style.css';
 
 const Signup = () => {
@@ -12,6 +13,7 @@ const Signup = () => {
   const [error, setError] = useState('');
   const [userType, setUserType] = useState('Job Seeker'); 
   const auth = getAuth(firebaseapp);
+  const firestore = getFirestore(firebaseapp);
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -21,6 +23,19 @@ const Signup = () => {
       const user = userCredential.user;
 
       await updateProfile(user, { displayName: name });
+      const userRef = doc(firestore, "users", user.uid);
+
+      const userData = {
+        uid: user.uid,
+        name: name,
+        email: user.email,
+        userType: userType,
+        savedJobs: [], 
+        appliedJobs: [],
+        createdAt: new Date().toISOString(), 
+      };
+
+      await setDoc(userRef, userData);
 
       console.log(`User: ${name}, Email: ${user.email}, Role: ${userType}`);
       navigate('/login');
