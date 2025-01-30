@@ -1,7 +1,7 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { fetchPdfFromFirestore, saveJobToFirestore, applyJobToFirestore } from '../components/utils';
+import { fetchPdfFromFirestore,addJobToFirestore } from '../components/utils';
 import '../components/style.css'; 
 
 const JobDetails = () => {
@@ -46,7 +46,7 @@ const JobDetails = () => {
       }
   
       try {
-        await saveJobToFirestore(job);
+        await addJobToFirestore(job, 'savedjobs');
         console.log('job added succesfully');
       } catch (error) {
         console.log('error uploading job');
@@ -62,7 +62,7 @@ const JobDetails = () => {
       }
   
       try {
-        await applyJobToFirestore(job);
+        await addJobToFirestore(job,'appliedjobs');
         console.log('job added succesfully');
       } catch (error) {
         console.log('error uploading job');

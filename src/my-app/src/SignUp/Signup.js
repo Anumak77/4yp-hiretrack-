@@ -8,7 +8,9 @@ import '../components/style.css';
 const Signup = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
-  const [name, setName] = useState('');
+  const [first_name, setfirstName] = useState('');
+  const [last_name, setlastName] = useState('');
+  const [location, setlocation] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [userType, setUserType] = useState('Job Seeker'); 
@@ -22,22 +24,23 @@ const Signup = () => {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      await updateProfile(user, { displayName: name });
+      await updateProfile(user, { displayName: first_name +" "+ last_name });
       const userRef = doc(firestore, "users", user.uid);
 
       const userData = {
         uid: user.uid,
-        name: name,
+        first_name: first_name,
+        last_name: last_name,
+        name: first_name + last_name,
         email: user.email,
         userType: userType,
-        savedJobs: [], 
-        appliedJobs: [],
         createdAt: new Date().toISOString(), 
+        location: location
       };
 
       await setDoc(userRef, userData);
 
-      console.log(`User: ${name}, Email: ${user.email}, Role: ${userType}`);
+      console.log(`User: ${first_name + " " + last_name}, Email: ${user.email}, Role: ${userType}`);
       navigate('/login');
     } catch (err) {
       setError(err.message);
@@ -54,13 +57,26 @@ const Signup = () => {
 
         <form>
           <div style={{ padding: "10px 30px 30px 10px" }}>
-            <label htmlFor="name" className="label">Name</label>
+            <label htmlFor="name" className="label">First Name</label>
             <input
               id="name"
               type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Enter your name"
+              value={first_name}
+              onChange={(e) => setfirstName(e.target.value)}
+              placeholder="Enter your first name"
+              required
+              className="input"
+            />
+          </div>
+
+          <div style={{ padding: "10px 30px 30px 10px" }}>
+            <label htmlFor="name" className="label">Last Name</label>
+            <input
+              id="name"
+              type="text"
+              value={last_name}
+              onChange={(e) => setlastName(e.target.value)}
+              placeholder="Enter your last name"
               required
               className="input"
             />

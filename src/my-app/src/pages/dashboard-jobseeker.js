@@ -26,7 +26,7 @@ const DashJobseeker = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTexts, setEditedTexts] = useState({});
   const pdfContainerRef = useRef(null);
-
+/*
   const fetchSimilarityScores = async () => {
     setLoading(true);
     setError("");
@@ -44,7 +44,7 @@ const DashJobseeker = () => {
       setLoading(false);
     }
   };
-
+*/
   const handleFileUpload = async (event) => {
     const file = event.target.files[0];
     if (file && file.type === "application/pdf") {
@@ -114,20 +114,6 @@ const DashJobseeker = () => {
         <div style={{ flexGrow: 1, padding: "20px" }}>
           <h3>Job Match Scores</h3>
           <div style={{ border: "1px solid #ddd", padding: "20px", borderRadius: "8px", backgroundColor: "#f9f9f9" }}>
-            <button
-              onClick={fetchSimilarityScores}
-              style={{
-                padding: "10px 20px",
-                backgroundColor: "#ff69b4",
-                color: "white",
-                border: "none",
-                borderRadius: "8px",
-                cursor: "pointer",
-                marginBottom: "20px",
-              }}
-            >
-              Fetch Match Scores
-            </button>
 
             {loading && <p>Loading...</p>}
             {error && <p style={{ color: "red" }}>{error}</p>}
