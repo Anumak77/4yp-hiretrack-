@@ -12,6 +12,8 @@ const Signup = () => {
   const [last_name, setlastName] = useState('');
   const [location, setlocation] = useState('');
   const [password, setPassword] = useState('');
+  const [phone_number, setPhone_number] = useState('');
+  const [company_name, setCompany_name] = useState('');
   const [error, setError] = useState('');
   const [userType, setUserType] = useState('Job Seeker'); 
   const auth = getAuth(firebaseapp);
@@ -37,6 +39,15 @@ const Signup = () => {
         createdAt: new Date().toISOString(), 
         location: location
       };
+
+      const RecruiterData = {
+        uid: user.uid,
+        company_name: company_name,
+        email: user.email,
+        phone_number: phone_number,
+        userType: userType,
+        createdAt: new Date().toISOString(), 
+      }
 
       await setDoc(userRef, userData);
 

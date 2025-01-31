@@ -51,25 +51,6 @@ export const fetchPdfFromFirestore = async () => {
     }
   };
 
-  export const fetchSavedJobs = async () => {
-    try {
-      const user = getAuth().currentUser;
-      if (!user) throw new Error('User not authenticated');
-  
-      const firestore = getFirestore();
-      const jobsCollection = collection(firestore, `users/${user.uid}/savedjobs`);
-      const jobsSnapshot = await getDocs(jobsCollection);
-  
-      const jobs = jobsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      console.log('Retrieved jobs:', jobs);
-  
-      return jobs;
-    } catch (error) {
-      console.error('Error fetching jobs from Firestore:', error);
-      throw error;
-    }
-  };
-
   export const addJobToFirestore = async (job, firebasecollection) => {
     try {
       const user = getAuth().currentUser;
@@ -111,13 +92,13 @@ export const fetchPdfFromFirestore = async () => {
     }
   };
 
-  export const fetchAppliedJobs = async () => {
+  export const fetchUserJobs = async (firebasecollection) => {
     try {
       const user = getAuth().currentUser;
       if (!user) throw new Error('User not authenticated');
   
       const firestore = getFirestore();
-      const jobsCollection = collection(firestore, `users/${user.uid}/appliedjobs`);
+      const jobsCollection = collection(firestore, `users/${user.uid}/${firebasecollection}`);
       const jobsSnapshot = await getDocs(jobsCollection);
   
       const jobs = jobsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -128,4 +109,23 @@ export const fetchPdfFromFirestore = async () => {
       console.error('Error fetching jobs from Firestore:', error);
       throw error;
     }
-  }; 
+  };
+
+  export const fetchJobsListings = async (firebasecollection) => {
+    try {
+      const user = getAuth().currentUser;
+      if (!user) throw new Error('User not authenticated');
+  
+      const firestore = getFirestore();
+      const jobsCollection = collection(firestore, `users/${user.uid}/${firebasecollection}`);
+      const jobsSnapshot = await getDocs(jobsCollection);
+  
+      const jobs = jobsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      console.log('Retrieved jobs:', jobs);
+  
+      return jobs;
+    } catch (error) {
+      console.error('Error fetching jobs from Firestore:', error);
+      throw error;
+    }
+  };
