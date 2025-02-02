@@ -59,6 +59,7 @@ export const fetchPdfFromFirestore = async () => {
       const firestore = getFirestore();
       const jobId = job.id || `${job.Company}-${job.Title}`.replace(/\s+/g, "-").toLowerCase();
       const JobRef = doc(firestore, `users/${user.uid}/${firebasecollection}/${jobId}`);
+      let applicationstatus;
 
       const jobSnap = await getDoc(JobRef);
     if (jobSnap.exists()) {
@@ -77,12 +78,27 @@ export const fetchPdfFromFirestore = async () => {
       cv: cvBase64.split(',')[1],
     });
 
+    if (firebasecollection == "appliedjobs"){
+      applicationstatus = "applied"
+    }
+    else if (firebasecollection == "savedjobs"){
+      applicationstatus = "NA"
+    }
+    else if (firebasecollection == "interviewedjobs"){
+      applicationstatus = "interviewed"
+    }
+    else if (firebasecollection == "rejected"){
+      applicationstatus = "rejectedjobs"
+    }
+
+
     const similarityScore = response.data['cosine similarity'];
   
       await setDoc(JobRef, {
         ...job,
         savedAt: new Date().toISOString(),
-        matchScore: (similarityScore * 100).toFixed(2)
+        matchScore: (similarityScore * 100).toFixed(2),
+        applicationstatus: applicationstatus
       });
   
       console.log('File saved to Firestore');

@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import { Bar, Pie } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -10,6 +9,9 @@ import {
   Legend,
   ArcElement,
 } from "chart.js";
+import { getAuth } from "firebase/auth";
+import React, { useState, useEffect } from "react";
+import { getFirestore, collection, getDocs } from "firebase/firestore";
 import "../components/style.css"; 
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
@@ -21,6 +23,41 @@ const JobTrackerJobseeker = () => {
   const [jobApplications, setJobApplications] = useState([]);
   const [dueDate, setDueDate] = useState("");
   const [jobStatus, setJobStatus] = useState("Applied");
+
+
+  useEffect(() => {
+  const fetchAppliedJobs = async () => {
+    try {
+      const auth = getAuth();
+      const user = auth.currentUser;
+
+      if (!user) {
+        console.log("User not authenticated");
+        return;
+      }
+
+      const firestore = getFirestore();
+      const appliedJobsRef = collection(firestore, `users/${user.uid}/appliedjobs`);
+      const snapshot = await getDocs(appliedJobsRef);
+
+      if (!snapshot.empty) {
+        const appliedJobs = snapshot.docs.map((doc) => ({
+          jobTitle: doc.data().Title || "Unknown Job",
+          dueDate: doc.data().Deadline || "No Deadline",
+          status: "Applied",
+        }));
+        
+        setJobApplications(appliedJobs);
+      } else {
+        console.log("No applied jobs found");
+      }
+    } catch (error) {
+      console.error("Error fetching applied jobs", error);
+    }
+  };
+
+  fetchAppliedJobs();
+}, []);
 
   const handleAddApplication = () => {
     if (!selectedJob || !dueDate) {
