@@ -1,4 +1,4 @@
-import { getFirestore, doc, setDoc, getDoc, collection, getDocs  } from 'firebase/firestore';
+import { getFirestore, doc, setDoc, getDoc, collection, getDocs, deleteDoc  } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import axios from 'axios';
 
@@ -75,6 +75,8 @@ export const fetchPdfFromFirestore = async () => {
 
     const response = await axios.post('http://127.0.0.1:5000/compare_with_description', {
       JobDescription: job.JobDescription,
+      JobRequirment: job.JobRequirment || "", 
+      RequiredQual: job.RequiredQual || "",
       cv: cvBase64.split(',')[1],
     });
 
@@ -108,6 +110,34 @@ export const fetchPdfFromFirestore = async () => {
     }
   };
 
+
+  
+  export const deleteJobToFirestore = async (job, firebasecollection) => {
+    try {
+      const user = getAuth().currentUser;
+      if (!user) throw new Error('User not authenticated');
+  
+      const firestore = getFirestore();
+      const jobId = job.id || `${job.Company}-${job.Title}`.replace(/\s+/g, "-").toLowerCase();
+      const JobRef = doc(firestore, `users/${user.uid}/${firebasecollection}/${jobId}`);
+
+      const jobSnap = await getDoc(JobRef);
+    if (jobSnap.exists()) {
+      console.log("Job exists in Firestore.");
+    }
+
+    await deleteDoc(JobRef);
+    console.log("Job deleted successfully from Firestore.");
+  
+      console.log('Job deleted from Firestore');
+    } catch (error) {
+      console.error('Error deleting job from Firestore:', error);
+      throw error;
+    }
+  };
+
+
+
   export const fetchUserJobs = async (firebasecollection) => {
     try {
       const user = getAuth().currentUser;
@@ -126,6 +156,8 @@ export const fetchPdfFromFirestore = async () => {
       throw error;
     }
   };
+
+
 
   export const fetchJobsListings = async (firebasecollection) => {
     try {
