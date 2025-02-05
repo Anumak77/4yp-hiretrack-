@@ -5,7 +5,6 @@ import '../components/style.css';
 const JobSeekerDetails = () => {
   const navigate = useNavigate();
 
-  // Mock job seeker data
   const jobSeeker = {
     firstName: "Alice",
     lastName: "Johnson",
@@ -21,6 +20,7 @@ const JobSeekerDetails = () => {
       <section className="job-details__card">
         <div className="job-details__header">
           <button className="job-details__button" onClick={() => navigate(-1)}>Go Back</button>
+          <button className="job-details__button" onClick={() => navigate('/jobseekerchat')}>Reach Out</button>
         </div>
 
         <h1 className="job-details__title">Job Seeker Details</h1>
@@ -31,7 +31,6 @@ const JobSeekerDetails = () => {
         <p><strong>Experience:</strong> {jobSeeker.experience}</p>
         <p><strong>Qualifications:</strong> {jobSeeker.qualifications}</p>
         <p><strong>Past Jobs:</strong> {jobSeeker.jobsAppliedFor.join(", ")}</p>
-
       </section>
     </main>
   );

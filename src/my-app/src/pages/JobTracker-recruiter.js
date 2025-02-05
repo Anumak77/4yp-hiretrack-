@@ -1,21 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Line } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
 import '../components/style.css'; 
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
-const jobOptions = [
-  'Software Engineer',
-  'Data Analyst',
-  'Project Manager',
-  'Product Designer',
-  'Marketing Specialist',
-];
-
 const monthOrder = [
   'January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December',
+];
+
+const mockJobOptions = [
+  'Software Engineer', 'Data Analyst', 'Project Manager', 'Product Designer', 'Marketing Specialist'
 ];
 
 const JobTrackerRecruiter = () => {
@@ -48,7 +44,7 @@ const JobTrackerRecruiter = () => {
 
   const lineChartData = {
     labels: [...new Set(sortedJobTrends.map(trend => trend.month))],
-    datasets: jobOptions.map((job, index) => ({
+    datasets: mockJobOptions.map((job, index) => ({
       label: job,
       data: sortedJobTrends
         .filter(trend => trend.jobTitle === job)
@@ -65,12 +61,16 @@ const JobTrackerRecruiter = () => {
 
         <div className="job-tracker__form">
           <label>Select Job Title</label>
-          <select value={selectedJob} onChange={(e) => setSelectedJob(e.target.value)}>
-            <option value="">Select a Job</option>
-            {jobOptions.map((job, index) => (
-              <option key={index} value={job}>{job}</option>
+          <div className="job-options-container">
+            {mockJobOptions.map((job, index) => (
+              <button 
+                key={index} 
+                className={`job-option-button ${selectedJob === job ? 'selected' : ''}`} 
+                onClick={() => setSelectedJob(job)}>
+                {job}
+              </button>
             ))}
-          </select>
+          </div>
 
           <label>Application Date</label>
           <input

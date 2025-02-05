@@ -1,10 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { analyzeSimilarity } from "../components/utils";
+import { analyzeSimilarity, savePdfToFirestore, fetchPdfFromFirestore } from "../components/utils";
 import { Document, Page, pdfjs } from "react-pdf";
 import { jsPDF } from "jspdf";
 import { saveAs } from "file-saver";
 import * as pdfjsLib from "pdfjs-dist/webpack";
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { firebaseapp } from "../components/firebaseconfigs";
+import { getAuth } from "firebase/auth";
+import "../components/style.css";
+
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   "pdfjs-dist/build/pdf.worker.min.js",
   import.meta.url
@@ -19,13 +24,19 @@ const DashJobseeker = () => {
   const [similarityScores, setSimilarityScores] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [name, setName] = useState("Guest");
+  const [file, setFile] = useState(null);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const auth = getAuth(firebaseapp);
 
-  const [pdfFile, setPdfFile] = useState(null);
-  const [numPages, setNumPages] = useState(null);
-  const [textItems, setTextItems] = useState([]);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedTexts, setEditedTexts] = useState({});
-  const pdfContainerRef = useRef(null);
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setName(user.displayName || "Guest");
+      }
+    });
+  }, [auth]);
 
   const fetchSimilarityScores = async () => {
     setLoading(true);
@@ -45,175 +56,70 @@ const DashJobseeker = () => {
     }
   };
 
-  const handleFileUpload = async (event) => {
-    const file = event.target.files[0];
-    if (file && file.type === "application/pdf") {
-      setPdfFile(URL.createObjectURL(file));
-      extractTextFromPDF(file);
+  const handleFileChange = (e) => {
+    const uploadedFile = e.target.files[0];
+    const validTypes = ["application/pdf"];
+
+    if (uploadedFile && validTypes.includes(uploadedFile.type)) {
+      setFile(uploadedFile);
+      setErrorMessage("");
+      setSuccessMessage("");
     } else {
-      alert("Please upload a valid PDF file.");
+      setFile(null);
+      setErrorMessage("Please upload a valid PDF file.");
     }
   };
 
-  const extractTextFromPDF = async (file) => {
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      const typedArray = new Uint8Array(e.target.result);
-      const pdf = await pdfjsLib.getDocument(typedArray).promise;
-      let extractedTextItems = [];
+  const handleSubmitofFileChange = async (e) => {
+    e.preventDefault();
+    if (!file) {
+      setErrorMessage("Please select a PDF to upload.");
+      return;
+    }
 
-      for (let i = 1; i <= pdf.numPages; i++) {
-        const page = await pdf.getPage(i);
-        const textContent = await page.getTextContent();
-        textContent.items.forEach((item) => {
-          extractedTextItems.push({
-            text: item.str,
-            x: item.transform[4],
-            y: item.transform[5],
-            width: item.width,
-            height: item.height,
-            page: i,
-          });
-        });
-      }
-
-      setTextItems(extractedTextItems);
-      setIsEditing(true);
-    };
-    reader.readAsArrayBuffer(file);
+    try {
+      await savePdfToFirestore(file);
+      setSuccessMessage("PDF uploaded successfully!");
+    } catch (error) {
+      setErrorMessage("Error uploading PDF.");
+    }
   };
 
-  const handleTextChange = (index, event) => {
-    setEditedTexts({ ...editedTexts, [index]: event.target.innerText });
+  const displayPdf = async () => {
+    const pdfData = await fetchPdfFromFirestore();
+    const pdfWindow = window.open();
+    pdfWindow.document.write(`<iframe width="100%" height="100%" src="${pdfData}"></iframe>`);
   };
 
-  const handleDownload = () => {
-    const pdf = new jsPDF();
-    pdf.setFontSize(14);
-
-    let yPosition = 20;
-    textItems.forEach((item, index) => {
-      const newText = editedTexts[index] || item.text;
-      pdf.text(newText, item.x * 0.75, yPosition);
-      yPosition += 10;
-    });
-
-    const pdfBlob = pdf.output("blob");
-    saveAs(pdfBlob, "Updated_CV.pdf");
+  const handleLogout = () => {
+    signOut(auth)
+      .then(() => {
+        window.location.href = "/login";
+      })
+      .catch(() => {
+        setErrorMessage("Error signing out.");
+      });
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "20px" }}>
-      <div style={{ display: "flex", width: "100%", marginTop: "20px" }}>
-        <div style={{ width: "20%", borderRight: "1px solid #ddd", padding: "20px" }}>
-          <Link to="/profile" style={{ textDecoration: "none", color: "#007bff" }}>
-            Go to Profile
-          </Link>
+    <div className="dashboard__container">
+      <h1>Hey, welcome back {name}!</h1>
+      <p>Please upload your CV below</p>
+
+      <form onSubmit={handleSubmitofFileChange} className="profile__form">
+        <input type="file" accept=".pdf" onChange={handleFileChange} />
+        {errorMessage && <p className="profile__error">{errorMessage}</p>}
+        {file && <p className="profile__selected">Selected file: <strong>{file.name}</strong></p>}
+
+        <div className="profile__buttons">
+          <button type="submit">Upload CV</button>
+          <button type="button" onClick={displayPdf}>View Uploaded CV</button>
         </div>
+      </form>
 
-        <div style={{ flexGrow: 1, padding: "20px" }}>
-          <h3>Job Match Scores</h3>
-          <div style={{ border: "1px solid #ddd", padding: "20px", borderRadius: "8px", backgroundColor: "#f9f9f9" }}>
-            <button
-              onClick={fetchSimilarityScores}
-              style={{
-                padding: "10px 20px",
-                backgroundColor: "#ff69b4",
-                color: "white",
-                border: "none",
-                borderRadius: "8px",
-                cursor: "pointer",
-                marginBottom: "20px",
-              }}
-            >
-              Fetch Match Scores
-            </button>
+      {successMessage && <p className="profile__success">{successMessage}</p>}
 
-            {loading && <p>Loading...</p>}
-            {error && <p style={{ color: "red" }}>{error}</p>}
-
-            {similarityScores.length > 0 && (
-              <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                <thead>
-                  <tr style={{ backgroundColor: "#ff69b4", color: "white" }}>
-                    <th style={{ padding: "10px", border: "1px solid #ddd" }}>Job Description</th>
-                    <th style={{ padding: "10px", border: "1px solid #ddd" }}>Match Score (%)</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {similarityScores.map((item, index) => (
-                    <tr key={index} style={{ backgroundColor: index % 2 === 0 ? "#f9f9f9" : "#ffffff" }}>
-                      <td style={{ padding: "10px", border: "1px solid #ddd" }}>{item.description}</td>
-                      <td style={{ padding: "10px", border: "1px solid #ddd" }}>{(item.score * 100).toFixed(2)}%</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
-
-          <div style={{ marginTop: "30px", textAlign: "center" }}>
-            <h3>Edit Your CV</h3>
-            <input type="file" accept=".pdf" onChange={handleFileUpload} />
-
-            <div ref={pdfContainerRef} style={{ position: "relative", display: "inline-block", marginTop: "20px" }}>
-              {pdfFile && (
-                <Document file={pdfFile} onLoadSuccess={({ numPages }) => setNumPages(numPages)}>
-                  {Array.from(new Array(numPages), (el, index) => (
-                    <Page key={index} pageNumber={index + 1} />
-                  ))}
-                </Document>
-              )}
-
-              {isEditing &&
-                textItems.map((item, index) => (
-                  <div
-                    key={index}
-                    contentEditable
-                    suppressContentEditableWarning
-                    onBlur={(event) => handleTextChange(index, event)}
-                    style={{
-                      position: "absolute",
-                      left: `${item.x}px`,
-                      top: `${item.y}px`,
-                      width: `${item.width}px`,
-                      height: `${item.height}px`,
-                      background: "rgba(255, 255, 255, 0.7)",
-                      fontSize: "12px",
-                      padding: "2px",
-                      border: "1px solid #ccc",
-                      cursor: "text",
-                    }}
-                  >
-                    {editedTexts[index] || item.text}
-                  </div>
-                ))}
-            </div>
-
-            {isEditing && (
-              <button onClick={handleDownload} style={{ marginTop: "20px", padding: "10px", backgroundColor: "#007bff", color: "white", border: "none", cursor: "pointer" }}>
-                Download Updated CV
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {isEditing && (
-        <button
-          onClick={handleDownload}
-          style={{
-            marginTop: "20px",
-            padding: "10px",
-            backgroundColor: "#007bff",
-            color: "white",
-            border: "none",
-            cursor: "pointer",
-          }}
-        >
-          Download Updated CV
-        </button>
-      )}
+      <button className="profile__logout" onClick={handleLogout}>Logout</button>
     </div>
   );
 };

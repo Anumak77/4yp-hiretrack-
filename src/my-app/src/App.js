@@ -4,7 +4,6 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import Navbar from './components/Navbar';
 import Login from './SignUp/Login';
 import Signup from './SignUp/Signup';
-import Profile from './pages/profile';
 import JobDetails from './pages/job-details';
 import JobSearch from './pages/JobSearch';
 import DashJobseeker from './pages/dashboard-jobseeker';
@@ -13,7 +12,9 @@ import JobTrackerJobseeker from './pages/JobTracker-jobseeker';
 import JobTrackerRecruiter from './pages/JobTracker-recruiter';
 import RecruiterSearch from './pages/RecruiterSearch';
 import JobSeekerDetails from './pages/jobseeker-details';
-
+import JobSeekerChat from './pages/jobseekerchat';
+import PostJob from './pages/postjob';
+import ViewJobPostings from './pages/viewjob-postings';
 
 
 
@@ -45,9 +46,12 @@ function MainApp() {
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/profile" element={<Profile />} />
         <Route path="/job-details" element={<JobDetails />} />
         <Route path="/jobseeker-details" element={<JobSeekerDetails />} />
+        <Route path="/jobseekerchat" element={<JobSeekerChat />} />
+        <Route path="/createpost" element={<PostJob />} />
+        <Route path="/viewjobpostings" element={<ViewJobPostings />} />
+
         
         <Route path="/job-search" element={<JobSearch />} /> 
         <Route path="/recruiter-search" element={<RecruiterSearch />} />

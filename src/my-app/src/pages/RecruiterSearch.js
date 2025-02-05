@@ -1,6 +1,32 @@
+// Updated RecruiterSearch component with Match Score
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Fuse from 'fuse.js';
+import axios from 'axios';
+import { fetchPdfFromFirestore } from '../components/utils';
+
+const getMatchScore = async (jobDescription, setMatchScores, seeker) => {
+  try {
+    const cvBase64 = await fetchPdfFromFirestore();
+    if (!cvBase64) {
+      alert('No CV found for the user. Please upload a CV.');
+      return;
+    }
+    
+    const response = await axios.post('http://127.0.0.1:5000/compare_with_description', {
+      JobDescription: jobDescription,
+      cv: cvBase64.split(',')[1],
+    });
+    
+    const score = (response.data['cosine similarity'] * 100).toFixed(2);
+    setMatchScores(prevScores => ({ ...prevScores, [seeker.firstName]: score }));
+  } catch (error) {
+    console.error('Error comparing CV with job description:', error);
+    alert('An error occurred. Please try again.');
+  }
+};
+
+
 
 const mockJobSeekers = [
   {
@@ -9,6 +35,7 @@ const mockJobSeekers = [
     industry: "Software Engineering",
     location: "New York, USA",
     experience: "3 years",
+    jobDescription: "Software Engineer with React and Node.js experience."
   },
   {
     firstName: "Bob",
@@ -16,26 +43,14 @@ const mockJobSeekers = [
     industry: "Data Science",
     location: "San Francisco, USA",
     experience: "5 years",
-  },
-  {
-    firstName: "Charlie",
-    lastName: "Davis",
-    industry: "Cybersecurity",
-    location: "London, UK",
-    experience: "4 years",
-  },
-  {
-    firstName: "Diana",
-    lastName: "Lee",
-    industry: "Product Management",
-    location: "Berlin, Germany",
-    experience: "2 years",
+    jobDescription: "Data Scientist with expertise in Python and Machine Learning."
   }
 ];
 
 const RecruiterSearch = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredJobSeekers, setFilteredJobSeekers] = useState(mockJobSeekers);
+  const [matchScores, setMatchScores] = useState({});
   const navigate = useNavigate();
 
   const handleSearch = (event) => {
@@ -48,7 +63,7 @@ const RecruiterSearch = () => {
     }
 
     const fuse = new Fuse(mockJobSeekers, {
-      keys: ['firstName', 'lastName', 'industry' ],
+      keys: ['firstName', 'lastName', 'industry'],
       threshold: 0.4,
     });
 
@@ -56,15 +71,10 @@ const RecruiterSearch = () => {
     setFilteredJobSeekers(result.map(({ item }) => item));
   };
 
-  const handleMoreInfoClick = (jobSeeker) => {
-    navigate('/jobseeker-details', { state: jobSeeker });
-  };
-
   return (
     <main className="job-search-container">
       <section className="job-search-section">
         <h1 className="job-search-heading">Recruiter Search</h1>
-
         <input
           type="text"
           placeholder="Search by name, industry, or jobs applied for"
@@ -72,7 +82,6 @@ const RecruiterSearch = () => {
           onChange={handleSearch}
           className="job-search-input"
         />
-
         <div className="job-table-container">
           <table className="job-table">
             <thead>
@@ -82,6 +91,7 @@ const RecruiterSearch = () => {
                 <th>Industry</th>
                 <th>Location</th>
                 <th>Experience</th>
+                <th>Match Score</th>
                 <th>Resume</th>
               </tr>
             </thead>
@@ -95,7 +105,16 @@ const RecruiterSearch = () => {
                     <td>{seeker.location}</td>
                     <td>{seeker.experience}</td>
                     <td>
-                      <button className="more-info-button" onClick={() => handleMoreInfoClick(seeker)}>
+                      {matchScores[seeker.firstName] ? (
+                        `${matchScores[seeker.firstName]}%`
+                      ) : (
+                        <button className="more-info-button" onClick={() => getMatchScore(seeker.jobDescription, setMatchScores, seeker)}>
+                          Get Match Score
+                        </button>
+                      )}
+                    </td>
+                    <td>
+                      <button className="more-info-button" onClick={() => navigate('/jobseeker-details', { state: seeker })}>
                         View CV
                       </button>
                     </td>

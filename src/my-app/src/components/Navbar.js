@@ -44,11 +44,6 @@ const Navbar = () => {
         </li>
       </ul>
 
-      <div className="profile-container">
-        <NavLink to="/profile">
-          <img src={profileIcon} alt="Profile Icon" className="profile-icon" />
-        </NavLink>
-      </div>
     </nav>
   );
 };
