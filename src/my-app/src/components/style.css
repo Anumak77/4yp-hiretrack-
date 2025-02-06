@@ -1117,3 +1117,228 @@ strong {
 .action-button:hover {
   opacity: 0.8;
 }
+
+/* DASHBOARD LAYOUT */
+.dashboard {
+  display: flex;
+  height: 100vh;
+  background: #eddbcd; 
+}
+
+/* SIDEBAR */
+.sidebar {
+  width: 260px;
+  background: #192231; 
+  color: #f4f4f4;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* PROFILE */
+.profile {
+  text-align: center;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.profile__image {
+  width: 100px;
+  height: 100px;
+  background: #c0b283; 
+  border-radius: 50%;
+  margin-bottom: 10px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.profile__icon {
+  font-size: 24px;
+  color: #192231;
+  font-weight: bold;
+}
+
+.profile__image-label {
+  cursor: pointer;
+}
+
+.profile__name {
+  font-size: 18px;
+  font-weight: bold;
+  color: #eddbcd; 
+  text-align: center;
+  width: 100%;
+}
+
+/* LOGOUT BUTTON */
+.logout {
+  background: #c0b283; 
+  color: #192231;
+  border: none;
+  padding: 12px 20px;
+  cursor: pointer;
+  border-radius: 5px;
+  font-size: 16px;
+  font-weight: bold;
+  width: 100%;
+  text-align: center;
+}
+
+.logout:hover {
+  background: #eddbcd; 
+}
+
+/* MAIN CONTENT */
+.main-content {
+  flex: 1;
+  padding: 30px;
+  background: #c0b283; 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.dashboard-title {
+  color: #192231; 
+  margin-bottom: 20px;
+  font-size: 26px;
+}
+
+/* JOB SECTIONS */
+.job-section {
+  width: 80%;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.job-section h2 {
+  font-size: 22px;
+  color: #404a42; 
+  margin-bottom: 15px;
+}
+
+/* JOB LIST */
+.job-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 100%;
+}
+
+/* JOB CARD */
+.job-card {
+  background: white;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 10px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease-in-out;
+  width: 100%;
+}
+
+.job-card:hover {
+  transform: translateY(-5px);
+}
+
+.job-info h3 {
+  font-size: 18px;
+  color: #192231;
+}
+
+/* JOB BUTTONS */
+.job-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.more-info, .match {
+  padding: 8px 15px;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.more-info {
+  background: #404a42; 
+  color: #f4f4f4;
+}
+
+.match {
+  background: #c0b283;
+  color: #192231; 
+}
+
+.more-info:hover {
+  background: #c0b283;
+}
+
+.match:hover {
+  background: #eddbcd;
+}
+
+/* RESPONSIVENESS */
+@media (max-width: 768px) {
+  .dashboard {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    padding: 15px;
+    align-items: center;
+  }
+
+  .main-content {
+    padding: 20px;
+  }
+
+  .job-section {
+    width: 90%;
+  }
+}
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.popup-content {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  width: 300px;
+}
+
+.popup-cancel-button {
+  background: red;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  margin-top: 10px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.popup-cancel-button:hover {
+  background: darkred;
+}

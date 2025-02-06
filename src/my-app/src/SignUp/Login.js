@@ -22,7 +22,7 @@ const Login = () => {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
       console.log('Logged in:', user);
-      navigate('/profile');
+      navigate('/dashboard_jobseeker');
     } catch (error) {
       if (error.code === 'auth/wrong-password') {
         setError('Incorrect password. Please try again.');

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { fetchPdfFromFirestore, saveJobToFirestore } from '../components/utils';
@@ -8,6 +8,8 @@ const JobDetails = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const job = location.state;
+  const [showPopup, setShowPopup] = useState(false);
+  const [matchScore, setMatchScore] = useState(null);
 
   if (!job) {
     return <p className="job-details__no-job">No job details available.</p>;
@@ -29,29 +31,20 @@ const JobDetails = () => {
       });
 
       const similarityScore = response.data['cosine similarity'];
-      alert(`Your match score with this job is: ${(similarityScore * 100).toFixed(2)}%`);
+      setMatchScore((similarityScore * 100).toFixed(2));
     } catch (error) {
       console.error('Error comparing CV with job description:', error);
       alert('An error occurred. Please try again.');
     }
   };
 
+  const handleApplyForJob = () => {
+    setShowPopup(true);
+  };
 
-    const handleSubmitofJobUpload = async (e) => {
-      e.preventDefault();
-  
-      if (!job) {
-        console.log('Please select a PDF to upload.');
-        return;
-      }
-  
-      try {
-        await saveJobToFirestore(job);
-        console.log('job added succesfully');
-      } catch (error) {
-        console.log('error uploading job');
-      }
-    };
+  const closePopup = () => {
+    setShowPopup(false);
+  };
 
   return (
     <main className="job-details__container">
@@ -86,10 +79,24 @@ const JobDetails = () => {
         <p><strong>Application Deadline:</strong> {job['Deadline'] || "N/A"}</p>
 
         <div className="job-details__actions">
-          <button className="job-details__button" onClick={() => navigate(-1)}>Apply for Job</button>
+          <button className="job-details__button" onClick={handleApplyForJob}>Apply for Job</button>
           <button className="job-details__button" onClick={compareWithDescription}>Get Match Score</button>
         </div>
       </section>
+
+      {showPopup && (
+        <div className="popup-overlay">
+          <div className="popup-content">
+            <h2>Application Submitted</h2>
+            {matchScore !== null ? (
+              <p>Your match score with this job is: {matchScore}%</p>
+            ) : (
+              <p>You have successfully applied for this job.</p>
+            )}
+            <button className="popup-cancel-button" onClick={closePopup}>Cancel</button>
+          </div>
+        </div>
+      )}
     </main>
   );
 };
