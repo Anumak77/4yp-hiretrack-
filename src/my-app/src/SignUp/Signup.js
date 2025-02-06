@@ -4,11 +4,17 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { firebaseapp } from '../components/firebaseconfigs';
 import '../components/style.css';
 
+const countryOptions = [
+  "United States", "United Kingdom", "India", "Canada", "Germany",
+  "France", "Australia", "Armenia", "Singapore", "United Arab Emirates"
+];
+
 const Signup = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
+  const [location, setLocation] = useState('');
   const [error, setError] = useState('');
   const [userType, setUserType] = useState('Job Seeker'); 
   const auth = getAuth(firebaseapp);
@@ -22,7 +28,7 @@ const Signup = () => {
 
       await updateProfile(user, { displayName: name });
 
-      console.log(`User: ${name}, Email: ${user.email}, Role: ${userType}`);
+      console.log(`User: ${name}, Email: ${user.email}, Role: ${userType}, Location: ${location}`);
       navigate('/login');
     } catch (err) {
       setError(err.message);
@@ -34,7 +40,7 @@ const Signup = () => {
     <main className="main-container">
       <section className="section-container">
         <h1 className="heading">HireTrack</h1>
-        
+
         {error && <p className="error-text">{error}</p>}
 
         <form>
@@ -104,6 +110,24 @@ const Signup = () => {
             </div>
           </div>
 
+          {/* Location Dropdown */}
+          <div style={{ padding: "10px 30px 30px 10px" }}>
+            <label htmlFor="location" className="label">Location</label>
+            <select
+              id="location"
+              name="location"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              required
+              className="location-dropdown"
+            >
+              <option value="">Select a country</option>
+              {countryOptions.map((country, index) => (
+                <option key={index} value={country}>{country}</option>
+              ))}
+            </select>
+          </div>
+
           <div style={{ padding: "10px 30px 30px 10px" }}>
             <button type="submit" onClick={onSubmit} className="button">Sign up</button>
           </div>
@@ -119,4 +143,3 @@ const Signup = () => {
 };
 
 export default Signup;
-

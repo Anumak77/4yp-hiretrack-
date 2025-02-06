@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { onAuthStateChanged, signOut, getAuth } from "firebase/auth";
 import { firebaseapp } from "../components/firebaseconfigs";
+import { savePdfToFirestore, fetchPdfFromFirestore } from "../components/utils";
 import "../components/style.css";
 
 const DashJobseeker = () => {
   const [name, setName] = useState("Guest");
   const [profileImage, setProfileImage] = useState(null);
+  const [file, setFile] = useState(null);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const auth = getAuth(firebaseapp);
 
   useEffect(() => {
@@ -34,6 +38,53 @@ const DashJobseeker = () => {
         setProfileImage(reader.result); // image as base64 string
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  // Handle file selection
+  const handleFileChange = (e) => {
+    const uploadedFile = e.target.files[0];
+    const validTypes = ["application/pdf"];
+
+    if (uploadedFile && validTypes.includes(uploadedFile.type)) {
+      setFile(uploadedFile);
+      setErrorMessage("");
+      setSuccessMessage("");
+    } else {
+      setFile(null);
+      setErrorMessage("Please upload a valid PDF file.");
+    }
+  };
+
+  // Upload CV to Firestore
+  const handleUploadCV = async (e) => {
+    e.preventDefault();
+
+    if (!file) {
+      setErrorMessage("Please select a PDF to upload.");
+      return;
+    }
+
+    try {
+      await savePdfToFirestore(file);
+      setSuccessMessage("CV uploaded successfully!");
+    } catch (error) {
+      setErrorMessage("Error uploading CV.");
+    }
+  };
+
+  // View Uploaded CV
+  const viewCV = async () => {
+    try {
+      const pdfData = await fetchPdfFromFirestore();
+      if (pdfData) {
+        window.open(pdfData, "_blank");
+      } else {
+        alert("No CV found. Please upload a CV.");
+      }
+    } catch (error) {
+      console.error("Error fetching CV:", error);
+      alert("Error fetching CV.");
     }
   };
 
@@ -72,7 +123,33 @@ const DashJobseeker = () => {
           <p className="profile__name">{name}</p>
         </div>
 
-        <button className="logout" onClick={handleLogout}>Logout</button>
+        {/* CV Upload Section */}
+        <div className="cv-upload-section">
+          <h3>Upload Your CV</h3>
+          <input
+            type="file"
+            accept=".pdf"
+            onChange={handleFileChange}
+            className="cv-upload-input"
+          />
+          <button onClick={handleUploadCV} className="upload-cv-button">
+            Upload CV
+          </button>
+          <button onClick={viewCV} className="view-cv-button">
+            View CV
+          </button>
+          {errorMessage && <p className="error-message">{errorMessage}</p>}
+          {successMessage && <p className="success-message">{successMessage}</p>}
+        </div>
+
+        <button onClick={() => (window.location.href = "/jobseekerchat")} className="logout">
+          Inbox
+        </button>
+
+        <button className="logout" onClick={handleLogout}>
+          Logout
+        </button>
+        
       </aside>
 
       <main className="main-content">
@@ -106,7 +183,6 @@ const DashJobseeker = () => {
                   <button className="match">Match</button>
                 </div>
               </div>
-              
             ))}
           </div>
         </section>

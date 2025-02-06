@@ -4,17 +4,17 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import Navbar from './components/Navbar';
 import Login from './SignUp/Login';
 import Signup from './SignUp/Signup';
-import JobDetails from './pages/job-details';
-import JobSearch from './pages/JobSearch';
-import DashJobseeker from './pages/dashboard-jobseeker';
-import DashRecruiter from './pages/dashboard-recruiter';
-import JobTrackerJobseeker from './pages/JobTracker-jobseeker';
-import JobTrackerRecruiter from './pages/JobTracker-recruiter';
-import RecruiterSearch from './pages/RecruiterSearch';
-import JobSeekerDetails from './pages/jobseeker-details';
-import JobSeekerChat from './pages/jobseekerchat';
-import PostJob from './pages/postjob';
-import ViewJobPostings from './pages/viewjob-postings';
+import JobDetails from './jobseekers/job-details';
+import JobSearch from './jobseekers/JobSearch';
+import DashJobseeker from './jobseekers/dashboard-jobseeker';
+import DashRecruiter from './recruiters/dashboard-recruiter';
+import JobTrackerJobseeker from './jobseekers/JobTracker-jobseeker';
+import JobTrackerRecruiter from './recruiters/JobTracker-recruiter';
+import RecruiterSearch from './recruiters/RecruiterSearch';
+import JobSeekerDetails from './jobseekers/jobseeker-details';
+import JobSeekerChat from './chat/jobseekerchat';
+import PostJob from './recruiters/postjob';
+import ViewJobPostings from './recruiters/viewjob-postings';
 
 
 

@@ -2,6 +2,19 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../components/style.css';
 
+const countryOptions = [
+  "United States",
+  "United Kingdom",
+  "India",
+  "Canada",
+  "Germany",
+  "France",
+  "Australia",
+  "Armenia",
+  "Singapore",
+  "United Arab Emirates"
+];
+
 const PostJob = () => {
   const navigate = useNavigate();
   const [jobData, setJobData] = useState({
@@ -19,7 +32,7 @@ const PostJob = () => {
     date: '',
     jobpost: ''
   });
-  
+
   const [alertMessage, setAlertMessage] = useState(null);
   const [alertType, setAlertType] = useState('error');
 
@@ -65,9 +78,21 @@ const PostJob = () => {
           </div>
 
           <div className="input-group">
-            <label>Location</label>
-            <input type="text" name="Location" value={jobData.Location} onChange={handleChange} placeholder="Enter job location" required />
-          </div>
+  <label htmlFor="Location">Location</label>
+  <select
+    name="Location"
+    value={jobData.Location}
+    onChange={handleChange}
+    required
+    className="location-dropdown"
+  >
+    <option value="">Select a country</option>
+    {countryOptions.map((country, index) => (
+      <option key={index} value={country}>{country}</option>
+    ))}
+  </select>
+</div>
+
 
           <div className="input-group">
             <label>Job Description</label>
@@ -76,22 +101,22 @@ const PostJob = () => {
 
           <div className="input-group">
             <label>Job Requirements</label>
-            <input type="text" name="JobRequirment" value={jobData.JobRequirment} onChange={handleChange} placeholder="Enter job requirements" required />
+            <textarea name="JobRequirment" value={jobData.JobRequirment} onChange={handleChange} placeholder="Enter job requirements" required></textarea>
           </div>
 
           <div className="input-group">
             <label>Required Qualifications</label>
-            <input type="text" name="RequiredQual" value={jobData.RequiredQual} onChange={handleChange} placeholder="Enter required qualifications" required />
+            <textarea name="RequiredQual" value={jobData.RequiredQual} onChange={handleChange} placeholder="Enter required qualifications" required></textarea>
           </div>
 
           <div className="input-group">
             <label>Application Process</label>
-            <input type="text" name="ApplicationP" value={jobData.ApplicationP} onChange={handleChange} placeholder="Enter application process" required />
+            <textarea name="ApplicationP" value={jobData.ApplicationP} onChange={handleChange} placeholder="Enter application process" required></textarea>
           </div>
 
           <div className="date-container">
             <div className="input-group">
-              <label>Starting Date</label>
+              <label>Opening Date</label>
               <input type="date" name="OpeningDate" value={jobData.OpeningDate} onChange={handleChange} required />
             </div>
             <div className="input-group">

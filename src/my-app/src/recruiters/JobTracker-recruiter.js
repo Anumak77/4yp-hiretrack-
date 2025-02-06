@@ -66,8 +66,12 @@ const JobTrackerRecruiter = () => {
               <button 
                 key={index} 
                 className={`job-option-button ${selectedJob === job ? 'selected' : ''}`} 
-                onClick={() => setSelectedJob(job)}>
+                onClick={() => setSelectedJob(job)}
+                style={{ margin: "1%" }} 
+
+                >
                 {job}
+                
               </button>
             ))}
           </div>
