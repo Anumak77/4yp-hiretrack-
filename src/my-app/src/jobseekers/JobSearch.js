@@ -9,6 +9,7 @@ const JobSearch = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredJobs, setFilteredJobs] = useState([]);
   const [allData, setAllData] = useState([]);
+  const [searchFilter, setSearchFilter] = useState('all');
   const navigate = useNavigate();
 
   const firebaseConfig = {
@@ -44,15 +45,38 @@ const JobSearch = () => {
       return;
     }
 
-    const fuse = new Fuse(allData, {
-      keys: ['Title', 'Company', 'Location'], 
-      threshold: 0.4,  
-    });
+    if (!query) {
+      setFilteredJobs([]);
+      return;
+    }
+
+    let filtered = [];
+
+    if (searchFilter === 'location') {
+      filtered = allData.filter(job =>
+        job.Location?.toLowerCase().includes(query)
+      );
+    } else if (searchFilter === 'company') {
+      filtered = allData.filter(job =>
+        job.Company?.toLowerCase().includes(query)
+      );
+    } else if (searchFilter === 'company') {
+      filtered = allData.filter(job =>
+        job.Company?.toLowerCase().includes(query)
+      );
+    } else {
+      const fuse = new Fuse(allData, {
+        keys: ['Title', 'Company', 'Location'],
+        threshold: 0.4,
+      });
 
     const result = fuse.search(query);
-    const filtered = result.map(({ item }) => item);
+    filtered = result.map(({ item }) => item);
     setFilteredJobs(filtered);
   };
+
+  setFilteredJobs(filtered);
+    };
 
   const handleMoreInfoClick = (job) => {
     navigate('/job-details', { state: job });
@@ -62,6 +86,34 @@ const JobSearch = () => {
     <main className="job-search-container">
       <section className="job-search-section">
         <h1 className="job-search-heading">Job Search</h1>
+
+        <div className="filter-buttons">
+          <button 
+            className={`filter-button ${searchFilter === 'all' ? 'active' : ''}`} 
+            onClick={() => setSearchFilter('all')}
+          >
+            All
+          </button>
+          <button 
+            className={`filter-button ${searchFilter === 'location' ? 'active' : ''}`} 
+            onClick={() => setSearchFilter('location')}
+          >
+            Location
+          </button>
+          <button 
+            className={`filter-button ${searchFilter === 'company' ? 'active' : ''}`} 
+            onClick={() => setSearchFilter('company')}
+          >
+            Company
+          </button>
+          <button 
+            className={`filter-button ${searchFilter === 'title' ? 'active' : ''}`} 
+            onClick={() => setSearchFilter('title')}
+          >
+            Title
+          </button>
+          
+        </div>
 
         <input
           type="text"
@@ -111,5 +163,6 @@ const JobSearch = () => {
     </main>
   );
 };
+
 
 export default JobSearch;

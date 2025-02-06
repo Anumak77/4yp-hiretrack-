@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { fetchPdfFromFirestore, saveJobToFirestore } from '../components/utils';
+import { fetchPdfFromFirestore,addJobToFirestore } from '../components/utils';
 import '../components/style.css'; 
 
 const JobDetails = () => {
@@ -38,20 +38,46 @@ const JobDetails = () => {
     }
   };
 
-  const handleApplyForJob = () => {
-    setShowPopup(true);
-  };
 
-  const closePopup = () => {
-    setShowPopup(false);
-  };
+    const handleSubmitofsaveJobUpload = async (e) => {
+      e.preventDefault();
+  
+      if (!job) {
+        console.log('Please select a PDF to upload.');
+        return;
+      }
+  
+      try {
+        await addJobToFirestore(job, 'savedjobs');
+        console.log('job added succesfully');
+      } catch (error) {
+        console.log('error uploading job');
+      }
+    };
+
+    const handleSubmitofapplyJobUpload = async (e) => {
+      e.preventDefault();
+  
+      if (!job) {
+        console.log('Please select a PDF to upload.');
+        return;
+      }
+  
+      try {
+        await addJobToFirestore(job,'appliedjobs');
+        console.log('job added succesfully');
+      } catch (error) {
+        console.log('error uploading job');
+      }
+    };
+
 
   return (
     <main className="job-details__container">
       <section className="job-details__card">
         <div className="job-details__header">
           <button className="job-details__button" onClick={() => navigate(-1)}>Go Back</button>
-          <button className="job-details__button">Save Job</button>
+          <button className="job-details__button"onClick={handleSubmitofsaveJobUpload} >Save Job</button>
         </div>
 
         <h1 className="job-details__title">Job Details</h1>
@@ -79,7 +105,7 @@ const JobDetails = () => {
         <p><strong>Application Deadline:</strong> {job['Deadline'] || "N/A"}</p>
 
         <div className="job-details__actions">
-          <button className="job-details__button" onClick={handleApplyForJob}>Apply for Job</button>
+          <button className="job-details__button" onClick={handleSubmitofapplyJobUpload}>Apply for Job</button>
           <button className="job-details__button" onClick={compareWithDescription}>Get Match Score</button>
         </div>
       </section>

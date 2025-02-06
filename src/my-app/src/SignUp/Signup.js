@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { firebaseapp } from '../components/firebaseconfigs';
+import { getFirestore, doc, setDoc } from 'firebase/firestore';
 import '../components/style.css';
 
 const countryOptions = [
@@ -12,12 +13,16 @@ const countryOptions = [
 const Signup = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
-  const [name, setName] = useState('');
+  const [first_name, setfirstName] = useState('');
+  const [last_name, setlastName] = useState('');
   const [password, setPassword] = useState('');
   const [location, setLocation] = useState('');
+  const [phone_number, setPhone_number] = useState('');
+  const [company_name, setCompany_name] = useState('');
   const [error, setError] = useState('');
   const [userType, setUserType] = useState('Job Seeker'); 
   const auth = getAuth(firebaseapp);
+  const firestore = getFirestore(firebaseapp);
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -26,9 +31,32 @@ const Signup = () => {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      await updateProfile(user, { displayName: name });
+      await updateProfile(user, { displayName: first_name +" "+ last_name });
+      const userRef = doc(firestore, "users", user.uid);
 
-      console.log(`User: ${name}, Email: ${user.email}, Role: ${userType}, Location: ${location}`);
+      const userData = {
+        uid: user.uid,
+        first_name: first_name,
+        last_name: last_name,
+        name: first_name + last_name,
+        email: user.email,
+        userType: userType,
+        createdAt: new Date().toISOString(), 
+        location: location
+      };
+
+      const RecruiterData = {
+        uid: user.uid,
+        company_name: company_name,
+        email: user.email,
+        phone_number: phone_number,
+        userType: userType,
+        createdAt: new Date().toISOString(), 
+      }
+
+      await setDoc(userRef, userData);
+
+      console.log(`User: ${first_name + " " + last_name}, Email: ${user.email}, Role: ${userType}, Location: ${location}`);
       navigate('/login');
     } catch (err) {
       setError(err.message);
@@ -45,13 +73,26 @@ const Signup = () => {
 
         <form>
           <div style={{ padding: "10px 30px 30px 10px" }}>
-            <label htmlFor="name" className="label">Name</label>
+            <label htmlFor="name" className="label">First Name</label>
             <input
               id="name"
               type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Enter your name"
+              value={first_name}
+              onChange={(e) => setfirstName(e.target.value)}
+              placeholder="Enter your first name"
+              required
+              className="input"
+            />
+          </div>
+
+          <div style={{ padding: "10px 30px 30px 10px" }}>
+            <label htmlFor="name" className="label">Last Name</label>
+            <input
+              id="name"
+              type="text"
+              value={last_name}
+              onChange={(e) => setlastName(e.target.value)}
+              placeholder="Enter your last name"
               required
               className="input"
             />

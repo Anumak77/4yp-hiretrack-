@@ -62,44 +62,6 @@ def filter_jobs():
         return jsonify({"message": "No jobs found for the given title"}), 404
 '''
 
-#FIX THIS !!!!!
-@app.route('/similarity', methods=['POST'])
-def similarity():
-    data = request.json
-    text1_base64 = data.get('text1')  # User's CV in Base64
-    job_title = data.get('title', '').lower()
-
-    if not text1_base64 or not job_title:
-        return jsonify({"error": "User CV and job title are required"}), 400
-
-    # Decode the user's CV
-    text1 = decode_pdf(text1_base64)
-
-    # Filter jobs by title
-    filtered_jobs = jobs_df[jobs_df['title'].str.lower().str.contains(job_title)]
-    if filtered_jobs.empty:
-        return jsonify({"error": "No jobs found for the given title"}), 404
-
-    # Combine user CV with job descriptions
-    texts = [text1] + filtered_jobs['description'].tolist()
-
-    # Vectorize using Tfidf
-    vectorizer = TfidfVectorizer(stop_words='english')
-    vectors = vectorizer.fit_transform(texts)
-
-    # Compute similarity between the user's CV and all filtered job descriptions
-    user_cv_vector = vectors[0]  # First vector is the user's CV
-    job_vectors = vectors[1:]  # Remaining vectors are job descriptions
-    similarities = cosine_similarity(user_cv_vector, job_vectors).flatten()
-
-    # Find the top 10 matches
-    top_indices = np.argsort(similarities)[-20:][::-1]  # Get top 10 indices in descending order
-    top_matches = filtered_jobs.iloc[top_indices]
-
-    # Prepare the response
-    response = top_matches.to_dict(orient='records')
-    return jsonify({"matches": response}), 200
-
 @app.route('/compare_with_description', methods=['POST'])
 def compare_with_description():
     try:
