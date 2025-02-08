@@ -1,6 +1,7 @@
 import { getFirestore, doc, setDoc, getDoc, collection, getDocs, deleteDoc  } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import axios from 'axios';
+import { getDatabase, ref, push, set } from "firebase/database";
 
 export const savePdfToFirestore = async (file) => {
     try {
@@ -177,3 +178,39 @@ export const fetchPdfFromFirestore = async () => {
       throw error;
     }
   };
+
+
+  export const createJobPosting = async (job) => {
+    try {
+
+      const user = getAuth().currentUser;
+      if (!user) throw new Error('User not authenticated');
+      const firestore = getFirestore();
+      const db = getDatabase();
+
+      const newJobRef = push(ref(db, "jobs"));
+
+      const jobId = job.id || `${job.Company}-${job.Title}`.replace(/\s+/g, "-").toLowerCase();
+      const JobRef = doc(firestore, `users/${user.uid}/jobposting/${jobId}`);
+
+      const jobWithMetadata = {
+        ...job,
+        recruiterId: user.uid,
+        postedAt: new Date().toISOString(),
+        date: "NA",
+        jobpost: "NA"
+      };
+
+      await set(newJobRef, jobWithMetadata);
+
+      await setDoc(JobRef, jobWithMetadata);
+
+     
+      
+      console.log("Job successfully posted!");
+    return { success: true, jobId };
+  } catch (error) {
+    console.error(" Error posting job:", error);
+    return { success: false, error: error.message };
+  }
+    }

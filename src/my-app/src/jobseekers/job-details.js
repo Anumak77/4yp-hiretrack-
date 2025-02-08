@@ -11,6 +11,9 @@ const JobDetails = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [matchScore, setMatchScore] = useState(null);
 
+  const closePopup = () => {
+    setShowPopup(false);
+  }
   if (!job) {
     return <p className="job-details__no-job">No job details available.</p>;
   }

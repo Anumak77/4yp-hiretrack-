@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../components/style.css';
+import { createJobPosting } from "../components/utils"
 
 const countryOptions = [
   "United States",
@@ -46,18 +47,32 @@ const PostJob = () => {
     setJobData({ ...jobData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const { date, jobpost, ...cleanedJobData } = jobData;
     
-    const isFormValid = Object.values(jobData).every(value => value !== undefined && value !== null && value.trim() !== '');
+    const isFormValid = Object.values(cleanedJobData).every(([key, value]) => {
+      if (typeof value === "string") {
+        return value.trim() !== ""; 
+      }
+      return value !== undefined && value !== null; 
+    });
     
     if (!isFormValid) {
+      console.log("Missing fields:", jobData);
       showAlert('Please fill out all fields.', 'error');
       return;
     }
+
+    const result = await createJobPosting(jobData);
     
-    console.log('Job Data Submitted:', jobData);
-    showAlert('Job Posted Successfully!', 'success');
+    if (result.success) {
+      showAlert("Job Posted Successfully!", "success");
+      navigate("/dashboard-recruiter");
+    } else {
+      showAlert("Error posting job. Try again.", "error");
+    }
   };
 
   return (
@@ -93,6 +108,10 @@ const PostJob = () => {
   </select>
 </div>
 
+          <div className="input-group">
+            <label>About Company</label>
+            <textarea name="AboutC" value={jobData.AboutC} onChange={handleChange} placeholder="Enter information about the company" required></textarea>
+          </div>
 
           <div className="input-group">
             <label>Job Description</label>
@@ -116,7 +135,7 @@ const PostJob = () => {
 
           <div className="date-container">
             <div className="input-group">
-              <label>Opening Date</label>
+              <label>OpeningDate</label>
               <input type="date" name="OpeningDate" value={jobData.OpeningDate} onChange={handleChange} required />
             </div>
             <div className="input-group">
@@ -124,6 +143,10 @@ const PostJob = () => {
               <input type="date" name="Deadline" value={jobData.Deadline} onChange={handleChange} required />
             </div>
           </div>
+          <div className="input-group">
+              <label>Start Date</label>
+              <input type="date" name="StartDate" value={jobData.StartDate} onChange={handleChange} required />
+            </div>
 
           <button type="submit" className="post-job-button">Post Job</button>
         </form>
