@@ -1,15 +1,49 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../components/style.css';
+import { getAuth,  onAuthStateChanged } from 'firebase/auth';
+import { getFirestore, collection, query, where, getDocs, deleteDoc, doc } from 'firebase/firestore';
+
 
 const ViewJobPostings = () => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+  const [jobPostings, setJobPostings] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const [jobPostings, setJobPostings] = useState([
-    { id: 1, title: 'Software Engineer', company: 'Google', location: 'New York', description: 'Develop scalable web applications.' },
-    { id: 2, title: 'Product Manager', company: 'Microsoft', location: 'Seattle', description: 'Lead cross-functional teams to deliver product roadmaps.' },
-    { id: 3, title: 'Data Scientist', company: 'Amazon', location: 'San Francisco', description: 'Analyze large datasets to generate insights.' }
-  ]);
+  useEffect(() => {
+    const fetchJobPostings = async (userId) => {
+      try {
+        const firestore = getFirestore();
+        const jobPostingRef = collection(firestore, `users/${userId}/jobposting`);
+        const jobQuery = query(jobPostingRef);
+        const jobSnapshot = await getDocs(jobQuery);
+
+        const jobs = jobSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+
+        setJobPostings(jobs);
+      } catch (error) {
+        console.error("Error fetching job postings:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        fetchJobPostings(user.uid);
+      } else {
+        console.error("User not authenticated.");
+        setLoading(false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);  
+    
 
   const handleEdit = (id) => {
     console.log(`Edit job posting with ID: ${id}`);
@@ -35,10 +69,10 @@ const ViewJobPostings = () => {
           <div key={job.id} className="job-card">
             <button className="delete-button" onClick={() => handleDelete(job.id)}>Delete</button>
             <div className="job-card-header">
-              <h2 className="job-card-title">{job.title}</h2>
-              <p className="job-card-company">{job.company} - {job.location}</p>
+              <h2 className="job-card-title">{job.Title}</h2>
+              <p className="job-card-company">{job.Company} - {job.Location}</p>
             </div>
-            <p className="job-card-description">{job.description}</p>
+            <p className="job-card-description">{job.JobDescription}</p>
             <div className="job-card-actions">
               <button className="action-button" onClick={() => handleEdit(job.id)}>Edit</button>
               <button className="action-button" onClick={() => handleViewInsights(job.id)}>View Insights</button>
