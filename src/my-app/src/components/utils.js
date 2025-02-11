@@ -1,4 +1,4 @@
-import { getFirestore, doc, setDoc, getDoc, collection, getDocs, deleteDoc  } from 'firebase/firestore';
+import { getFirestore, doc, setDoc, getDoc, collection, getDocs, deleteDoc, updateDoc, arrayUnion, increment  } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import axios from 'axios';
 import { getDatabase, ref, push, set } from "firebase/database";
@@ -60,6 +60,8 @@ export const fetchPdfFromFirestore = async () => {
       const firestore = getFirestore();
       const jobId = job.id || `${job.Company}-${job.Title}`.replace(/\s+/g, "-").toLowerCase();
       const JobRef = doc(firestore, `users/${user.uid}/${firebasecollection}/${jobId}`);
+      const recruiterJobRef = doc(firestore, `users/${job.recruiterId}/jobposting/${jobId}`);
+      const recruiterRef = doc(firestore, `users/${job.recruiterId}`);
       let applicationstatus;
 
       const jobSnap = await getDoc(JobRef);
@@ -82,6 +84,13 @@ export const fetchPdfFromFirestore = async () => {
     });
 
     if (firebasecollection == "appliedjobs"){
+      await updateDoc(recruiterJobRef, {
+        applicants: arrayUnion(user.uid)
+      });
+      await updateDoc(recruiterRef, {
+        applicantsnum: increment(1)
+      });
+
       applicationstatus = "applied"
     }
     else if (firebasecollection == "savedjobs"){
@@ -160,7 +169,7 @@ export const fetchPdfFromFirestore = async () => {
 
 
 
-  export const fetchJobsListings = async (firebasecollection) => {
+  export const fetchJobsPosting = async (firebasecollection) => {
     try {
       const user = getAuth().currentUser;
       if (!user) throw new Error('User not authenticated');
@@ -188,7 +197,7 @@ export const fetchPdfFromFirestore = async () => {
       const firestore = getFirestore();
       const db = getDatabase();
 
-      const newJobRef = push(ref(db, "jobs"));
+      const newJobRef = push(ref(db));
 
       const jobId = job.id || `${job.Company}-${job.Title}`.replace(/\s+/g, "-").toLowerCase();
       const JobRef = doc(firestore, `users/${user.uid}/jobposting/${jobId}`);
@@ -214,3 +223,25 @@ export const fetchPdfFromFirestore = async () => {
     return { success: false, error: error.message };
   }
     }
+
+export const updateJobPosting = async (job) => {
+  try {
+    const firestore = getFirestore();
+    const user = getAuth().currentUser;
+
+    if (!user) throw new Error("User not authenticated");
+
+    
+    const jobRef = doc(firestore, `users/${user.uid}/jobposting/${job.id}`);
+
+    
+    await updateDoc(jobRef, { ...job });
+
+    console.log("Job successfully updated!");
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating job posting:", error);
+    return { success: false, error: error.message };
+  }
+};
+

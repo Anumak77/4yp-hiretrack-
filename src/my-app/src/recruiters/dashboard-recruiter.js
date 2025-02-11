@@ -1,19 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../components/style.css';
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+import { fetchJobsPosting } from '../components/utils';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const DashRecruiter = () => {
   const navigate = useNavigate();
+  const [jobPostings, setJobPostings] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const jobPostings = [
-    { id: 1, title: 'Software Engineer', views: 150, applications: 25 },
-    { id: 2, title: 'Product Manager', views: 90, applications: 10 },
-    { id: 3, title: 'Data Analyst', views: 120, applications: 18 },
-  ];
+  useEffect(() => {
+    const fetchJobs = async () => {
+      try {
+        const jobs = await fetchJobsPosting("jobposting"); // Fetch jobs from Firestore
+        setJobPostings(jobs);
+      } catch (error) {
+        console.error("Error fetching job postings:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchJobs();
+  }, []);
 
   const totalJobs = jobPostings.length;
   const totalApplications = jobPostings.reduce((acc, job) => acc + job.applications, 0);

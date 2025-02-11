@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import '../components/style.css';
-import { createJobPosting } from "../components/utils"
+import { createJobPosting, updateJobPosting } from "../components/utils";
+
 
 const countryOptions = [
   "United States",
@@ -18,6 +19,7 @@ const countryOptions = [
 
 const PostJob = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [jobData, setJobData] = useState({
     AboutC: '',
     ApplicationP: '',
@@ -31,8 +33,19 @@ const PostJob = () => {
     StartDate: '',
     Title: '',
     date: '',
-    jobpost: ''
+    jobpost: '',
+    applicants: []
   });
+
+
+  const [isEditing, setIsEditing] = useState(false);
+  
+  useEffect(() => {
+    if (location.state?.job) {
+      setJobData(location.state.job);
+      setIsEditing(true);
+    }
+  }, [location.state]);
 
   const [alertMessage, setAlertMessage] = useState(null);
   const [alertType, setAlertType] = useState('error');
@@ -65,7 +78,14 @@ const PostJob = () => {
       return;
     }
 
-    const result = await createJobPosting(jobData);
+    let result;
+  if (isEditing) {
+    
+    result = await updateJobPosting(jobData);  
+  } else {
+    
+    result = await createJobPosting(jobData);
+  }
     
     if (result.success) {
       showAlert("Job Posted Successfully!", "success");

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../components/style.css';
-import { getAuth,  onAuthStateChanged } from 'firebase/auth';
-import { getFirestore, collection, query, where, getDocs, deleteDoc, doc } from 'firebase/firestore';
-
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { getFirestore, collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
+import { fetchJobsPosting } from '../components/utils';
 
 const ViewJobPostings = () => {
   const navigate = useNavigate();
@@ -11,19 +11,10 @@ const ViewJobPostings = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchJobPostings = async (userId) => {
+    const fetchJobs = async () => {
       try {
-        const firestore = getFirestore();
-        const jobPostingRef = collection(firestore, `users/${userId}/jobposting`);
-        const jobQuery = query(jobPostingRef);
-        const jobSnapshot = await getDocs(jobQuery);
-
-        const jobs = jobSnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-
-        setJobPostings(jobs);
+        const jobs = await fetchJobsPosting('jobposting'); 
+        setJobPostings(jobs)
       } catch (error) {
         console.error("Error fetching job postings:", error);
       } finally {
@@ -34,7 +25,7 @@ const ViewJobPostings = () => {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        fetchJobPostings(user.uid);
+        fetchJobs(user.uid);
       } else {
         console.error("User not authenticated.");
         setLoading(false);
@@ -43,19 +34,31 @@ const ViewJobPostings = () => {
 
     return () => unsubscribe();
   }, []);  
+
     
 
-  const handleEdit = (id) => {
-    console.log(`Edit job posting with ID: ${id}`);
+  const handleEdit = (job) => {
+    navigate("/createpost", { state: { job } });
   };
 
-  const handleViewInsights = (id) => {
-    console.log(`View insights for job posting with ID: ${id}`);
-  };
+  const handleDelete = async (id) => {
+    try {
+      const auth = getAuth();
+      const user = auth.currentUser;
 
-  const handleDelete = (id) => {
-    setJobPostings(jobPostings.filter(job => job.id !== id));
-    console.log(`Deleted job posting with ID: ${id}`);
+      if (!user) {
+        console.error("User not authenticated.");
+        return;
+      }
+
+      const firestore = getFirestore();
+      await deleteDoc(doc(firestore, `users/${user.uid}/jobposting`, id));
+
+      setJobPostings(prevJobs => prevJobs.filter(job => job.id !== id));
+      console.log(`Deleted job posting with ID: ${id}`);
+    } catch (error) {
+      console.error("Error deleting job posting:", error);
+    }
   };
 
   return (
@@ -75,7 +78,6 @@ const ViewJobPostings = () => {
             <p className="job-card-description">{job.JobDescription}</p>
             <div className="job-card-actions">
               <button className="action-button" onClick={() => handleEdit(job.id)}>Edit</button>
-              <button className="action-button" onClick={() => handleViewInsights(job.id)}>View Insights</button>
             </div>
           </div>
         ))}
