@@ -61,11 +61,13 @@ const PostJob = () => {
   };
 
   return (
-    <main className="post-job-container">
+    <main>
+              <h1 className="post-job-title">Post a Job</h1>
+
+      <section className="post-job-container">
       <section className="post-job-card">
         {alertMessage && <div className={`alert-box ${alertType}`}>{alertMessage}</div>}
         <button type="button" className="back-button" onClick={() => navigate('/dashboard-recruiter')}>Go Back</button>
-        <h1 className="post-job-title">Post a Job</h1>
         <form onSubmit={handleSubmit}>
           <div className="input-group">
             <label>Job Title</label>
@@ -127,6 +129,7 @@ const PostJob = () => {
 
           <button type="submit" className="post-job-button">Post Job</button>
         </form>
+      </section>
       </section>
     </main>
   );

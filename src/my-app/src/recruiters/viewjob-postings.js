@@ -41,7 +41,6 @@ const ViewJobPostings = () => {
             <p className="job-card-description">{job.description}</p>
             <div className="job-card-actions">
               <button className="action-button" onClick={() => handleEdit(job.id)}>Edit</button>
-              <button className="action-button" onClick={() => handleViewInsights(job.id)}>View Insights</button>
             </div>
           </div>
         ))}

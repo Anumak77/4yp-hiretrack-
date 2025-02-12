@@ -55,51 +55,53 @@ const JobTrackerRecruiter = () => {
   };
 
   return (
-    <main className="job-tracker__container">
-      <section className="job-tracker__card">
-        <h1 className="job-tracker__title">Job Tracker</h1>
 
-        <div className="job-tracker__form">
-          <label>Select Job Title</label>
-          <div className="job-options-container">
-            {mockJobOptions.map((job, index) => (
-              <button 
-                key={index} 
-                className={`job-option-button ${selectedJob === job ? 'selected' : ''}`} 
-                onClick={() => setSelectedJob(job)}
-                style={{ margin: "1%" }} 
+    
+<main>
+  <h1 className="job-tracker__title">Job Tracker</h1> 
 
-                >
-                {job}
-                
-              </button>
-            ))}
-          </div>
-
-          <label>Application Date</label>
-          <input
-            type="text"
-            placeholder="Enter Month (e.g., January)"
-            value={month}
-            onChange={(e) => setMonth(e.target.value)}
-          />
-
-          <input
-            type="number"
-            placeholder="Applications Count"
-            value={applications}
-            onChange={(e) => setApplications(e.target.value)}
-          />
-
-          <button onClick={handleAddJobTrend}>Add Job Trend</button>
+  <section className="job-tracker__container">
+    <div className="job-tracker__card">
+      <div className="job-tracker__form">
+        <div className="job-options-container">
+          {mockJobOptions.map((job, index) => (
+            <button 
+              key={index} 
+              className={`job-option-button ${selectedJob === job ? 'selected' : ''}`} 
+              onClick={() => setSelectedJob(job)}
+              style={{ margin: "1%" }} 
+            >
+              {job}
+            </button>
+          ))}
         </div>
 
-        <div className="job-tracker__chart">
-          <h2>Line Chart - Job Trends</h2>
-          <Line data={lineChartData} />
-        </div>
-      </section>
-    </main>
+        <label>Application Date</label>
+        <input
+          type="text"
+          placeholder="Enter Month (e.g., January)"
+          value={month}
+          onChange={(e) => setMonth(e.target.value)}
+        />
+
+        <input
+          type="number"
+          placeholder="Applications Count"
+          value={applications}
+          onChange={(e) => setApplications(e.target.value)}
+        />
+
+        <button onClick={handleAddJobTrend}>Add Job Trend</button>
+      </div>
+
+      <div className="job-tracker__chart">
+        <h2>Line Chart - Job Trends</h2>
+        <Line data={lineChartData} />
+      </div>
+    </div>
+  </section>
+</main>
+
   );
 };
 

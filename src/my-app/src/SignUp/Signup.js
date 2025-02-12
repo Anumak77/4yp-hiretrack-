@@ -13,14 +13,15 @@ const countryOptions = [
 const Signup = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
-  const [first_name, setfirstName] = useState('');
-  const [last_name, setlastName] = useState('');
   const [password, setPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [location, setLocation] = useState('');
-  const [phone_number, setPhone_number] = useState('');
-  const [company_name, setCompany_name] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [companyName, setCompanyName] = useState('');
+  const [userType, setUserType] = useState('Job Seeker');
   const [error, setError] = useState('');
-  const [userType, setUserType] = useState('Job Seeker'); 
+
   const auth = getAuth(firebaseapp);
   const firestore = getFirestore(firebaseapp);
 
@@ -31,32 +32,29 @@ const Signup = () => {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      await updateProfile(user, { displayName: first_name +" "+ last_name });
+      await updateProfile(user, { displayName: `${firstName} ${lastName}` });
       const userRef = doc(firestore, "users", user.uid);
 
-      const userData = {
+      let userData = {
         uid: user.uid,
-        first_name: first_name,
-        last_name: last_name,
-        name: first_name + last_name,
+        first_name: firstName,
+        last_name: lastName,
         email: user.email,
         userType: userType,
-        createdAt: new Date().toISOString(), 
-        location: location
+        createdAt: new Date().toISOString(),
       };
 
-      const RecruiterData = {
-        uid: user.uid,
-        company_name: company_name,
-        email: user.email,
-        phone_number: phone_number,
-        userType: userType,
-        createdAt: new Date().toISOString(), 
+      if (userType === 'Job Seeker') {
+        userData.location = location;
+        userData.phone_number = phoneNumber;
+      } else if (userType === 'Recruiter') {
+        userData.company_name = companyName;
+        userData.phone_number = phoneNumber;
       }
 
       await setDoc(userRef, userData);
 
-      console.log(`User: ${first_name + " " + last_name}, Email: ${user.email}, Role: ${userType}, Location: ${location}`);
+      console.log(`User: ${firstName} ${lastName}, Email: ${user.email}, Role: ${userType}`);
       navigate('/login');
     } catch (err) {
       setError(err.message);
@@ -65,69 +63,17 @@ const Signup = () => {
   };
 
   return (
-    <main className="main-container">
-      <section className="section-container">
-        <h1 className="heading">HireTrack</h1>
+    <main className="signup-main-container">
+      <section className="signup-section-container">
+        <h1 className="signup-heading">HireTrack</h1>
 
-        {error && <p className="error-text">{error}</p>}
+        {error && <p className="signup-error-text">{error}</p>}
 
-        <form>
-          <div style={{ padding: "10px 30px 30px 10px" }}>
-            <label htmlFor="name" className="label">First Name</label>
-            <input
-              id="name"
-              type="text"
-              value={first_name}
-              onChange={(e) => setfirstName(e.target.value)}
-              placeholder="Enter your first name"
-              required
-              className="input"
-            />
-          </div>
-
-          <div style={{ padding: "10px 30px 30px 10px" }}>
-            <label htmlFor="name" className="label">Last Name</label>
-            <input
-              id="name"
-              type="text"
-              value={last_name}
-              onChange={(e) => setlastName(e.target.value)}
-              placeholder="Enter your last name"
-              required
-              className="input"
-            />
-          </div>
-
-          <div style={{ padding: "10px 30px 30px 10px" }}>
-            <label htmlFor="email-address" className="label">Email address</label>
-            <input
-              type="email"
-              id="email-address"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email address"
-              required
-              className="input"
-            />
-          </div>
-
-          <div style={{ padding: "10px 30px 30px 10px" }}>
-            <label htmlFor="password" className="label">Password</label>
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Password"
-              required
-              className="input"
-            />
-          </div>
-
+        <form onSubmit={onSubmit}>
           <div style={{ padding: "10px 30px 10px 10px", textAlign: "left" }}>
-            <label className="label">I am a:</label>
-            <div className="user-type-container">
-              <label className="radio-label">
+            <label className="signup-label">I am a:</label>
+            <div className="signup-user-type-container">
+              <label className="signup-radio-label">
                 <input
                   type="radio"
                   name="userType"
@@ -138,7 +84,7 @@ const Signup = () => {
                 Job Seeker
               </label>
 
-              <label className="radio-label">
+              <label className="signup-radio-label">
                 <input
                   type="radio"
                   name="userType"
@@ -151,32 +97,129 @@ const Signup = () => {
             </div>
           </div>
 
-          {/* Location Dropdown */}
-          <div style={{ padding: "10px 30px 30px 10px" }}>
-            <label htmlFor="location" className="label">Location</label>
-            <select
-              id="location"
-              name="location"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
+          <div style={{ padding: "10px 30px 0px 10px" }}>
+            <label htmlFor="first-name" className="signup-label">First Name</label>
+            <input
+              id="first-name"
+              type="text"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              placeholder="Enter your first name"
               required
-              className="location-dropdown"
-            >
-              <option value="">Select a country</option>
-              {countryOptions.map((country, index) => (
-                <option key={index} value={country}>{country}</option>
-              ))}
-            </select>
+              className="signup-input"
+            />
           </div>
 
-          <div style={{ padding: "10px 30px 30px 10px" }}>
-            <button type="submit" onClick={onSubmit} className="button">Sign up</button>
+          <div style={{ padding: "10px 30px 0px 10px" }}>
+            <label htmlFor="last-name" className="signup-label">Last Name</label>
+            <input
+              id="last-name"
+              type="text"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              placeholder="Enter your last name"
+              required
+              className="signup-input"
+            />
+          </div>
+
+          <div style={{ padding: "10px 30px 0px 10px" }}>
+            <label htmlFor="email" className="signup-label">Email Address</label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email address"
+              required
+              className="signup-input"
+            />
+          </div>
+
+          <div style={{ padding: "10px 30px 0px 10px" }}>
+            <label htmlFor="password" className="signup-label">Password</label>
+            <input
+              type="password"
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+              required
+              className="signup-input"
+            />
+          </div>
+
+          {userType === 'Job Seeker' && (
+            <>
+              <div style={{ padding: "10px 5px 0px 10px" }}>
+                <label htmlFor="location" className="signup-label">Location</label>
+                <select
+                  id="location"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  required
+                  className="signup-location-dropdown"
+                >
+                  <option value="">Select a country</option>
+                  {countryOptions.map((country, index) => (
+                    <option key={index} value={country}>{country}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div style={{ padding: "10px 30px 0px 10px" }}>
+                <label htmlFor="phone" className="signup-label">Phone Number</label>
+                <input
+                  id="phone"
+                  type="text"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  placeholder="Enter your phone number"
+                  required
+                  className="signup-input"
+                />
+              </div>
+            </>
+          )}
+
+          {userType === 'Recruiter' && (
+            <>
+              <div style={{ padding: "10px 30px 0px 10px" }}>
+                <label htmlFor="company" className="signup-label">Company Name</label>
+                <input
+                  id="company"
+                  type="text"
+                  value={companyName}
+                  onChange={(e) => setCompanyName(e.target.value)}
+                  placeholder="Enter your company name"
+                  required
+                  className="signup-input"
+                />
+              </div>
+
+              <div style={{ padding: "10px 30px 0px 10px" }}>
+                <label htmlFor="phone" className="signup-label">Phone Number</label>
+                <input
+                  id="phone"
+                  type="text"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  placeholder="Enter your phone number"
+                  required
+                  className="signup-input"
+                />
+              </div>
+            </>
+          )}
+
+          <div style={{ padding: "10px 30px 0px 10px" }}>
+            <button type="submit" className="signup-button">Sign up</button>
           </div>
         </form>
 
         <p>
           Already have an account?{' '}
-          <NavLink to="/login" className="link">Sign in</NavLink>
+          <NavLink to="/login" className="signup-link">Sign in</NavLink>
         </p>
       </section>
     </main>

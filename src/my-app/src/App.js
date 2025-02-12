@@ -11,7 +11,7 @@ import DashRecruiter from './recruiters/dashboard-recruiter';
 import JobTrackerJobseeker from './jobseekers/JobTracker-jobseeker';
 import JobTrackerRecruiter from './recruiters/JobTracker-recruiter';
 import RecruiterSearch from './recruiters/RecruiterSearch';
-import JobSeekerDetails from './jobseekers/jobseeker-details';
+import JobSeekerDetails from './recruiters/jobseeker-details';
 import JobSeekerChat from './chat/jobseekerchat';
 import PostJob from './recruiters/postjob';
 import ViewJobPostings from './recruiters/viewjob-postings';
