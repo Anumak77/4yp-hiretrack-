@@ -15,6 +15,7 @@ import JobSeekerDetails from './jobseekers/jobseeker-details';
 import JobSeekerChat from './chat/jobseekerchat';
 import PostJob from './recruiters/postjob';
 import ViewJobPostings from './recruiters/viewjob-postings';
+import Applicants from './recruiters/applicants'
 
 
 
@@ -51,6 +52,7 @@ function MainApp() {
         <Route path="/jobseekerchat" element={<JobSeekerChat />} />
         <Route path="/createpost" element={<PostJob />} />
         <Route path="/viewjobpostings" element={<ViewJobPostings />} />
+        <Route path="/applicants" element={<Applicants />} />
 
         
         <Route path="/job-search" element={<JobSearch />} /> 

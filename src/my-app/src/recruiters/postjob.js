@@ -65,16 +65,20 @@ const PostJob = () => {
 
     const { date, jobpost, ...cleanedJobData } = jobData;
     
-    const isFormValid = Object.values(cleanedJobData).every(([key, value]) => {
-      if (typeof value === "string") {
-        return value.trim() !== ""; 
+    const missingFields = [];
+
+    Object.entries(cleanedJobData).forEach(([key, value]) => {
+      if (typeof value === "string" && value.trim() === "") {
+        missingFields.push(key);
+      } else if (value === undefined || value === null) {
+        missingFields.push(key);
       }
-      return value !== undefined && value !== null; 
     });
     
-    if (!isFormValid) {
-      console.log("Missing fields:", jobData);
-      showAlert('Please fill out all fields.', 'error');
+    if (missingFields.length > 0) {
+      console.log("Missing fields:", missingFields);
+      console.log("Form Data:", cleanedJobData);
+      showAlert(`Please fill out all fields: ${missingFields.join(", ")}`, 'error');
       return;
     }
 

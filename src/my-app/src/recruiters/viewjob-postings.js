@@ -61,6 +61,11 @@ const ViewJobPostings = () => {
     }
   };
 
+  const handleViewApplicantsClick = (job) => {
+    navigate('/applicants', { state: { jobId: job.id } });
+    console.log("Navigating to /applicants with jobId:", job.id);
+  };
+
   return (
     <main className="view-job-container">
       <div className="view-job-header">
@@ -78,6 +83,7 @@ const ViewJobPostings = () => {
             <p className="job-card-description">{job.JobDescription}</p>
             <div className="job-card-actions">
               <button className="action-button" onClick={() => handleEdit(job.id)}>Edit</button>
+              <button className="action-button" onClick={() => handleViewApplicantsClick(job)}>View Applicants</button>
             </div>
           </div>
         ))}

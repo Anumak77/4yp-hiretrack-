@@ -1,9 +1,10 @@
 // Updated RecruiterSearch component with Match Score
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Fuse from 'fuse.js';
 import axios from 'axios';
 import { fetchPdfFromFirestore } from '../components/utils';
+import { getFirestore, collection, getDocs } from "firebase/firestore";
 
 const getMatchScore = async (jobDescription, setMatchScores, seeker) => {
   try {
@@ -27,42 +28,37 @@ const getMatchScore = async (jobDescription, setMatchScores, seeker) => {
 };
 
 
-
-const mockJobSeekers = [
-  {
-    firstName: "Alice",
-    lastName: "Johnson",
-    industry: "Software Engineering",
-    location: "New York, USA",
-    experience: "3 years",
-    jobDescription: "Software Engineer with React and Node.js experience."
-  },
-  {
-    firstName: "Bob",
-    lastName: "Smith",
-    industry: "Data Science",
-    location: "San Francisco, USA",
-    experience: "5 years",
-    jobDescription: "Data Scientist with expertise in Python and Machine Learning."
-  }
-];
-
 const RecruiterSearch = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [filteredJobSeekers, setFilteredJobSeekers] = useState(mockJobSeekers);
+  const [jobSeekers, setJobSeekers] = useState([]);
+  const [filteredJobSeekers, setFilteredJobSeekers] = useState(jobSeekers);
   const [matchScores, setMatchScores] = useState({});
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchJobSeekers = async () => {
+      const db = getFirestore();
+      const seekersCollection = collection(db, 'users');
+      const seekerSnapshot = await getDocs(seekersCollection);
+      const seekersData = seekerSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+      setJobSeekers(seekersData);
+      setFilteredJobSeekers(seekersData);
+    };
+
+    fetchJobSeekers();
+  }, []);
 
   const handleSearch = (event) => {
     const query = event.target.value;
     setSearchTerm(query);
 
     if (!query) {
-      setFilteredJobSeekers(mockJobSeekers);
+      setFilteredJobSeekers(jobSeekers);
       return;
     }
 
-    const fuse = new Fuse(mockJobSeekers, {
+    const fuse = new Fuse(jobSeekers, {
       keys: ['firstName', 'lastName', 'industry'],
       threshold: 0.4,
     });
@@ -99,14 +95,14 @@ const RecruiterSearch = () => {
               {filteredJobSeekers.length > 0 ? (
                 filteredJobSeekers.map((seeker, index) => (
                   <tr key={index}>
-                    <td>{seeker.firstName}</td>
-                    <td>{seeker.lastName}</td>
+                    <td>{seeker.first_name}</td>
+                    <td>{seeker.last_name}</td>
                     <td>{seeker.industry}</td>
                     <td>{seeker.location}</td>
                     <td>{seeker.experience}</td>
                     <td>
-                      {matchScores[seeker.firstName] ? (
-                        `${matchScores[seeker.firstName]}%`
+                      {matchScores[seeker.first_name] ? (
+                        `${matchScores[seeker.first_name]}%`
                       ) : (
                         <button className="more-info-button" onClick={() => getMatchScore(seeker.jobDescription, setMatchScores, seeker)}>
                           Get Match Score
@@ -115,7 +111,7 @@ const RecruiterSearch = () => {
                     </td>
                     <td>
                       <button className="more-info-button" onClick={() => navigate('/jobseeker-details', { state: seeker })}>
-                        View CV
+                        View Details
                       </button>
                     </td>
                   </tr>
