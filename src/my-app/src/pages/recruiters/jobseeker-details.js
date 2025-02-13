@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../components/style.css'; 
+import '../../components/style.css'; 
 
 const JobSeekerDetails = () => {
   const navigate = useNavigate();

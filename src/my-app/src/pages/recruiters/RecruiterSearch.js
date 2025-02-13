@@ -1,9 +1,8 @@
-// Updated RecruiterSearch component with Match Score
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Fuse from 'fuse.js';
 import axios from 'axios';
-import { fetchPdfFromFirestore } from '../components/utils';
+import { fetchPdfFromFirestore } from '../../components/utils';
 
 const getMatchScore = async (jobDescription, setMatchScores, seeker) => {
   try {
@@ -72,9 +71,10 @@ const RecruiterSearch = () => {
   };
 
   return (
-    <main className="job-search-container">
-      <section className="job-search-section">
-        <h1 className="job-search-heading">Recruiter Search</h1>
+    <main>
+      <h1 className="job-search-heading">Recruiter Search</h1>
+      <section className="job-search-container">
+      <div className="job-search-section">
         <input
           type="text"
           placeholder="Search by name, industry, or jobs applied for"
@@ -129,6 +129,7 @@ const RecruiterSearch = () => {
               )}
             </tbody>
           </table>
+          </div>
         </div>
       </section>
     </main>
