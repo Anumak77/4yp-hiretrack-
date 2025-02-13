@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { fetchPdfFromFirestore,addJobToFirestore } from '../components/utils';
-import '../components/style.css'; 
+import { fetchPdfFromFirestore,addJobToFirestore } from '../../components/utils';
+import '../../components/style.css'; 
 
 const JobDetails = () => {
   const location = useLocation();

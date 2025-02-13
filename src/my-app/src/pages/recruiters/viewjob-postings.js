@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../components/style.css';
+import '../../components/style.css';
 
 const ViewJobPostings = () => {
     const navigate = useNavigate();

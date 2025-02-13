@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "../components/style.css";
+import "../../components/style.css";
 
 const JobSeekerChat = () => {
   const navigate = useNavigate();

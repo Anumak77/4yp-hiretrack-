@@ -4,7 +4,7 @@ import { ref, onValue } from "firebase/database";
 import { initializeApp, getApps } from "firebase/app";
 import { getDatabase } from "firebase/database";
 import Fuse from "fuse.js";
-import "../components/style.css";
+import "../../components/style.css";
 
 const JobSearch = () => {
   const [searchTerm, setSearchTerm] = useState("");

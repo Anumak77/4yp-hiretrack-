@@ -276,7 +276,6 @@ form {
 /* Dashboard Title */
 .dashboard-recruiter-heading {
   font-size: 26px;
-  font-weight: bold;
   color: #0b3d2e;
   margin-bottom: 20px;
   margin-top: 80px;
@@ -414,8 +413,7 @@ form {
 }
 /* Job Tracker Title - Now Outside the Container */
 .job-tracker__title {
-  font-size: 28px;
-  font-weight: bold;
+  font-size: 26px;
   color: #0b3d2e;
   margin-bottom: 20px;
   text-align: center;
@@ -532,11 +530,10 @@ form {
 /* Search Heading */
 .job-search-heading {
   font-size: 26px;
-  font-weight: bold;
   color: #0b3d2e;
   margin-bottom: 20px;
   text-align: center;
-  margin-top: 80px;
+  margin-top: 90px;
 }
 
 /* Search Input */
@@ -1245,10 +1242,8 @@ form {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Job Search Heading */
 .job-search-heading {
-  font-size: 24px;
-  font-weight: bold;
+  font-size: 26px;
   color: #0b3d2e;
   text-align: center;
   margin-bottom: 20px;
@@ -1390,6 +1385,15 @@ form {
   color: #0b3d2e;
   text-align: center;
   margin-bottom: 15px;
+  /* margin-top: 90px; */
+}
+.jobtracker-chart-title {
+  font-size: 26px;
+  font-weight: bold;
+  color: #0b3d2e;
+  text-align: center;
+  margin-bottom: 15px;
+  margin-top: 90px;
 }
 
 /* Job Selection Dropdown */
@@ -1496,6 +1500,7 @@ form {
   max-width: 600px;
   background-color: #ffffff;
   padding: 20px;
+  padding-bottom: 6px;
   border-radius: 10px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
   text-align: center;
@@ -1636,6 +1641,7 @@ body {
   background: #d9534f;
   color: #fff;
   margin-top: 10px;
+  padding: 3%;
 }
 
 /* Feedback Messages */
@@ -1734,7 +1740,7 @@ body {
   padding: 15px;
   border-radius: 8px;
   border: 1px solid #e6e6e6;
-  margin-top: 170px; /* space under the dashboard title */
+  margin-top: 85px; /* space under the dashboard title */
 }
 
 .dash-jobseeker__offered-title {

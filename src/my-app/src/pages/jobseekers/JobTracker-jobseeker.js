@@ -12,7 +12,7 @@ import {
 import { getAuth } from "firebase/auth";
 import React, { useState, useEffect } from "react";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
-import "../components/style.css"; 
+import "../../components/style.css"; 
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
@@ -121,10 +121,13 @@ const JobTrackerJobseeker = () => {
   
 
   return (
-    <main className="jobtracker-container">
+    <main>
+
+<h2 className="jobtracker-chart-title">Job Tracker Dashboard</h2>
+
+      <section className="jobtracker-container">
 
       <section className="jobtracker-form">
-        <h2 className="jobtracker-chart-heading">Job Tracker Dashboard</h2>
         <select className="jobtracker-select" value={selectedJob} onChange={(e) => setSelectedJob(e.target.value)}>
           <option value="">Select a Job</option>
           {jobOptions.map((job, index) => (
@@ -150,6 +153,7 @@ const JobTrackerJobseeker = () => {
         <button onClick={handleAddApplication} className="jobtracker-add-button">
           Add Application
         </button>
+      
       </section>
 
       <div className="jobtracker-chart-container">
@@ -165,6 +169,7 @@ const JobTrackerJobseeker = () => {
           <Pie data={pieChartData} />
         </div>
       </div>
+      </section>
     </main>
   );
 };

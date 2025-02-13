@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { onAuthStateChanged, signOut, getAuth } from "firebase/auth";
-import { firebaseapp } from "../components/firebaseconfigs";
-import { savePdfToFirestore, fetchPdfFromFirestore } from "../components/utils";
-import "../components/style.css";
+import { firebaseapp } from "../../components/firebaseconfigs";
+import { savePdfToFirestore, fetchPdfFromFirestore } from "../../components/utils";
+import "../../components/style.css";
 
 const DashJobseeker = () => {
   // ================= Auth / Profile =================
@@ -288,7 +288,7 @@ const DashJobseeker = () => {
             onDragOver={handleDragOver}
             onDrop={(e) => handleDrop(e, "unapply")}
           >
-            <h2 className="dash-jobseeker__column-title">Unapply</h2>
+            <h2 className="dash-jobseeker__column-title">Withdrawn</h2>
             <div className="dash-jobseeker__job-list">
               {jobColumns.unapply.map((job) => (
                 <div

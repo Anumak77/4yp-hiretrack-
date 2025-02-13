@@ -1,29 +1,11 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import profileIcon from '../images/profile_icon.png'; 
-import './style.css'; 
+import '../../components/style.css'; 
 
-const Navbar = () => {
+const NavbarRecruiters = () => {
   return (
     <nav className="navbar">
       <ul className="nav-menu">
-        <li className="nav-item">
-          <NavLink to="/dashboard_jobseeker" className="nav-link">
-            Dashboard JobSeeker
-          </NavLink>
-        </li>
-
-        <li className="nav-item">
-          <NavLink to="/jobtracker-jobseeker" className="nav-link">
-            Job Tracker JobSeeker
-          </NavLink>
-        </li>
-
-        <li className="nav-item">
-          <NavLink to="/job-search" className="nav-link">
-            Job Search
-          </NavLink>
-        </li>
 
         <li className="nav-item">
           <NavLink to="/dashboard-recruiter" className="nav-link">
@@ -48,4 +30,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar;
+export default NavbarRecruiters;

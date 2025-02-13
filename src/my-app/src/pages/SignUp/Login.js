@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { getAuth } from 'firebase/auth';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { firebaseapp } from "../components/firebaseconfigs";
-import '../components/style.css';
+import { firebaseapp } from "../../components/firebaseconfigs";
+import '../../components/style.css';
 
 const Login = () => {
   const navigate = useNavigate();

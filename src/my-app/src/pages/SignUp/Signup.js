@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { firebaseapp } from '../components/firebaseconfigs';
+import { firebaseapp } from '../../components/firebaseconfigs';
 import { getFirestore, doc, setDoc } from 'firebase/firestore';
-import '../components/style.css';
+import '../../components/style.css';
 
 const countryOptions = [
   "United States", "United Kingdom", "India", "Canada", "Germany",
