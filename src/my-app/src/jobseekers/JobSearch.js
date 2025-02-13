@@ -1,22 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ref, onValue } from 'firebase/database';
-import { initializeApp, getApps } from 'firebase/app';
-import { getDatabase } from 'firebase/database';
-import Fuse from 'fuse.js';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { ref, onValue } from "firebase/database";
+import { initializeApp, getApps } from "firebase/app";
+import { getDatabase } from "firebase/database";
+import Fuse from "fuse.js";
+import "../components/style.css";
 
 const JobSearch = () => {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [filteredJobs, setFilteredJobs] = useState([]);
   const [allData, setAllData] = useState([]);
-  const [searchFilter, setSearchFilter] = useState('all');
+  const [searchFilter, setSearchFilter] = useState("all");
   const navigate = useNavigate();
 
   const firebaseConfig = {
-    databaseURL: "https://hiretrack-7b035-default-rtdb.europe-west1.firebasedatabase.app/",
+    databaseURL:
+      "https://hiretrack-7b035-default-rtdb.europe-west1.firebasedatabase.app/",
   };
 
-  const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+  const app =
+    getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
   const database = getDatabase(app);
 
   useEffect(() => {
@@ -24,10 +27,8 @@ const JobSearch = () => {
 
     const unsubscribe = onValue(databaseRef, (snapshot) => {
       if (snapshot.exists()) {
-        console.log("found in the database")
         const data = snapshot.val();
         const dataArray = Object.values(data);
-        console.log("First item in the database:", dataArray[0]);
         setAllData(dataArray);
       } else {
         console.error("No data found in the database");
@@ -40,11 +41,6 @@ const JobSearch = () => {
     const query = event.target.value;
     setSearchTerm(query);
 
-    if (query === "") {
-      window.alert("Please enter a search term to filter jobs.");
-      return;
-    }
-
     if (!query) {
       setFilteredJobs([]);
       return;
@@ -52,77 +48,64 @@ const JobSearch = () => {
 
     let filtered = [];
 
-    if (searchFilter === 'location') {
-      filtered = allData.filter(job =>
+    if (searchFilter === "location") {
+      filtered = allData.filter((job) =>
         job.Location?.toLowerCase().includes(query)
       );
-    } else if (searchFilter === 'company') {
-      filtered = allData.filter(job =>
+    } else if (searchFilter === "company") {
+      filtered = allData.filter((job) =>
         job.Company?.toLowerCase().includes(query)
       );
-    } else if (searchFilter === 'company') {
-      filtered = allData.filter(job =>
-        job.Company?.toLowerCase().includes(query)
+    } else if (searchFilter === "title") {
+      filtered = allData.filter((job) =>
+        job.Title?.toLowerCase().includes(query)
       );
     } else {
       const fuse = new Fuse(allData, {
-        keys: ['Title', 'Company', 'Location'],
+        keys: ["Title", "Company", "Location"],
         threshold: 0.4,
       });
 
-    const result = fuse.search(query);
-    filtered = result.map(({ item }) => item);
+      const result = fuse.search(query);
+      filtered = result.map(({ item }) => item);
+    }
+
     setFilteredJobs(filtered);
   };
 
-  setFilteredJobs(filtered);
-    };
-
   const handleMoreInfoClick = (job) => {
-    navigate('/job-details', { state: job });
+    navigate("/job-details", { state: job });
   };
 
   return (
-    <main className="job-search-container">
-      <section className="job-search-section">
-        <h1 className="job-search-heading">Job Search</h1>
+    <main>
+              <h1 className="job-search-heading">Job Search</h1>
 
-        <div className="filter-buttons">
-          <button 
-            className={`filter-button ${searchFilter === 'all' ? 'active' : ''}`} 
-            onClick={() => setSearchFilter('all')}
+      <section className="job-search-container">
+      <section className="job-search-content">
+
+        {/* Search Bar & Filter Dropdown */}
+        <div className="search-filter-container">
+          <input
+            type="text"
+            placeholder={`Search by ${searchFilter}`}
+            value={searchTerm}
+            onChange={handleSearch}
+            className="job-search-input"
+          />
+          <select
+            className="search-filter-dropdown"
+            value={searchFilter}
+            onChange={(e) => setSearchFilter(e.target.value)}
           >
-            All
-          </button>
-          <button 
-            className={`filter-button ${searchFilter === 'location' ? 'active' : ''}`} 
-            onClick={() => setSearchFilter('location')}
-          >
-            Location
-          </button>
-          <button 
-            className={`filter-button ${searchFilter === 'company' ? 'active' : ''}`} 
-            onClick={() => setSearchFilter('company')}
-          >
-            Company
-          </button>
-          <button 
-            className={`filter-button ${searchFilter === 'title' ? 'active' : ''}`} 
-            onClick={() => setSearchFilter('title')}
-          >
-            Title
-          </button>
-          
+            <option value="all">All</option>
+            <option value="location">Location</option>
+            <option value="company">Company</option>
+            <option value="title">Title</option>
+          </select>
         </div>
 
-        <input
-          type="text"
-          placeholder="Search by job title, company name, or location"
-          value={searchTerm}
-          onChange={handleSearch}
-          className="job-search-input"
-        />
-
+        {/* Job Table */}
         <div className="job-table-container">
           <table className="job-table">
             <thead>
@@ -138,12 +121,15 @@ const JobSearch = () => {
               {filteredJobs.length > 0 ? (
                 filteredJobs.slice(0, 100).map((job, index) => (
                   <tr key={index}>
-                    <td>{job['Title'] || "N/A"}</td>
-                    <td>{job['Company'] || "N/A"}</td>
-                    <td>{job['Location'] || "N/A"}</td>
-                    <td>{job['Deadline'] || "N/A"}</td>
+                    <td>{job["Title"] || "N/A"}</td>
+                    <td>{job["Company"] || "N/A"}</td>
+                    <td>{job["Location"] || "N/A"}</td>
+                    <td>{job["Deadline"] || "N/A"}</td>
                     <td>
-                      <button className="more-info-button" onClick={() => handleMoreInfoClick(job)}>
+                      <button
+                        className="more-info-button"
+                        onClick={() => handleMoreInfoClick(job)}
+                      >
                         More Info
                       </button>
                     </td>
@@ -160,9 +146,9 @@ const JobSearch = () => {
           </table>
         </div>
       </section>
+      </section>
     </main>
   );
 };
-
 
 export default JobSearch;

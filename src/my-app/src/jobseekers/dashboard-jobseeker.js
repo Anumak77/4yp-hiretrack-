@@ -5,11 +5,9 @@ import { savePdfToFirestore, fetchPdfFromFirestore } from "../components/utils";
 import "../components/style.css";
 
 const DashJobseeker = () => {
+  // ================= Auth / Profile =================
   const [name, setName] = useState("Guest");
   const [profileImage, setProfileImage] = useState(null);
-  const [file, setFile] = useState(null);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
   const auth = getAuth(firebaseapp);
 
   useEffect(() => {
@@ -25,23 +23,23 @@ const DashJobseeker = () => {
       .then(() => {
         window.location.href = "/login";
       })
-      .catch(() => {
-        console.error("Error signing out.");
-      });
+      .catch(() => console.error("Error signing out."));
   };
 
   const handleProfileImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = () => {
-        setProfileImage(reader.result); // image as base64 string
-      };
+      reader.onload = () => setProfileImage(reader.result);
       reader.readAsDataURL(file);
     }
   };
 
-  // Handle file selection
+  // ================= CV Upload =================
+  const [file, setFile] = useState(null);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+
   const handleFileChange = (e) => {
     const uploadedFile = e.target.files[0];
     const validTypes = ["application/pdf"];
@@ -56,15 +54,12 @@ const DashJobseeker = () => {
     }
   };
 
-  // Upload CV to Firestore
   const handleUploadCV = async (e) => {
     e.preventDefault();
-
     if (!file) {
       setErrorMessage("Please select a PDF to upload.");
       return;
     }
-
     try {
       await savePdfToFirestore(file);
       setSuccessMessage("CV uploaded successfully!");
@@ -73,7 +68,6 @@ const DashJobseeker = () => {
     }
   };
 
-  // View Uploaded CV
   const viewCV = async () => {
     try {
       const pdfData = await fetchPdfFromFirestore();
@@ -88,29 +82,84 @@ const DashJobseeker = () => {
     }
   };
 
-  const appliedJobs = [
-    { id: 1, title: "Software Developer" },
-    { id: 2, title: "Financial Analyst" },
-    { id: 3, title: "Project Manager" },
-  ];
+  // ================= DRAG AND DROP STATES =================
+  //"Offered" separate and NOT included in drag & drop.
+  const [jobColumns, setJobColumns] = useState({
+    saved: [
+      { id: 1, title: "Front-End Developer" },
+      { id: 2, title: "Data Analyst" },
+      { id: 3, title: "Business Analyst" },
+    ],
+    interviewed: [
+      { id: 4, title: "Software Developer" },
+      { id: 5, title: "Back-End Developer" },
+    ],
+    applied: [
+      { id: 6, title: "Quality Assurance Engineer" },
+      { id: 7, title: "Scrum Master" },
+    ],
+    unapply: [
+      { id: 8, title: "Product Owner" },
+      { id: 9, title: "Solutions Architect" },
+      { id: 10, title: "DevOps Engineer" },
+    ],
+  });
 
-  const savedJobs = [
-    { id: 4, title: "Marketing Specialist" },
-    { id: 5, title: "Business Consultant" },
-  ];
+  // Offered jobs (non-draggable)
+  const [offeredJobs] = useState([
+    { id: 11, title: "Marketing Specialist" },
+    { id: 12, title: "Project Manager" },
+  ]);
+
+  // Drag & Drop Handlers
+  const handleDragStart = (e, job, sourceColumn) => {
+    // Attach job data to the drag event
+    e.dataTransfer.setData("jobData", JSON.stringify({ job, sourceColumn }));
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e, targetColumn) => {
+    e.preventDefault();
+    const data = e.dataTransfer.getData("jobData");
+    if (data) {
+      const { job, sourceColumn } = JSON.parse(data);
+      if (sourceColumn === targetColumn) return; // No change if same column
+
+      setJobColumns((prev) => {
+        // Remove from source
+        const sourceJobs = prev[sourceColumn].filter((j) => j.id !== job.id);
+        // Add to target
+        const targetJobs = [...prev[targetColumn], job];
+        return {
+          ...prev,
+          [sourceColumn]: sourceJobs,
+          [targetColumn]: targetJobs,
+        };
+      });
+    }
+  };
 
   return (
-    <div className="dashboard">
-      <aside className="sidebar">
-        <div className="profile">
-          <label htmlFor="profile-upload" className="profile__image-label">
+    <div className="dash-jobseeker__container">
+      {/* =============== SIDEBAR =============== */}
+      <aside className="dash-jobseeker__sidebar">
+        <div className="dash-jobseeker__profile">
+          <label
+            htmlFor="profile-upload"
+            className="dash-jobseeker__profile-image-label"
+          >
             <div
-              className="profile__image"
+              className="dash-jobseeker__profile-image"
               style={{
-                backgroundImage: profileImage ? `url(${profileImage})` : null,
+                backgroundImage: profileImage ? `url(${profileImage})` : "none",
               }}
             >
-              {!profileImage && <span className="profile__icon">+</span>}
+              {!profileImage && (
+                <span className="dash-jobseeker__profile-icon">+</span>
+              )}
             </div>
           </label>
           <input
@@ -120,72 +169,156 @@ const DashJobseeker = () => {
             onChange={handleProfileImageChange}
             style={{ display: "none" }}
           />
-          <p className="profile__name">{name}</p>
+          <p className="dash-jobseeker__profile-name">{name}</p>
         </div>
 
-        {/* CV Upload Section */}
-        <div className="cv-upload-section">
-          <h3>Upload Your CV</h3>
+        {/* CV Section */}
+        <div className="dash-jobseeker__cv-section">
+
           <input
             type="file"
             accept=".pdf"
             onChange={handleFileChange}
-            className="cv-upload-input"
+            className="dash-jobseeker__input"
           />
-          <button onClick={handleUploadCV} className="upload-cv-button">
+          <button onClick={handleUploadCV} className="dash-jobseeker__button">
             Upload CV
           </button>
-          <button onClick={viewCV} className="view-cv-button">
+          <button onClick={viewCV} className="dash-jobseeker__button">
             View CV
           </button>
-          {errorMessage && <p className="error-message">{errorMessage}</p>}
-          {successMessage && <p className="success-message">{successMessage}</p>}
+          {errorMessage && (
+            <p className="dash-jobseeker__error-message">{errorMessage}</p>
+          )}
+          {successMessage && (
+            <p className="dash-jobseeker__success-message">{successMessage}</p>
+          )}
         </div>
 
-        <button onClick={() => (window.location.href = "/jobseekerchat")} className="logout">
+        <button
+          onClick={() => (window.location.href = "/jobseekerchat")}
+          className="dash-jobseeker__button"
+        >
           Inbox
         </button>
 
-        <button className="logout" onClick={handleLogout}>
+        <button className="dash-jobseeker__logout" onClick={handleLogout}>
           Logout
         </button>
-        
       </aside>
 
-      <main className="main-content">
-        <h1 className="dashboard-title">Dashboard</h1>
+      {/* =============== MAIN CONTENT =============== */}
+      <main className="dash-jobseeker__main">
+        <h1 className="dash-jobseeker__title">Dashboard</h1>
 
-        <section className="job-section">
-          <h2>Applied Jobs</h2>
-          <div className="job-list">
-            {appliedJobs.map((job) => (
-              <div key={job.id} className="job-card">
-                <div className="job-info">
+        {/* Four Columns in a 2x2 Grid (SAVED, INTERVIEWED, APPLIED, UNAPPLY) */}
+        <div className="dash-jobseeker__drag-area">
+          {/* ======== Saved ======== */}
+          <div
+            className="dash-jobseeker__column"
+            onDragOver={handleDragOver}
+            onDrop={(e) => handleDrop(e, "saved")}
+          >
+            <h2 className="dash-jobseeker__column-title">Saved</h2>
+            <div className="dash-jobseeker__job-list">
+              {jobColumns.saved.map((job) => (
+                <div
+                  key={job.id}
+                  className="dash-jobseeker__job-card"
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, job, "saved")}
+                >
+                  <div className="dash-jobseeker__job-info">
+                    <h3>{job.title}</h3>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* ======== Interviewed ======== */}
+          <div
+            className="dash-jobseeker__column"
+            onDragOver={handleDragOver}
+            onDrop={(e) => handleDrop(e, "interviewed")}
+          >
+            <h2 className="dash-jobseeker__column-title">Interviewed</h2>
+            <div className="dash-jobseeker__job-list">
+              {jobColumns.interviewed.map((job) => (
+                <div
+                  key={job.id}
+                  className="dash-jobseeker__job-card"
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, job, "interviewed")}
+                >
+                  <div className="dash-jobseeker__job-info">
+                    <h3>{job.title}</h3>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* ======== Applied (Bottom Left) ======== */}
+          <div
+            className="dash-jobseeker__column"
+            onDragOver={handleDragOver}
+            onDrop={(e) => handleDrop(e, "applied")}
+          >
+            <h2 className="dash-jobseeker__column-title">Applied</h2>
+            <div className="dash-jobseeker__job-list">
+              {jobColumns.applied.map((job) => (
+                <div
+                  key={job.id}
+                  className="dash-jobseeker__job-card"
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, job, "applied")}
+                >
+                  <div className="dash-jobseeker__job-info">
+                    <h3>{job.title}</h3>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* ======== Unapply (Bottom Right) ======== */}
+          <div
+            className="dash-jobseeker__column"
+            onDragOver={handleDragOver}
+            onDrop={(e) => handleDrop(e, "unapply")}
+          >
+            <h2 className="dash-jobseeker__column-title">Unapply</h2>
+            <div className="dash-jobseeker__job-list">
+              {jobColumns.unapply.map((job) => (
+                <div
+                  key={job.id}
+                  className="dash-jobseeker__job-card"
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, job, "unapply")}
+                >
+                  <div className="dash-jobseeker__job-info">
+                    <h3>{job.title}</h3>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* ======== Offered (NOT draggable) ======== */}
+        <div className="dash-jobseeker__offered-column">
+          <h2 className="dash-jobseeker__offered-title">Offered</h2>
+          <div className="dash-jobseeker__job-list">
+            {offeredJobs.map((job) => (
+              <div key={job.id} className="dash-jobseeker__job-card">
+                <div className="dash-jobseeker__job-info">
                   <h3>{job.title}</h3>
                 </div>
-                <div className="job-buttons">
-                  <button className="more-info">More Info</button>
-                  <button className="match">Match</button>
-                </div>
               </div>
             ))}
           </div>
-        </section>
-
-        <section className="job-section">
-          <h2>Saved Jobs</h2>
-          <div className="job-list">
-            {savedJobs.map((job) => (
-              <div key={job.id} className="job-card">
-                <h3>{job.title}</h3>
-                <div className="job-buttons">
-                  <button className="more-info">More Info</button>
-                  <button className="match">Match</button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
+        </div>
       </main>
     </div>
   );
