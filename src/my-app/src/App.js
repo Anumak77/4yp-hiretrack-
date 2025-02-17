@@ -59,10 +59,10 @@ function MainApp() {
         // }
 
         // For demo, we pretend we got "Recruiter"
-        setUserRole('JobSeeker');
+        setUserRole('Recruiter');
       } else {
         setIsAuthenticated(false);
-        setUserRole('JobSeeker');
+        setUserRole('Recruiter');
       }
     });
   }, []);
