@@ -28,12 +28,13 @@ const JobDetails = () => {
         return;
       }
 
-      const response = await axios.post('http://127.0.0.1:5000/compare_with_description', {
+      const response = await axios.post('http://127.0.0.1:500/compare_with_description', {
         JobDescription: jobDescription,
         cv: cvBase64.split(',')[1],
       });
 
       const similarityScore = response.data['cosine similarity'];
+      console.log(similarityScore)
       setMatchScore((similarityScore * 100).toFixed(2));
     } catch (error) {
       console.error('Error comparing CV with job description:', error);

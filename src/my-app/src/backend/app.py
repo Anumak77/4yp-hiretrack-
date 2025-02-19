@@ -62,36 +62,40 @@ def filter_jobs():
         return jsonify({"message": "No jobs found for the given title"}), 404
 '''
 
-@app.route('/compare_with_description', methods=['POST'])
+@app.route('/compare_with_description', methods=['GET','POST'])
 def compare_with_description():
-    try:
-        data = request.json
-        job_description = data.get('JobDescription') 
-        job_requirements = data.get('JobRequirment', '')
-        requirement_qual = data.get('RequiredQual', '')
-        cv_base64 = data.get('cv')  
-
-        combined_job_description = f"{job_description}\n\n{job_requirements}\n\n{requirement_qual}"
-
-        if not combined_job_description or not cv_base64:
-            return jsonify({"error": "Job description and CV are required"}), 400
-        
+    if request.method == 'POST':
         try:
-            user_cv_text = decode_pdf(cv_base64)
-        except ValueError as e:
-            return jsonify({"error": str(e)}), 400
-        
-        if not user_cv_text.strip() or not combined_job_description.strip():
-                return jsonify({"error": "Job description or CV is empty"}), 40
+            data = request.json
+            job_description = data.get('JobDescription') 
+            job_requirements = data.get('JobRequirment', '')
+            requirement_qual = data.get('RequiredQual', '')
+            cv_base64 = data.get('cv')  
 
-        vectorizer = TfidfVectorizer().fit_transform([user_cv_text, job_description])
-        similarity_score = cosine_similarity(vectorizer[0], vectorizer[1])[0][0]
+            combined_job_description = f"{job_description}\n\n{job_requirements}\n\n{requirement_qual}"
 
-        return jsonify({"cosine similarity": similarity_score}), 200
+            if not combined_job_description or not cv_base64:
+                return jsonify({"error": "Job description and CV are required"}), 400
+            
+            try:
+                user_cv_text = decode_pdf(cv_base64)
+            except ValueError as e:
+                return jsonify({"error": str(e)}), 400
+            
+            if not user_cv_text.strip() or not combined_job_description.strip():
+                    return jsonify({"error": "Job description or CV is empty"}), 40
 
-    except Exception as e:
-        print(f"Error in compare_with_description: {str(e)}")
-        return jsonify({"error": "Internal Server Error"}), 500
+            vectorizer = TfidfVectorizer().fit_transform([user_cv_text, job_description])
+            similarity_score = cosine_similarity(vectorizer[0], vectorizer[1])[0][0]
+
+            return jsonify({"cosine similarity": similarity_score}), 200
+
+        except Exception as e:
+            print(f"Error in compare_with_description: {str(e)}")
+            return jsonify({"error": "Internal Server Error"}), 500
+    elif request.method == 'GET':
+        # Handle GET request (for debugging)
+        return jsonify({"message": "GET request received. Use POST to compare CV with job description."}), 200
 
 if __name__ == '__main__':
-    app.run(port=5000)
+    app.run(port=500)

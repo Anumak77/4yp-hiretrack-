@@ -60,7 +60,7 @@ export const fetchPdfFromFirestore = async () => {
       const firestore = getFirestore();
       const jobId = job.id || `${job.Company}-${job.Title}`.replace(/\s+/g, "-").toLowerCase();
       const JobRef = doc(firestore, `users/${user.uid}/${firebasecollection}/${jobId}`);
-      const recruiterJobRef = doc(firestore, `users/${job.recruiterId}/jobposting/${jobId}/applicants/applicants`);
+      const recruiterJobRef = doc(firestore, `users/${job.recruiterId}/jobposting/${jobId}/applicants/${user.id}`);
       const recruiterRef = doc(firestore, `users/${job.recruiterId}`);
       let applicationstatus;
 
@@ -76,7 +76,7 @@ export const fetchPdfFromFirestore = async () => {
       return { success: false, message: "No CV found" };
     }
 
-    const response = await axios.post('http://127.0.0.1:5000/compare_with_description', {
+    const response = await axios.post('http://127.0.0.1:500/compare_with_description', {
       JobDescription: job.JobDescription,
       JobRequirment: job.JobRequirment || "", 
       RequiredQual: job.RequiredQual || "",
@@ -84,21 +84,15 @@ export const fetchPdfFromFirestore = async () => {
     });
 
     if (firebasecollection == "appliedjobs"){
-      const recruiterJobSnap = await getDoc(recruiterJobRef);
-
-      if (!recruiterJobSnap.exists()) {
-        // If it doesn't exist, create it
-        await setDoc(recruiterJobRef, { applicants: [user.uid] });
-      } else {
-        // If it exists, update it
-        await updateDoc(recruiterJobRef, {
-          applicants: arrayUnion(user.uid),
-        });
-      }
-      await updateDoc(recruiterRef, {
-        applicantsnum: increment(1)
+      await setDoc(recruiterJobRef, {
+        userId: user.uid,
+        appliedAt: new Date().toISOString(),
       });
 
+      // Increment the number of applicants for the recruiter
+      await updateDoc(recruiterRef, {
+        applicantsnum: increment(1),
+      });
       applicationstatus = "applied"
     }
     else if (firebasecollection == "savedjobs"){
@@ -113,6 +107,9 @@ export const fetchPdfFromFirestore = async () => {
 
 
     const similarityScore = response.data['cosine similarity'];
+    const matchScore = (similarityScore * 100).toFixed(2);
+
+  console.log("Calculated Match Score:", matchScore);
   
       await setDoc(JobRef, {
         ...job,
@@ -122,6 +119,7 @@ export const fetchPdfFromFirestore = async () => {
       });
   
       console.log('File saved to Firestore');
+      console.log({matchScore})
     } catch (error) {
       console.error('Error saving job to Firestore:', error);
       throw error;
