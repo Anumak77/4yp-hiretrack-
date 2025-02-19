@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Fuse from 'fuse.js';
 import axios from 'axios';
-import { fetchPdfFromFirestore } from '../components/utils';
-import { getFirestore, collection, getDocs } from "firebase/firestore";
+import { fetchPdfFromFirestore } from '../../components/utils';
+
 
 const getMatchScore = async (jobDescription, setMatchScores, seeker) => {
   try {

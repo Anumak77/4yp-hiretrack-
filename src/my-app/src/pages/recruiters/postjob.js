@@ -1,8 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import '../components/style.css';
-import { createJobPosting, updateJobPosting } from "../components/utils";
-
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import '../../components/style.css';
 
 const countryOptions = [
   "United States",
@@ -19,7 +17,6 @@ const countryOptions = [
 
 const PostJob = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const [jobData, setJobData] = useState({
     AboutC: '',
     ApplicationP: '',
@@ -33,19 +30,8 @@ const PostJob = () => {
     StartDate: '',
     Title: '',
     date: '',
-    jobpost: '',
-    applicants: []
+    jobpost: ''
   });
-
-
-  const [isEditing, setIsEditing] = useState(false);
-  
-  useEffect(() => {
-    if (location.state?.job) {
-      setJobData(location.state.job);
-      setIsEditing(true);
-    }
-  }, [location.state]);
 
   const [alertMessage, setAlertMessage] = useState(null);
   const [alertType, setAlertType] = useState('error');
@@ -60,10 +46,8 @@ const PostJob = () => {
     setJobData({ ...jobData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-
-    const { date, jobpost, ...cleanedJobData } = jobData;
     
     const missingFields = [];
 
@@ -79,32 +63,22 @@ const PostJob = () => {
       console.log("Missing fields:", missingFields);
       console.log("Form Data:", cleanedJobData);
       showAlert(`Please fill out all fields: ${missingFields.join(", ")}`, 'error');
+
       return;
     }
-
-    let result;
-  if (isEditing) {
     
-    result = await updateJobPosting(jobData);  
-  } else {
-    
-    result = await createJobPosting(jobData);
-  }
-    
-    if (result.success) {
-      showAlert("Job Posted Successfully!", "success");
-      navigate("/dashboard-recruiter");
-    } else {
-      showAlert("Error posting job. Try again.", "error");
-    }
+    console.log('Job Data Submitted:', jobData);
+    showAlert('Job Posted Successfully!', 'success');
   };
 
   return (
-    <main className="post-job-container">
+    <main>
+              <h1 className="post-job-title">Post a Job</h1>
+
+      <section className="post-job-container">
       <section className="post-job-card">
         {alertMessage && <div className={`alert-box ${alertType}`}>{alertMessage}</div>}
         <button type="button" className="back-button" onClick={() => navigate('/dashboard-recruiter')}>Go Back</button>
-        <h1 className="post-job-title">Post a Job</h1>
         <form onSubmit={handleSubmit}>
           <div className="input-group">
             <label>Job Title</label>
@@ -132,10 +106,6 @@ const PostJob = () => {
   </select>
 </div>
 
-          <div className="input-group">
-            <label>About Company</label>
-            <textarea name="AboutC" value={jobData.AboutC} onChange={handleChange} placeholder="Enter information about the company" required></textarea>
-          </div>
 
           <div className="input-group">
             <label>Job Description</label>
@@ -159,7 +129,7 @@ const PostJob = () => {
 
           <div className="date-container">
             <div className="input-group">
-              <label>OpeningDate</label>
+              <label>Opening Date</label>
               <input type="date" name="OpeningDate" value={jobData.OpeningDate} onChange={handleChange} required />
             </div>
             <div className="input-group">
@@ -167,13 +137,10 @@ const PostJob = () => {
               <input type="date" name="Deadline" value={jobData.Deadline} onChange={handleChange} required />
             </div>
           </div>
-          <div className="input-group">
-              <label>Start Date</label>
-              <input type="date" name="StartDate" value={jobData.StartDate} onChange={handleChange} required />
-            </div>
 
           <button type="submit" className="post-job-button">Post Job</button>
         </form>
+      </section>
       </section>
     </main>
   );

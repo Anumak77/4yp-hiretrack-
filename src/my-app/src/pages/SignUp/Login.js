@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { getAuth } from 'firebase/auth';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { firebaseapp } from "../components/firebaseconfigs";
-import '../components/style.css';
+import { firebaseapp } from "../../components/firebaseconfigs";
+import '../../components/style.css';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -38,15 +38,15 @@ const Login = () => {
   };
 
   return (
-    <main className="main-container">
-      <section className="section-container">
-        <h1 className="heading">HireTrack</h1>
+    <main className="login-main-container">
+      <section className="login-section-container">
+        <h1 className="login-heading">HireTrack</h1>
 
-        {error && <p className="error-text">{error}</p>}
+        {error && <p className="login-error-text">{error}</p>}
 
         <form>
-        <div style={{ padding: "10px 30px 20px 10px" }}>
-        <label htmlFor="email-address" className="label">Email address</label>
+          <div style={{ padding: "10px 30px 0px 10px" }}>
+            <label htmlFor="email-address" className="login-label">Email address</label>
             <input
               id="email-address"
               type="email"
@@ -54,12 +54,12 @@ const Login = () => {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Email address"
               required
-              className="input"
+              className="login-input"
             />
           </div>
 
-          <div style={{ padding: "10px 30px 30px 10px" }}>
-          <label htmlFor="password" className="label">Password </label>
+          <div style={{ padding: "10px 30px 0px 10px" }}>
+            <label htmlFor="password" className="login-label">Password </label>
             <input
               id="password"
               type="password"
@@ -67,12 +67,12 @@ const Login = () => {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Password"
               required
-              className="input"
+              className="login-input"
             /> 
           </div>
 
           <div style={{ padding: "10px 10px 10px 10px" }}>
-            <button type="submit" onClick={onLogin} className="button">
+            <button type="submit" onClick={onLogin} className="login-button">
               Login
             </button>
           </div>
@@ -80,7 +80,7 @@ const Login = () => {
 
         <p>
           No account yet?{' '}
-          <NavLink to="/signup" className="link">Sign up</NavLink>
+          <NavLink to="/signup" className="login-link">Sign up</NavLink>
         </p>
       </section>
     </main>

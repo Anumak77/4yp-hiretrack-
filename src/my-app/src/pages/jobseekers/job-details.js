@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { fetchPdfFromFirestore,addJobToFirestore } from '../components/utils';
-import '../components/style.css'; 
+import { fetchPdfFromFirestore,addJobToFirestore } from '../../components/utils';
+import '../../components/style.css'; 
 
 const JobDetails = () => {
   const location = useLocation();
@@ -11,9 +11,11 @@ const JobDetails = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [matchScore, setMatchScore] = useState(null);
 
-  const closePopup = () => {
-    setShowPopup(false);
-  }
+const closePopup = () => {
+  setShowPopup(false);
+};
+  
+
   if (!job) {
     return <p className="job-details__no-job">No job details available.</p>;
   }
@@ -114,19 +116,22 @@ const JobDetails = () => {
         </div>
       </section>
 
-      {showPopup && (
-        <div className="popup-overlay">
-          <div className="popup-content">
-            <h2>Application Submitted</h2>
-            {matchScore !== null ? (
-              <p>Your match score with this job is: {matchScore}%</p>
-            ) : (
-              <p>You have successfully applied for this job.</p>
-            )}
-            <button className="popup-cancel-button" onClick={closePopup}>Cancel</button>
-          </div>
-        </div>
+
+
+{showPopup && (
+  <div className="popup-overlay">
+    <div className="popup-content">
+      <h2>Application Submitted</h2>
+      {matchScore !== null ? (
+        <p>Your match score with this job is: {matchScore}%</p>
+      ) : (
+        <p>You have successfully applied for this job.</p>
       )}
+      <button className="popup-cancel-button" onClick={closePopup}>Cancel</button>
+    </div>
+  </div>
+)}
+
     </main>
   );
 };
