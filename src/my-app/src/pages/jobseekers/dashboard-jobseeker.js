@@ -3,6 +3,7 @@ import { onAuthStateChanged, signOut, getAuth } from "firebase/auth";
 import { firebaseapp } from "../../components/firebaseconfigs";
 import { savePdfToFirestore, fetchPdfFromFirestore } from "../../components/utils";
 import "../../components/style.css";
+import NavbarJobseeker from './NavbarJobseeker';
 
 const DashJobseeker = () => {
   // ================= Auth / Profile =================
@@ -12,6 +13,7 @@ const DashJobseeker = () => {
 
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
+      console.log("User is logged in:", user);
       if (user) {
         setName(user.displayName || "Guest");
       }
@@ -144,7 +146,7 @@ const DashJobseeker = () => {
 
   return (
     <div className="dash-jobseeker__container">
-      {/* =============== SIDEBAR =============== */}
+      <NavbarJobseeker />
       <aside className="dash-jobseeker__sidebar">
         <div className="dash-jobseeker__profile">
           <label

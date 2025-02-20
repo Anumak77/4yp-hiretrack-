@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import '../../components/style.css';
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+import NavbarRecruiters from './NavbarRecruiters';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -38,6 +39,7 @@ const DashRecruiter = () => {
 
   return (
     <main className="dashboard-recruiter-container">
+      <NavbarRecruiters />
       <h1 className="dashboard-recruiter-heading">Recruiter Dashboard</h1>
 
       <div className="dashboard-recruiter-content">

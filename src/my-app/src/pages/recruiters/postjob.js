@@ -51,7 +51,7 @@ const PostJob = () => {
     
     const missingFields = [];
 
-    Object.entries(cleanedJobData).forEach(([key, value]) => {
+    Object.entries("").forEach(([key, value]) => {
       if (typeof value === "string" && value.trim() === "") {
         missingFields.push(key);
       } else if (value === undefined || value === null) {
@@ -61,7 +61,7 @@ const PostJob = () => {
     
     if (missingFields.length > 0) {
       console.log("Missing fields:", missingFields);
-      console.log("Form Data:", cleanedJobData);
+      console.log("Form Data:", "");
       showAlert(`Please fill out all fields: ${missingFields.join(", ")}`, 'error');
 
       return;

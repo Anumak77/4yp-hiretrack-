@@ -12,9 +12,12 @@ import firebase_admin
 from firebase_admin import credentials, db
 from PyPDF2 import PdfReader
 import io
+from routes.auth import auth_bp  
 
 app = Flask(__name__)
 CORS(app)
+
+app.register_blueprint(auth_bp)
 
 FIREBASE_DATABASE_URL = "https://hiretrack-7b035-default-rtdb.europe-west1.firebasedatabase.app/"
 
@@ -98,4 +101,4 @@ def compare_with_description():
         return jsonify({"message": "GET request received. Use POST to compare CV with job description."}), 200
 
 if __name__ == '__main__':
-    app.run(port=500)
+    app.run(port=5000)

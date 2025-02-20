@@ -4,6 +4,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { firebaseapp } from '../../components/firebaseconfigs';
 import { getFirestore, doc, setDoc } from 'firebase/firestore';
 import '../../components/style.css';
+import axios from 'axios';
 
 const countryOptions = [
   "United States", "United Kingdom", "India", "Canada", "Germany",
@@ -22,43 +23,32 @@ const Signup = () => {
   const [userType, setUserType] = useState('Job Seeker');
   const [error, setError] = useState('');
 
-  const auth = getAuth(firebaseapp);
-  const firestore = getFirestore(firebaseapp);
+ 
 
   const onSubmit = async (e) => {
     e.preventDefault();
 
+    setError('');
+
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-
-      await updateProfile(user, { displayName: `${firstName} ${lastName}` });
-      const userRef = doc(firestore, "users", user.uid);
-
-      let userData = {
-        uid: user.uid,
+      const userData = {
+        email,
+        password,
         first_name: firstName,
         last_name: lastName,
-        email: user.email,
-        userType: userType,
-        createdAt: new Date().toISOString(),
+        userType,
+        location: userType === 'Job Seeker' ? location : '',
+        phone_number: phoneNumber,
+        company_name: userType === 'Recruiter' ? companyName : '',
       };
 
-      if (userType === 'Job Seeker') {
-        userData.location = location;
-        userData.phone_number = phoneNumber;
-      } else if (userType === 'Recruiter') {
-        userData.company_name = companyName;
-        userData.phone_number = phoneNumber;
-      }
-
-      await setDoc(userRef, userData);
-
-      console.log(`User: ${firstName} ${lastName}, Email: ${user.email}, Role: ${userType}`);
+      const response = await axios.post('http://127.0.0.1:5000/signup', userData);
+      console.log('Signup successful:', response.data);
+      
       navigate('/login');
     } catch (err) {
-      setError(err.message);
-      console.error('Error during signup:', err.message);
+      setError(err.response?.data?.error || 'Signup failed. Please try again.');
+      console.error('Signup error:', err);
     }
   };
 
