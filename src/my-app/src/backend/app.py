@@ -13,11 +13,17 @@ from firebase_admin import credentials, db
 from PyPDF2 import PdfReader
 import io
 from routes.auth import auth_bp  
+from routes.cv import cv_bp 
+from routes.seekersearch import seekersearch_bp 
+
 
 app = Flask(__name__)
 CORS(app)
 
 app.register_blueprint(auth_bp)
+app.register_blueprint(cv_bp)
+app.register_blueprint(seekersearch_bp)
+
 
 FIREBASE_DATABASE_URL = "https://hiretrack-7b035-default-rtdb.europe-west1.firebasedatabase.app/"
 
@@ -45,25 +51,6 @@ def decode_pdf(base64_pdf):
         return text.strip()
     except Exception as e:
         raise ValueError(f"Error decoding PDF: {str(e)}")
-
-
-'''
-#used fuzzy matching to filter out jobs as database is very large 
-@app.route('/filter', methods=['GET'])
-def filter_jobs():
-
-    job_title = request.args.get('title', '').lower()
-    if not job_title:
-        return jsonify({"error": "Job title is required"}), 400
-    
-    titles = jobs_df['title'].tolist()
-    matches = process.extract(job_title, titles, limit=10, scorer=process.fuzz.partial_ratio)
-    matched_titles = [match[0] for match in matches if match[1] > 50]  
-    filtered_jobs = jobs_df[jobs_df['title'].isin(matched_titles)]
-
-    if filtered_jobs.empty:
-        return jsonify({"message": "No jobs found for the given title"}), 404
-'''
 
 @app.route('/compare_with_description', methods=['GET','POST'])
 def compare_with_description():
