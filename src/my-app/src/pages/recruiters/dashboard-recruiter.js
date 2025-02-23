@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getAuth } from 'firebase/auth';
 import '../../components/style.css';
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
@@ -35,6 +36,25 @@ const DashRecruiter = () => {
         },
     ],
 };
+
+const logIdToken = async () => {
+  try {
+    const user = getAuth().currentUser; 
+    if (!user) {
+      console.log('No user is currently signed in.');
+      return;
+    }
+
+    // Get the Firebase ID token
+    const idToken = await user.getIdToken();
+    console.log('Firebase ID Token:', idToken); 
+  } catch (error) {
+    console.error('Error fetching ID token:', error);
+  }
+};
+
+
+logIdToken();
 
 
   return (

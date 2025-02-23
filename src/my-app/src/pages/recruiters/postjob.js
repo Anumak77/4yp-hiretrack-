@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import {getAuth} from 'firebase/auth'
 import '../../components/style.css';
 
 const countryOptions = [
@@ -46,7 +48,7 @@ const PostJob = () => {
     setJobData({ ...jobData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     const missingFields = [];
@@ -67,9 +69,36 @@ const PostJob = () => {
       return;
     }
     
-    console.log('Job Data Submitted:', jobData);
-    showAlert('Job Posted Successfully!', 'success');
+    try {
+      
+      const user = getAuth().currentUser;
+      if (!user) throw new Error('User not authenticated');
+
+      const idToken = await user.getIdToken();
+      if (!idToken) throw new Error('Failed to get ID token');
+
+
+      const response = await axios.post('http://localhost:5000/create-job', jobData, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': idToken, 
+        },
+      });
+
+      if (response.data.success) {
+        showAlert('Job Posted Successfully!', 'success');
+        console.log('Job posted with ID:', response.data.jobId);
+    
+        navigate('/dashboard-recruiter');
+      } else {
+        throw new Error(response.data.error || "Failed to post job");
+      }
+    } catch (error) {
+      console.error('Error posting job:', error);
+      showAlert(error.message || 'An error occurred while posting the job.', 'error');
+    }
   };
+
 
   return (
     <main>

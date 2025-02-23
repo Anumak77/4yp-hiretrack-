@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { fetchPdfFromFirestore,addJobToFirestore } from '../../components/utils';
-import '../../components/style.css'; 
+import '../../components/style.css';
 
 const JobDetails = () => {
   const location = useLocation();
@@ -10,72 +9,155 @@ const JobDetails = () => {
   const job = location.state;
   const [showPopup, setShowPopup] = useState(false);
   const [matchScore, setMatchScore] = useState(null);
+  const[base64Data, setBase64Data] = useState(null);
 
-const closePopup = () => {
-  setShowPopup(false);
-};
-  
+  const closePopup = () => {
+    setShowPopup(false);
+  };
 
   if (!job) {
     return <p className="job-details__no-job">No job details available.</p>;
   }
 
-  const compareWithDescription = async () => {
+  const fetchPdfFromFlaskBackend = async () => {
     try {
-      const cvBase64 = await fetchPdfFromFirestore();
-      const jobDescription = job['JobDescription'];
-
-      if (!cvBase64) {
-        alert('No CV found for the user. Please upload a CV.');
-        return;
-      }
-
-      const response = await axios.post('http://127.0.0.1:500/compare_with_description', {
-        JobDescription: jobDescription,
-        cv: cvBase64.split(',')[1],
+      const user = JSON.parse(localStorage.getItem('user')); 
+      if (!user) throw new Error('User not authenticated');
+  
+      
+      const idToken = await user.getIdToken(); 
+      if (!idToken) throw new Error('Failed to get ID token');
+  
+      
+      const response = await fetch('http://localhost:5000/fetch-pdf', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': idToken, 
+        },
       });
-
-      const similarityScore = response.data['cosine similarity'];
-      console.log(similarityScore)
-      setMatchScore((similarityScore * 100).toFixed(2));
+  
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch CV');
+      }
+  
+      
+      const result = await response.json();
+  
+      
+      if (result.fileData) {
+        return result.fileData; 
+      } else {
+        throw new Error(result.error || 'No CV found for user');
+      }
     } catch (error) {
-      console.error('Error comparing CV with job description:', error);
-      alert('An error occurred. Please try again.');
+      console.error('Error fetching CV:', error);
+      throw error;
     }
   };
 
+  const compareWithDescription = async () => {
+    try {
+        let cvBase64;
 
-    const handleSubmitofsaveJobUpload = async (e) => {
-      e.preventDefault();
-  
-      if (!job) {
-        console.log('Please select a PDF to upload.');
-        return;
-      }
-  
-      try {
-        await addJobToFirestore(job, 'savedjobs');
-        console.log('job added succesfully');
-      } catch (error) {
-        console.log('error uploading job');
-      }
-    };
+        
+        if (base64Data) {
+            cvBase64 = base64Data;
+        } else {
+            
+            cvBase64 = await fetchPdfFromFlaskBackend();
+        }
 
-    const handleSubmitofapplyJobUpload = async (e) => {
-      e.preventDefault();
-  
-      if (!job) {
-        console.log('Please select a PDF to upload.');
+        console.log("CV Base64 Data:", cvBase64); 
+
+        const jobDescription = job['JobDescription'];
+
+        if (!cvBase64) {
+            alert('No CV found for the user. Please upload a CV.');
+            return;
+        }
+
+        const response = await axios.post('http://127.0.0.1:5000/compare_with_description', {
+            JobDescription: jobDescription,
+            cv: cvBase64.split(',')[1], 
+        });
+
+        const similarityScore = response.data['cosine similarity'];
+        console.log(similarityScore);
+        setMatchScore((similarityScore * 100).toFixed(2));
+        setShowPopup(true); 
+    } catch (error) {
+        console.error('Error comparing CV with job description:', error);
+        alert('An error occurred. Please try again.');
+    }
+};
+
+  const handleSubmitofsaveJobUpload = async (e) => {
+    e.preventDefault();
+
+    if (!job) {
+      console.log('Please select a job to save.');
+      return;
+    }
+
+    try {
+      const response = await fetch('http://127.0.0.1:5000/save-job', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: 'currentUserId', 
+          job: job,
+        }),
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        console.log('Job saved successfully:', result.message);
+      } else {
+        console.log('Error saving job:', result.error);
+      }
+    } catch (error) {
+      console.log('Error saving job:', error);
+    }
+  };
+
+  const handleSubmitofapplyJobUpload = async (e) => {
+    e.preventDefault();
+
+    if (!job) {
+        console.error('Please select a job to apply.');
         return;
-      }
-  
-      try {
-        await addJobToFirestore(job,'appliedjobs');
-        console.log('job added succesfully');
-      } catch (error) {
-        console.log('error uploading job');
-      }
-    };
+    }
+
+    try {
+        const userId = "actualUserId"; 
+        console.log("Sending request with userId:", userId);
+        const response = await fetch('http://127.0.0.1:5000/apply-job', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                userId: userId,
+                job: job,
+            }),
+        });
+
+        const result = await response.json();
+        console.log("Response received:", result);
+
+        if (response.ok) {
+            console.log('Job applied successfully:', result.message);
+        } else {
+            console.error('Error applying to job:', result.error);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+};
 
 
   return (

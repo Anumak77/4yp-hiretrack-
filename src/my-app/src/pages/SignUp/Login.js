@@ -27,6 +27,7 @@ const Login = () => {
   
       // Get the Firebase ID token
       const idToken = await user.getIdToken();
+      console.log(idToken);
   
       
       const response = await axios.post('http://127.0.0.1:5000/login', {
@@ -36,6 +37,7 @@ const Login = () => {
       
       console.log('Login successful:', response.data);
       const { uid, userType } = response.data;
+
   
       // Redirect based on user type
       if (userType === 'Job Seeker') {

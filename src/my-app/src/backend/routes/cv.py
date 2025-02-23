@@ -58,7 +58,7 @@ def fetch_pdf():
 
         # Fetch the CV file from Firestore
         firestore_db = firestore.client()
-        doc_ref = firestore_db.collection(f'users/{uid}/cv').document('cvFile')
+        doc_ref = firestore_db.collection(f'jobseekers/{uid}/cv').document('cvFile')
         doc_snap = doc_ref.get()
 
         if not doc_snap.exists:

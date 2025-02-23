@@ -15,7 +15,8 @@ import io
 from routes.auth import auth_bp  
 from routes.cv import cv_bp 
 from routes.seekersearch import seekersearch_bp 
-
+from routes.seekeractions import seekeractions_bp
+from routes.recruiterdashboard import recruiterdash_bp
 
 app = Flask(__name__)
 CORS(app)
@@ -23,32 +24,38 @@ CORS(app)
 app.register_blueprint(auth_bp)
 app.register_blueprint(cv_bp)
 app.register_blueprint(seekersearch_bp)
+app.register_blueprint(seekeractions_bp)
+app.register_blueprint(recruiterdash_bp)
 
 
 FIREBASE_DATABASE_URL = "https://hiretrack-7b035-default-rtdb.europe-west1.firebasedatabase.app/"
+import base64
 
-def fetch_jobs_from_firebase():
-    """Fetch jobs data from Firebase Realtime Database using REST API."""
-    response = requests.get(FIREBASE_DATABASE_URL)
-    if response.status_code == 200:
-        jobs_data = response.json()
-        return list(jobs_data.values()) if jobs_data else []
-    else:
-        raise Exception(f"Error fetching data from Firebase: {response.status_code}")
-
+import base64
+from io import BytesIO
+from PyPDF2 import PdfReader
 
 def decode_pdf(base64_pdf):
     try:
-        # Decode the Base64 string
+        # Add padding if necessary
+        padding = len(base64_pdf) % 4
+        if padding:
+            base64_pdf += '=' * (4 - padding)
+
+        # Decode the base64 string
         pdf_bytes = base64.b64decode(base64_pdf)
-        pdf_reader = PdfReader(io.BytesIO(pdf_bytes))
+
+        # Verify the PDF file
+        pdf_reader = PdfReader(BytesIO(pdf_bytes))
+        if not pdf_reader.pages:
+            raise ValueError("PDF file is empty or invalid")
 
         # Extract text from all pages
         text = ''
         for page in pdf_reader.pages:
             text += page.extract_text()
 
-        return text.strip()
+        return text.strip(), jsonify({base64_pdf})
     except Exception as e:
         raise ValueError(f"Error decoding PDF: {str(e)}")
 
@@ -73,9 +80,9 @@ def compare_with_description():
                 return jsonify({"error": str(e)}), 400
             
             if not user_cv_text.strip() or not combined_job_description.strip():
-                    return jsonify({"error": "Job description or CV is empty"}), 40
+                    return jsonify({"error": "Job description or CV is empty"}), 400
 
-            vectorizer = TfidfVectorizer().fit_transform([user_cv_text, job_description])
+            vectorizer = TfidfVectorizer().fit_transform([user_cv_text, combined_job_description])
             similarity_score = cosine_similarity(vectorizer[0], vectorizer[1])[0][0]
 
             return jsonify({"cosine similarity": similarity_score}), 200
