@@ -54,10 +54,10 @@ function MainApp() {
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         setIsAuthenticated(true);
-        setUserRole('Recruiter');
+        setUserRole('JobSeeker');
       } else {
         setIsAuthenticated(false);
-        setUserRole('Recruiter');
+        setUserRole('JobSeeker');
       }
     });
   }, []);

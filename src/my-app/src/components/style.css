@@ -1903,3 +1903,53 @@ body {
 .cancel-button:hover {
   background-color: #c9302c; /* Darker Red */
 }
+
+
+/* Status Buttons Container */
+.jobtracker-status-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+/* Status Buttons */
+.jobtracker-status-button {
+  flex: 1;
+  padding: 10px;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background-color: #f4f4f4;
+  color: #333;
+}
+
+/* Button Colors */
+.jobtracker-status-button.applied {
+  color: #c0b283;
+}
+
+.jobtracker-status-button.interviewed {
+  color: #404a42;
+}
+
+.jobtracker-status-button.rejected {
+  color: #192231;
+}
+
+/* Highlighted (Selected) Button */
+.jobtracker-status-button.active {
+  background-color: #1f3a52;
+  color: white;
+  border: 2px solid #0b3d2e;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+/* Button Hover Effect */
+.jobtracker-status-button:hover {
+  background-color: #e6e6e6;
+}

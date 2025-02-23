@@ -139,16 +139,26 @@ const JobTrackerJobseeker = () => {
 
         <input type="date" className="input-date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
         <div className="jobtracker-status-buttons">
-          <button onClick={() => handleStatusChange("Applied")} className="jobtracker-status-button applied">
-            Applied
-          </button>
-          <button onClick={() => handleStatusChange("Interviewed")} className="jobtracker-status-button interviewed">
-            Interviewed
-          </button>
-          <button onClick={() => handleStatusChange("Rejected")} className="jobtracker-status-button rejected">
-            Rejected
-          </button>
-        </div>
+  <button
+    onClick={() => handleStatusChange("Applied")}
+    className={`jobtracker-status-button applied ${jobStatus === "Applied" ? "active" : ""}`}
+  >
+    Applied
+  </button>
+  <button
+    onClick={() => handleStatusChange("Interviewed")}
+    className={`jobtracker-status-button interviewed ${jobStatus === "Interviewed" ? "active" : ""}`}
+  >
+    Interviewed
+  </button>
+  <button
+    onClick={() => handleStatusChange("Rejected")}
+    className={`jobtracker-status-button rejected ${jobStatus === "Rejected" ? "active" : ""}`}
+  >
+    Rejected
+  </button>
+</div>
+
 
         <button onClick={handleAddApplication} className="jobtracker-add-button">
           Add Application
