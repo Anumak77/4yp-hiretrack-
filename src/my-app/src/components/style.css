@@ -1,3 +1,21 @@
+.back-button-viewjob-back {
+  padding: 10px 20px;
+  background-color: #1f3a52; /* Deep Navy Blue */
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s ease-in-out;
+  margin-top: 50px;
+  margin-right: 600px;
+}
+
+.back-button-viewjob-back:hover {
+  background-color: #172a3d; /* Darker Navy */
+}
+
 /* Login Page Styles */
 .login-main-container {
   display: flex;
@@ -775,6 +793,7 @@ form {
   margin-left: -500px;
 }
 
+
 .back-button:hover {
   background-color: #172a3d; /* Darker Navy */
 }
@@ -901,12 +920,13 @@ form {
   background-color: #172a3d; /* Darker Navy */
 }
 
+
 /* View Job Title */
 .view-job-title {
   font-size: 24px;
   font-weight: bold;
   color: #0b3d2e;
-  margin-bottom: 20px;
+  margin-top: 50px;
 }
 
 /* Job List */
@@ -1749,4 +1769,137 @@ body {
   font-size: 1.2rem;
   font-weight: 600;
   color: #004d00;
+}
+
+.job-option-button {
+  padding: 10px 15px;
+  border: 2px solid #ddd;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.job-option-button:hover {
+  background-color: #ececec;
+}
+
+.job-option-button.selected {
+  background-color: #3CB371;
+  color: white;
+  border-color: #3CB371;
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+
+.confirmation-dialog {
+  background-color: #e0f7fa;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  margin-top: 20px;
+}
+
+.confirmation-button {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.confirmation-button:hover {
+  background-color: #0056b3;
+}
+
+/* Main Container */
+.edit-job-container {
+  background-color: #f9f9f9; /* Light grey background */
+  min-height: 100vh;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #333; /* Dark text */
+}
+
+/* Header */
+.edit-job-title {
+  /* font-size: 2.5rem; */
+  margin-bottom: 30px;
+  margin-top: 50px;
+  color: #0b3d2e; /* Dark green */
+}
+
+/* Form Container */
+.edit-job-form {
+  background-color: white;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 600px;
+}
+
+/* Input Group */
+.input-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+
+.input-group label {
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: #555;
+}
+
+.input-group input,
+.input-group textarea {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.input-group textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+/* Buttons */
+.button-container {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.save-button,
+.cancel-button {
+  background-color: #1f3a52; /* Deep Navy Blue */
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s ease-in-out;
+}
+
+.save-button:hover {
+  background-color: #0b3d2e; /* Dark green */
+}
+
+.cancel-button {
+  background-color: #d9534f; /* Red */
+}
+
+.cancel-button:hover {
+  background-color: #c9302c; /* Darker Red */
 }

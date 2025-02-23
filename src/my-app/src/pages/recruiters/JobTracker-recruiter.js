@@ -19,12 +19,14 @@ const JobTrackerRecruiter = () => {
   const [selectedJob, setSelectedJob] = useState('');
   const [applications, setApplications] = useState('');
   const [month, setMonth] = useState('');
+  const [error, setError] = useState('');
 
   const handleAddJobTrend = () => {
     if (!selectedJob || !applications || !month) {
-      alert('Please fill out all fields.');
+      setError("Oops! Looks like you missed something. Please complete all fields.");
       return;
     }
+    setError("");
 
     const newJobTrend = {
       jobTitle: selectedJob,
@@ -37,6 +39,15 @@ const JobTrackerRecruiter = () => {
     setApplications('');
     setMonth('');
   };
+
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError('');
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
 
   const sortedJobTrends = jobTrends.sort(
     (a, b) => monthOrder.indexOf(a.month) - monthOrder.indexOf(b.month)
@@ -55,53 +66,51 @@ const JobTrackerRecruiter = () => {
   };
 
   return (
+    <main>
+      <h1 className="job-tracker__title">Job Tracker</h1> 
+      <section className="job-tracker__container">
+        <div className="job-tracker__card">
+          <div className="job-tracker__form">
+            <div className="job-options-container">
+              {mockJobOptions.map((job, index) => (
+                <button 
+                  key={index} 
+                  className={`job-option-button ${selectedJob === job ? 'selected' : ''}`} 
+                  onClick={() => setSelectedJob(job)}
+                  style={{ margin: "1%" }} 
+                >
+                  {job}
+                </button>
+              ))}
+            </div>
 
-    
-<main>
-  <h1 className="job-tracker__title">Job Tracker</h1> 
+            <label>Application Date</label>
+            <input
+              type="text"
+              placeholder="Enter Month (e.g., January)"
+              value={month}
+              onChange={(e) => setMonth(e.target.value)}
+            />
 
-  <section className="job-tracker__container">
-    <div className="job-tracker__card">
-      <div className="job-tracker__form">
-        <div className="job-options-container">
-          {mockJobOptions.map((job, index) => (
-            <button 
-              key={index} 
-              className={`job-option-button ${selectedJob === job ? 'selected' : ''}`} 
-              onClick={() => setSelectedJob(job)}
-              style={{ margin: "1%" }} 
-            >
-              {job}
-            </button>
-          ))}
+            <input
+              type="number"
+              placeholder="Applications Count"
+              value={applications}
+              onChange={(e) => setApplications(e.target.value)}
+            />
+
+            <button onClick={handleAddJobTrend}>Add Job Trend</button>
+
+            {error && <div className="error-message">{error}</div>}
+          </div>
+
+          <div className="job-tracker__chart">
+            <h2>Line Chart - Job Trends</h2>
+            <Line data={lineChartData} />
+          </div>
         </div>
-
-        <label>Application Date</label>
-        <input
-          type="text"
-          placeholder="Enter Month (e.g., January)"
-          value={month}
-          onChange={(e) => setMonth(e.target.value)}
-        />
-
-        <input
-          type="number"
-          placeholder="Applications Count"
-          value={applications}
-          onChange={(e) => setApplications(e.target.value)}
-        />
-
-        <button onClick={handleAddJobTrend}>Add Job Trend</button>
-      </div>
-
-      <div className="job-tracker__chart">
-        <h2>Line Chart - Job Trends</h2>
-        <Line data={lineChartData} />
-      </div>
-    </div>
-  </section>
-</main>
-
+      </section>
+    </main>
   );
 };
 

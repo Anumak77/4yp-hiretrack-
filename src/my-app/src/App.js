@@ -23,7 +23,9 @@ import RecruiterSearch from './pages/recruiters/RecruiterSearch';
 import JobSeekerDetails from './pages/recruiters/jobseeker-details';
 import JobSeekerChat from './pages/chat/jobseekerchat';
 import PostJob from './pages/recruiters/postjob';
-import ViewJobPostings from './pages/recruiters/viewjob-postings';
+import ViewJobPostings from './pages/recruiters/ViewJobPostings';
+
+import EditJob from './pages/recruiters/editjobposting';
 
 function App() {
   return (
@@ -37,6 +39,12 @@ function MainApp() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState(null); // "JobSeeker" | "Recruiter" | null
 
+  const [jobPostings, setJobPostings] = useState([
+    { id: 1, title: 'Software Engineer', company: 'Google', location: 'New York', description: 'Develop scalable web applications.' },
+    { id: 2, title: 'Product Manager', company: 'Microsoft', location: 'Seattle', description: 'Lead cross-functional teams to deliver product roadmaps.' },
+    { id: 3, title: 'Data Scientist', company: 'Amazon', location: 'San Francisco', description: 'Analyze large datasets to generate insights.' }
+  ]);
+
   const location = useLocation();
   const hideNavbar =
     location.pathname === '/login' || location.pathname === '/signup';
@@ -46,19 +54,6 @@ function MainApp() {
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         setIsAuthenticated(true);
-
-        // --------------------------
-        // Fetch role from Firebase
-        // --------------------------
-
-        // Using Firestore “users” collection:
-        // const userDoc = await getDoc(doc(db, "users", user.uid));
-        // if (userDoc.exists()) {
-        //   const data = userDoc.data();
-        //   setUserRole(data?.role); // e.g. "JobSeeker" or "Recruiter"
-        // }
-
-        // For demo, we pretend we got "Recruiter"
         setUserRole('Recruiter');
       } else {
         setIsAuthenticated(false);
@@ -73,7 +68,6 @@ function MainApp() {
         <>
           {userRole === 'JobSeeker' && <NavbarJobseeker />}
           {userRole === 'Recruiter' && <NavbarRecruiters />}
-
         </>
       )}
 
@@ -86,7 +80,8 @@ function MainApp() {
         <Route path="/jobseeker-details" element={<JobSeekerDetails />} />
         <Route path="/jobseekerchat" element={<JobSeekerChat />} />
         <Route path="/createpost" element={<PostJob />} />
-        <Route path="/viewjobpostings" element={<ViewJobPostings />} />
+        <Route path="/viewjobpostings" element={<ViewJobPostings jobPostings={jobPostings} setJobPostings={setJobPostings} />} />
+        <Route path="/editjobpostings/:id" element={<EditJob jobPostings={jobPostings} setJobPostings={setJobPostings} />} />
 
         <Route path="/job-search" element={<JobSearch />} />
         <Route path="/recruiter-search" element={<RecruiterSearch />} />
