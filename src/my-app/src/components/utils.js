@@ -60,7 +60,7 @@ export const fetchPdfFromFirestore = async () => {
       const firestore = getFirestore();
       const jobId = job.id || `${job.Company}-${job.Title}`.replace(/\s+/g, "-").toLowerCase();
       const JobRef = doc(firestore, `users/${user.uid}/${firebasecollection}/${jobId}`);
-      const recruiterJobRef = doc(firestore, `users/${job.recruiterId}/jobposting/${jobId}`);
+      const recruiterJobRef = doc(firestore, `users/${job.recruiterId}/jobposting/${jobId}/applicants/${user.id}`);
       const recruiterRef = doc(firestore, `users/${job.recruiterId}`);
       let applicationstatus;
 
@@ -76,7 +76,7 @@ export const fetchPdfFromFirestore = async () => {
       return { success: false, message: "No CV found" };
     }
 
-    const response = await axios.post('http://127.0.0.1:5000/compare_with_description', {
+    const response = await axios.post('http://127.0.0.1:500/compare_with_description', {
       JobDescription: job.JobDescription,
       JobRequirment: job.JobRequirment || "", 
       RequiredQual: job.RequiredQual || "",
@@ -84,13 +84,15 @@ export const fetchPdfFromFirestore = async () => {
     });
 
     if (firebasecollection == "appliedjobs"){
-      await updateDoc(recruiterJobRef, {
-        applicants: arrayUnion(user.uid)
-      });
-      await updateDoc(recruiterRef, {
-        applicantsnum: increment(1)
+      await setDoc(recruiterJobRef, {
+        userId: user.uid,
+        appliedAt: new Date().toISOString(),
       });
 
+      // Increment the number of applicants for the recruiter
+      await updateDoc(recruiterRef, {
+        applicantsnum: increment(1),
+      });
       applicationstatus = "applied"
     }
     else if (firebasecollection == "savedjobs"){
@@ -105,6 +107,9 @@ export const fetchPdfFromFirestore = async () => {
 
 
     const similarityScore = response.data['cosine similarity'];
+    const matchScore = (similarityScore * 100).toFixed(2);
+
+  console.log("Calculated Match Score:", matchScore);
   
       await setDoc(JobRef, {
         ...job,
@@ -114,6 +119,7 @@ export const fetchPdfFromFirestore = async () => {
       });
   
       console.log('File saved to Firestore');
+      console.log({matchScore})
     } catch (error) {
       console.error('Error saving job to Firestore:', error);
       throw error;
@@ -244,4 +250,52 @@ export const updateJobPosting = async (job) => {
     return { success: false, error: error.message };
   }
 };
+
+
+export const fetchApplicants = async (jobId) => {
+  try {
+    const firestore = getFirestore();
+    const user = getAuth().currentUser;
+    if (!user) throw new Error("User not authenticated");
+
+    // Reference to the job posting
+    const jobDocRef = doc(firestore, `users/${user.uid}/jobposting/${jobId}/applicants/applicants`);
+    const jobDocSnap = await getDoc(jobDocRef);
+
+    if (!jobDocSnap.exists()) {
+      throw new Error("Job not found or no applicants.");
+    }
+
+    const jobData = jobDocSnap.data();
+    const applicantIds = jobData.applicants || [];
+    
+    console.log(applicantIds);  // Debug: Check the list of applicant IDs
+
+    if (applicantIds.length === 0){
+      console.log("no applicants")
+      return [];
+    }
+
+    // Fetch applicant data
+    const applicantsData = await Promise.all(
+      applicantIds.map(async (applicantId) => {
+        const userRef = doc(firestore, `users/${applicantId}`);
+        const userSnap = await getDoc(userRef);
+
+        console.log(userSnap.data()); // Debug: Check the data of each applicant
+
+        if (!userSnap.exists()) return null;
+        return { id: applicantId, ...userSnap.data() };
+      })
+    );
+
+    // Return only non-null applicant data
+    return applicantsData.filter(applicant => applicant !== null);
+  } catch (error) {
+    console.error("Error fetching applicants:", error);
+    return [];
+  }
+};
+
+
 

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { onAuthStateChanged, signOut, getAuth } from "firebase/auth";
 import { firebaseapp } from "../../components/firebaseconfigs";
-import { savePdfToFirestore, fetchPdfFromFirestore } from "../../components/utils";
 import "../../components/style.css";
+import NavbarJobseeker from './NavbarJobseeker';
+import axios from 'axios';
 
 const DashJobseeker = () => {
   // ================= Auth / Profile =================
@@ -12,6 +13,7 @@ const DashJobseeker = () => {
 
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
+      console.log("User is logged in:", user);
       if (user) {
         setName(user.displayName || "Guest");
       }
@@ -60,19 +62,67 @@ const DashJobseeker = () => {
       setErrorMessage("Please select a PDF to upload.");
       return;
     }
+  
     try {
-      await savePdfToFirestore(file);
-      setSuccessMessage("CV uploaded successfully!");
+      const idToken = await auth.currentUser.getIdToken();
+  
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = async () => {
+        const base64File = reader.result.split(",")[1]; 
+  
+        
+        console.log("Base64 file data:", base64File);
+  
+        
+        const response = await axios.post(
+          "http://127.0.0.1:5000/save-pdf",
+          { file: base64File },
+          {
+            headers: {
+              Authorization: idToken, 
+            },
+          }
+        );
+  
+        if (response.status === 200) {
+          setSuccessMessage("CV uploaded successfully!");
+        } else {
+          setErrorMessage("Error uploading CV.");
+        }
+      };
     } catch (error) {
+      console.error("Error uploading CV:", error);
       setErrorMessage("Error uploading CV.");
     }
   };
 
   const viewCV = async () => {
     try {
-      const pdfData = await fetchPdfFromFirestore();
-      if (pdfData) {
-        window.open(pdfData, "_blank");
+      const idToken = await auth.currentUser.getIdToken();
+  
+      const response = await axios.get("http://127.0.0.1:5000/fetch-pdf", {
+        headers: {
+          Authorization: idToken, 
+        },
+      });
+  
+      if (response.data.fileData) {
+        const byteCharacters = atob(response.data.fileData);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: "application/pdf" });
+  
+        // Create a Blob URL
+        const blobUrl = URL.createObjectURL(blob);
+  
+        // Open the PDF in a new tab
+        window.open(blobUrl, "_blank");
+  
+        URL.revokeObjectURL(blobUrl);
       } else {
         alert("No CV found. Please upload a CV.");
       }
@@ -81,6 +131,7 @@ const DashJobseeker = () => {
       alert("Error fetching CV.");
     }
   };
+
 
   // ================= DRAG AND DROP STATES =================
   //"Offered" separate and NOT included in drag & drop.
@@ -144,7 +195,7 @@ const DashJobseeker = () => {
 
   return (
     <div className="dash-jobseeker__container">
-      {/* =============== SIDEBAR =============== */}
+      <NavbarJobseeker />
       <aside className="dash-jobseeker__sidebar">
         <div className="dash-jobseeker__profile">
           <label

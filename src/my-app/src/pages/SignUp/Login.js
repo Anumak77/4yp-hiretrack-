@@ -3,6 +3,7 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 import { getAuth } from 'firebase/auth';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { firebaseapp } from "../../components/firebaseconfigs";
+import axios from 'axios';
 import '../../components/style.css';
 
 const Login = () => {
@@ -19,11 +20,35 @@ const Login = () => {
     setError('');
 
     try {
+      
+      const auth = getAuth(firebaseapp);
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
-      console.log('Logged in:', user);
-      navigate('/dashboard_jobseeker');
+  
+      // Get the Firebase ID token
+      const idToken = await user.getIdToken();
+      console.log(idToken);
+  
+      
+      const response = await axios.post('http://127.0.0.1:5000/login', {
+        idToken, // Send the Firebase ID token instead of email/password
+      });
+  
+      
+      console.log('Login successful:', response.data);
+      const { uid, userType } = response.data;
+
+  
+      // Redirect based on user type
+      if (userType === 'Job Seeker') {
+        navigate('/dashboard_jobseeker');
+      } else if (userType === 'Recruiter') {
+        navigate('/dashboard_recruiter');
+      } else {
+        navigate('/'); // default redirect
+      }
     } catch (error) {
+      // Handle errors
       if (error.code === 'auth/wrong-password') {
         setError('Incorrect password. Please try again.');
       } else if (error.code === 'auth/user-not-found') {
@@ -31,11 +56,12 @@ const Login = () => {
       } else {
         setError('Failed to log in. Please try again later.');
       }
-      console.error('Login Error:', error.message);
+      console.error('Login Error:', error);
     } finally {
       setLoading(false);
     }
   };
+  
 
   return (
     <main className="login-main-container">

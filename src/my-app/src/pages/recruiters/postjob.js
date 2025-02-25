@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import {getAuth} from 'firebase/auth'
 import '../../components/style.css';
 
 const countryOptions = [
@@ -49,21 +51,57 @@ const PostJob = () => {
     setJobData({ ...jobData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Check that all fields are non-empty (after trim)
-    const isFormValid = Object.values(jobData).every(
-      (value) => value !== undefined && value !== null && String(value).trim() !== ''
-    );
+    
+    const missingFields = [];
 
-    if (!isFormValid) {
-      showAlert('Please fill out all fields.', 'error');
+    Object.entries("").forEach(([key, value]) => {
+      if (typeof value === "string" && value.trim() === "") {
+        missingFields.push(key);
+      } else if (value === undefined || value === null) {
+        missingFields.push(key);
+      }
+    });
+    
+    if (missingFields.length > 0) {
+      console.log("Missing fields:", missingFields);
+      console.log("Form Data:", "");
+      showAlert(`Please fill out all fields: ${missingFields.join(", ")}`, 'error');
+
       return;
     }
+    
+    try {
+      
+      const user = getAuth().currentUser;
+      if (!user) throw new Error('User not authenticated');
 
-    console.log('Job Data Submitted:', jobData);
-    showAlert('Job has been posted successfully!', 'success');
+      const idToken = await user.getIdToken();
+      if (!idToken) throw new Error('Failed to get ID token');
+
+
+      const response = await axios.post('http://localhost:5000/create-job', jobData, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': idToken, 
+        },
+      });
+
+      if (response.data.success) {
+        showAlert('Job Posted Successfully!', 'success');
+        console.log('Job posted with ID:', response.data.jobId);
+    
+        navigate('/dashboard-recruiter');
+      } else {
+        throw new Error(response.data.error || "Failed to post job");
+      }
+    } catch (error) {
+      console.error('Error posting job:', error);
+      showAlert(error.message || 'An error occurred while posting the job.', 'error');
+    }
   };
+
 
   return (
     <main>
