@@ -45,15 +45,19 @@ def signup():
             "createdAt": firestore.SERVER_TIMESTAMP
         }
 
-        if user_type == 'recruiter':
+        if user_type == 'Recruiter':
+            if not company_name:
+                return jsonify({"error": "Company name is required for recruiters"}), 400
             user_data["company_name"] = company_name
+        if user_type == 'Recruiter':
             user_ref = firestore_db.collection('recruiters').document(user.uid)
-        else:
+        elif user_type == 'Job Seeker':
             user_ref = firestore_db.collection('jobseekers').document(user.uid)
+        else:
+            return jsonify({"error": "Invalid user type"}), 400
 
         user_ref.set(user_data)
 
-        # Save user in 'users' collection
         firestore_db.collection('users').document(user.uid).set(user_data)
 
         return jsonify({"message": "User created successfully", "uid": user.uid}), 201

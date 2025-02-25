@@ -44,30 +44,31 @@ const EditJob = () => {
       try {
         const user = getAuth().currentUser;
         if (!user) throw new Error('User not authenticated');
-
+  
         const idToken = await user.getIdToken();
         if (!idToken) throw new Error('Failed to get ID token');
-
-        const response = await fetch(`http://localhost:5000/fetch-job/${id}`, {
+  
+        const user_id = user.uid; // Get the current user's ID
+        const response = await fetch(`http://localhost:5000/fetch_job/${user_id}/${id}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': idToken,
           },
         });
-
+  
         if (!response.ok) {
           throw new Error('Failed to fetch job data');
         }
-
+  
         const job = await response.json();
-        setJobData(job); 
+        setJobData(job); // Pre-fill the form with the fetched job data
       } catch (error) {
         console.error('Error fetching job data:', error);
         showAlert(error.message || 'An error occurred while fetching the job data.', 'error');
       }
     };
-
+  
     fetchJobData();
   }, [id]);
 
@@ -83,43 +84,30 @@ const EditJob = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const missingFields = [];
-
-    Object.entries(jobData).forEach(([key, value]) => {
-      if (typeof value === "string" && value.trim() === "") {
-        missingFields.push(key);
-      } else if (value === undefined || value === null) {
-        missingFields.push(key);
-      }
-    });
-
-    if (missingFields.length > 0) {
-      showAlert(`Please fill out all fields: ${missingFields.join(", ")}`, 'error');
-      return;
-    }
-
+  
     try {
       const user = getAuth().currentUser;
       if (!user) throw new Error('User not authenticated');
-
+  
       const idToken = await user.getIdToken();
       if (!idToken) throw new Error('Failed to get ID token');
-
-      const response = await axios.put(`http://localhost:5000/update-job/${id}`, jobData, {
+  
+      const user_id = user.uid; // Get the current user's ID
+      const response = await fetch(`http://localhost:5000/update_job/${user_id}/${id}`, {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': idToken,
         },
+        body: JSON.stringify(jobData),
       });
-
-      if (response.data.success) {
-        showAlert('Job Updated Successfully!', 'success');
-        console.log('Job updated with ID:', response.data.jobId);
-        navigate('/dashboard-recruiter');
-      } else {
-        throw new Error(response.data.error || "Failed to update job");
+  
+      if (!response.ok) {
+        throw new Error('Failed to update job');
       }
+  
+      showAlert('Job updated successfully!', 'success');
+      navigate('/dashboard-recruiter');
     } catch (error) {
       console.error('Error updating job:', error);
       showAlert(error.message || 'An error occurred while updating the job.', 'error');
