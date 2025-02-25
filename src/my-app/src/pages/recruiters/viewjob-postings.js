@@ -42,14 +42,12 @@ const ViewJobPostings = () => {
         setLoading(false);
       }
     };
-  
-    
     useEffect(() => {
       fetchJobPostings();
     }, []);
 
   const handleEdit = (id) => {
-    console.log(`Edit job posting with ID: ${id}`);
+    navigate(`/edit-job/${id}`);
   };
 
   const handleViewInsights = (id) => {
@@ -66,7 +64,7 @@ const ViewJobPostings = () => {
       if (!idToken) throw new Error('Failed to get ID token');
   
       
-      const response = await fetch(`http://localhost:5000/api/delete-job/${id}`, {
+      const response = await fetch(`http://localhost:5000/delete-job/${id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',

@@ -4,13 +4,12 @@ from firebase_admin.exceptions import FirebaseError
 import base64
 from datetime import datetime
 
-# Create a Blueprint for CV-related routes
+
 cv_bp = Blueprint('cv', __name__)
 
 @cv_bp.route('/save-pdf', methods=['POST'])
 def save_pdf():
     try:
-        # Get the user ID from the request (e.g., from a token)
         id_token = request.headers.get('Authorization')
         if not id_token:
             return jsonify({"error": "Authorization token is required"}), 401
