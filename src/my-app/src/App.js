@@ -24,6 +24,7 @@ import JobSeekerDetails from './pages/recruiters/jobseeker-details';
 import JobSeekerChat from './pages/chat/jobseekerchat';
 import PostJob from './pages/recruiters/postjob';
 import ViewJobPostings from './pages/recruiters/viewjob-postings';
+import EditJob from './pages/recruiters/edit-job';
 
 function App() {
   return (
@@ -94,6 +95,7 @@ function MainApp() {
         <Route path="/dashboard-recruiter" element={<DashRecruiter />} />
         <Route path="/jobtracker-jobseeker" element={<JobTrackerJobseeker />} />
         <Route path="/jobtracker-recruiter" element={<JobTrackerRecruiter />} />
+        <Route path="/edit-job/:id" element={<EditJob />} />
 
         <Route path="*" element={<h1>404 - Page Not Found</h1>} />
       </Routes>

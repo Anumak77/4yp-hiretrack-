@@ -5,9 +5,6 @@ import axios from 'axios';
 import { fetchPdfFromFirestore } from '../../components/utils';
 import { getFirestore, collection, getDocs } from 'firebase/firestore';
 
-
-
-
 const getMatchScore = async (jobDescription, setMatchScores, seeker) => {
   try {
     const cvBase64 = await fetchPdfFromFirestore();
@@ -39,35 +36,42 @@ const RecruiterSearch = () => {
 
   useEffect(() => {
     const fetchJobSeekers = async () => {
-      const db = getFirestore();
-      const seekersCollection = collection(db, 'users');
-      const seekerSnapshot = await getDocs(seekersCollection);
-      const seekersData = seekerSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-      setJobSeekers(seekersData);
-      setFilteredJobSeekers(seekersData);
+      try {
+        // Fetch all job seekers from Flask backend
+        const response = await fetch('http://127.0.0.1:5000/fetch-jobseekers');
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const seekersData = await response.json();
+        setJobSeekers(seekersData);
+        setFilteredJobSeekers(seekersData);
+      } catch (error) {
+        console.error('Error fetching job seekers:', error);
+        alert('An error occurred while fetching job seekers. Please try again.');
+      }
     };
 
     fetchJobSeekers();
   }, []);
 
-  const handleSearch = (event) => {
+  const handleSearch = async (event) => {
     const query = event.target.value;
     setSearchTerm(query);
 
-    if (!query) {
-      setFilteredJobSeekers(jobSeekers);
-      return;
+    try {
+      // Search job seekers using Flask backend
+      const response = await fetch(`http://127.0.0.1:5000/search-jobseekers?search_term=${query}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const filteredSeekers = await response.json();
+      setFilteredJobSeekers(filteredSeekers);
+    } catch (error) {
+      console.error('Error searching job seekers:', error);
+      alert('An error occurred while searching. Please try again.');
     }
-
-    const fuse = new Fuse(jobSeekers, {
-      keys: ['firstName', 'lastName', 'industry'],
-      threshold: 0.4,
-    });
-
-    const result = fuse.search(query);
-    setFilteredJobSeekers(result.map(({ item }) => item));
   };
+
 
   return (
     <main>
