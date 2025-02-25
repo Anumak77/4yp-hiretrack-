@@ -84,6 +84,17 @@ const Signup = () => {
                 />
                 Recruiter
               </label>
+
+              <label className="signup-radio-label">
+                <input
+                  type="radio"
+                  name="userType"
+                  value="Admin"
+                  checked={userType === 'Admin'}
+                  onChange={(e) => setUserType(e.target.value)}
+                />
+                Admin
+              </label>
             </div>
           </div>
 
