@@ -1006,14 +1006,14 @@ form {
 .action-button {
   background-color: #1f3a52; /* Deep Navy Blue */
   color: white;
-  padding: 10px;
+  padding: 8px;
   font-size: 14px;
-  font-weight: bold;
   border: none;
   border-radius: 6px;
   cursor: pointer;
   transition: background 0.3s ease-in-out, transform 0.1s ease-in-out;
   flex: 1;
+  margin-bottom: 10px;
 }
 
 .action-button:hover {
