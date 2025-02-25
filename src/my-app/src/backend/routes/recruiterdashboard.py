@@ -67,7 +67,6 @@ def fetch_jobs():
         jobs_ref = firestore_db.collection(f'recruiters/{uid}/jobposting')
         jobs_snapshot = jobs_ref.get()
 
-        
         jobs = []
         for doc in jobs_snapshot:
             jobs.append({ "id": doc.id, **doc.to_dict() })
