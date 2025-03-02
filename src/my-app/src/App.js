@@ -23,11 +23,11 @@ import RecruiterSearch from './pages/recruiters/RecruiterSearch';
 import JobSeekerDetails from './pages/recruiters/jobseeker-details';
 import JobSeekerChat from './pages/chat/jobseekerchat';
 import PostJob from './pages/recruiters/postjob';
-import ViewJobPostings from './pages/recruiters/ViewJobPostings';
+// import ViewJobPostings from './pages/recruiters/ViewJobPostings';
 
 import EditJob from './pages/recruiters/editjobposting';
 import ViewJobPostings from './pages/recruiters/viewjob-postings';
-import EditJob from './pages/recruiters/edit-job';
+// import EditJob from './pages/recruiters/edit-job';
 
 function App() {
   return (
