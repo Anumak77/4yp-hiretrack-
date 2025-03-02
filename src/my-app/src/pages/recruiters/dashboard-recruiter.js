@@ -1,14 +1,27 @@
 import React from 'react';
+import { useEffect, useState } from "react";
+import { getAuth } from "firebase/auth";
+import NavbarRecruiters from './NavbarRecruiters';
+import NavbarAdmin from '../admin/navbar-admin';
 import { useNavigate } from 'react-router-dom';
-import { getAuth } from 'firebase/auth';
 import '../../components/style.css';
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
-import NavbarRecruiters from './NavbarRecruiters';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const DashRecruiter = () => {
+  const [userRole, setUserRole] = useState(localStorage.getItem('userRole') || null);
+  useEffect(() => {
+    const auth = getAuth();
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        const storedRole = localStorage.getItem('userRole');
+        setUserRole(storedRole);
+      }
+    });
+  }, []);
+
   const navigate = useNavigate();
 
   const jobPostings = [

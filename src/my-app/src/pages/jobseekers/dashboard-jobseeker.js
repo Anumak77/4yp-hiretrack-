@@ -4,21 +4,23 @@ import { firebaseapp } from "../../components/firebaseconfigs";
 import "../../components/style.css";
 import NavbarJobseeker from './NavbarJobseeker';
 import axios from 'axios';
+import NavbarAdmin from '../admin/navbar-admin';
 
 const DashJobseeker = () => {
   // ================= Auth / Profile =================
   const [name, setName] = useState("Guest");
   const [profileImage, setProfileImage] = useState(null);
+  const [userRole, setUserRole] = useState(localStorage.getItem('userRole') || null);
   const auth = getAuth(firebaseapp);
 
   useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
-      console.log("User is logged in:", user);
+    auth.onAuthStateChanged((user) => {
       if (user) {
-        setName(user.displayName || "Guest");
+        const storedRole = localStorage.getItem('userRole');
+        setUserRole(storedRole);
       }
     });
-  }, [auth]);
+  }, []);
 
   const handleLogout = () => {
     signOut(auth)
