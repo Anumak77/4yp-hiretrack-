@@ -13,7 +13,7 @@ seekersearch_bp = Blueprint('seekersearch', __name__)
 
 cred = credentials.Certificate("firebase_service_account_key.json")
 
-@seekersearch_bp.route('/jobs', methods=['GET'])
+@seekersearch_bp.route('/get_jobs', methods=['GET'])
 def get_jobs():
     try:
         page = int(request.args.get('page', 1)) 

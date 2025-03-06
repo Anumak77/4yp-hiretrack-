@@ -13,31 +13,25 @@ const JobSearch = () => {
   const [searchFilter, setSearchFilter] = useState("all");
   const navigate = useNavigate();
 
-  const firebaseConfig = {
-    databaseURL:
-      "https://hiretrack-7b035-default-rtdb.europe-west1.firebasedatabase.app/",
-  };
-
-  const app =
-    getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-  const database = getDatabase(app);
-
   useEffect(() => {
-    const databaseRef = ref(database);
-
-    const unsubscribe = onValue(databaseRef, (snapshot) => {
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        const dataArray = Object.values(data);
-        setAllData(dataArray);
-      } else {
-        console.error("No data found in the database");
+    const fetchJobs = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/get_jobs");
+        if (!response.ok) {
+          throw new Error("Failed to fetch jobs");
+        }
+        const data = await response.json();
+        setAllData(data);
+      } catch (error) {
+        console.error("Error fetching jobs:", error);
       }
-    });
-    return () => unsubscribe();
+    };
+
+    fetchJobs();
   }, []);
 
-  const handleSearch = (event) => {
+  // Handle search input changes
+  const handleSearch = async (event) => {
     const query = event.target.value;
     setSearchTerm(query);
 
@@ -46,33 +40,22 @@ const JobSearch = () => {
       return;
     }
 
-    let filtered = [];
-
-    if (searchFilter === "location") {
-      filtered = allData.filter((job) =>
-        job.Location?.toLowerCase().includes(query)
+    try {
+      // Call the Flask search endpoint
+      const response = await fetch(
+        `http://localhost:5000/search-jobs?query=${query}&filter=${searchFilter}`
       );
-    } else if (searchFilter === "company") {
-      filtered = allData.filter((job) =>
-        job.Company?.toLowerCase().includes(query)
-      );
-    } else if (searchFilter === "title") {
-      filtered = allData.filter((job) =>
-        job.Title?.toLowerCase().includes(query)
-      );
-    } else {
-      const fuse = new Fuse(allData, {
-        keys: ["Title", "Company", "Location"],
-        threshold: 0.4,
-      });
-
-      const result = fuse.search(query);
-      filtered = result.map(({ item }) => item);
+      if (!response.ok) {
+        throw new Error("Failed to fetch search results");
+      }
+      const data = await response.json();
+      setFilteredJobs(data);
+    } catch (error) {
+      console.error("Error searching jobs:", error);
     }
-
-    setFilteredJobs(filtered);
   };
 
+  // Handle "More Info" button click
   const handleMoreInfoClick = (job) => {
     navigate("/job-details", { state: job });
   };
