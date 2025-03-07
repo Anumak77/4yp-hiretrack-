@@ -41,3 +41,8 @@ deploy:
     - serve -s build
   only:
     - main # Run this only when pushing to main branch
+    - new 
+  
+  include:
+  - local: "src/my-app/.gitlab-ci.yml"
+
