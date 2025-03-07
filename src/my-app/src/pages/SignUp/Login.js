@@ -38,9 +38,9 @@ const Login = () => {
 
         // Redirect based on role
         if (userType === 'Job Seeker') {
-          navigate('/dashboard_jobseeker');
+          navigate('/dashboard-jobseeker');
         } else if (userType === 'Recruiter') {
-          navigate('/dashboard_recruiter');
+          navigate('/dashboard-recruiter');
         } else if (userType === 'Admin') {
           navigate('/admin');
         } else {
