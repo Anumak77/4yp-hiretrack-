@@ -9,19 +9,23 @@ import "../../components/style.css";
 const JobSearch = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredJobs, setFilteredJobs] = useState([]);
-  const [allData, setAllData] = useState([]);
+  const [allJobs, setAllJobs] = useState([]);
   const [searchFilter, setSearchFilter] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [jobsPerPage, setJobsPerPage] = useState(10); 
+  const [totalJobs, setTotalJobs] = useState(0); 
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        const response = await fetch("http://localhost:5000/get_jobs");
+        const response = await fetch("http://localhost:5000/jobs");
         if (!response.ok) {
           throw new Error("Failed to fetch jobs");
         }
         const data = await response.json();
-        setAllData(data);
+        setAllJobs(data); // Store all jobs
+        setFilteredJobs(data); // Initialize filteredJobs with all jobs
       } catch (error) {
         console.error("Error fetching jobs:", error);
       }
@@ -30,35 +34,47 @@ const JobSearch = () => {
     fetchJobs();
   }, []);
 
-  // Handle search input changes
-  const handleSearch = async (event) => {
+  const handleSearch = (event) => {
     const query = event.target.value;
     setSearchTerm(query);
 
     if (!query) {
-      setFilteredJobs([]);
+      setFilteredJobs(allJobs); 
+      setCurrentPage(1); 
       return;
     }
 
-    try {
-      // Call the Flask search endpoint
-      const response = await fetch(
-        `http://localhost:5000/search-jobs?query=${query}&filter=${searchFilter}`
-      );
-      if (!response.ok) {
-        throw new Error("Failed to fetch search results");
-      }
-      const data = await response.json();
-      setFilteredJobs(data);
-    } catch (error) {
-      console.error("Error searching jobs:", error);
-    }
+    // Configure Fuse.js options
+    const fuseOptions = {
+      keys: ["Title", "Company", "Location"], // Fields to search
+      threshold: 0.6, // Adjust the threshold for fuzzy matching
+    };
+
+    const fuse = new Fuse(allJobs, fuseOptions);
+
+    const results = fuse.search(query);
+
+    const matchedJobs = results.map((result) => result.item);
+
+    setFilteredJobs(matchedJobs); 
+    setCurrentPage(1);
   };
 
-  // Handle "More Info" button click
   const handleMoreInfoClick = (job) => {
     navigate("/job-details", { state: job });
   };
+
+  const handleNextPage = () => {
+    setCurrentPage((prev) => prev + 1);
+  };
+
+  const handlePreviousPage = () => {
+    setCurrentPage((prev) => Math.max(prev - 1, 1));
+  };
+
+  const start = (currentPage - 1) * jobsPerPage;
+  const end = start + jobsPerPage;
+  const paginatedJobs = filteredJobs.slice(start, end);
 
   return (
     <main>
@@ -128,6 +144,21 @@ const JobSearch = () => {
             </tbody>
           </table>
         </div>
+        <div className="pagination-controls">
+  <button
+    onClick={handlePreviousPage}
+    disabled={currentPage === 1} 
+  >
+    Previous
+  </button>
+  <span>Page {currentPage}</span>
+  <button
+    onClick={handleNextPage}
+    disabled={paginatedJobs.length < jobsPerPage} 
+  >
+    Next
+  </button>
+</div>
       </section>
       </section>
     </main>
