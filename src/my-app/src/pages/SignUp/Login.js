@@ -25,7 +25,7 @@ const Login = () => {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // Fetch user role from Firestore
+      localStorage.setItem('user', JSON.stringify(user));
       const userDocRef = doc(db, "users", user.uid); // Get user document
       const userDocSnap = await getDoc(userDocRef);
       
@@ -38,9 +38,9 @@ const Login = () => {
 
         // Redirect based on role
         if (userType === 'Job Seeker') {
-          navigate('/dashboard_jobseeker');
+          navigate('/dashboard-jobseeker');
         } else if (userType === 'Recruiter') {
-          navigate('/dashboard_recruiter');
+          navigate('/dashboard-recruiter');
         } else if (userType === 'Admin') {
           navigate('/admin');
         } else {

@@ -59,18 +59,24 @@ def apply_job():
 
         cv_base64 = cv_snap.to_dict().get('fileData')
 
+         # Handle CV data splitting safely
+        cv_parts = cv_base64.split(',')
+        if len(cv_parts) > 1:
+            cv_data = cv_parts[1]  # Use the part after the comma
+        else:
+            cv_data = cv_base64 
+
         # Compare CV with job description (optional)
         response = requests.post('http://127.0.0.1:5000/compare_with_description', json={
             "JobDescription": job.get('JobDescription'),
             "JobRequirment": job.get('JobRequirment', ""),
             "RequiredQual": job.get('RequiredQual', ""),
-            "cv": cv_base64.split(',')[1],
+            "cv": cv_data,
         })
 
         similarity_score = response.json().get('cosine similarity', 0)
         match_score = round(similarity_score * 100, 2)
 
-        # Save the job to the user's appliedjobs collection
         job_id = job.get('id') or f"{job.get('Company')}-{job.get('Title')}".replace(" ", "-").lower()
         job_ref = firestore_db.collection(f'jobseekers/{user_id}/appliedjobs').document(job_id)
         job_ref.set({
@@ -80,18 +86,18 @@ def apply_job():
             "applicationstatus": "applied"
         })
 
-        # Update the recruiter's jobposting collection
-        recruiter_job_ref = firestore_db.collection(f'recruiters/{recruiter_id}/jobposting/{job_id}/applicants').document(user_id)
+        recruiter_job_ref = firestore_db.collection(f'recruiters/{recruiter_id}/jobposting/{job_id}'/'applicants').document(user_id)
         recruiter_job_ref.set({
             "userId": user_id,
             "appliedAt": datetime.now().isoformat(),
         })
 
-        # Increment the number of applicants for the recruiter
-        recruiter_ref = firestore_db.collection(f'recruiters/{recruiter_id}').document('metadata')
+
+        recruiter_ref = firestore_db.collection(f'recruiters/{recruiter_id}/applicantsnum').document('metadata')
         recruiter_ref.update({
             "applicantsnum": firestore.Increment(1)
         })
+
 
         return jsonify({"success": True, "message": "Job applied successfully", "matchScore": match_score}), 200
     except Exception as e:

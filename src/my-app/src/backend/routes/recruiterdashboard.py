@@ -3,6 +3,8 @@ from firebase_admin import firestore
 from firebase_admin.exceptions import FirebaseError
 from firebase_admin import credentials, initialize_app, auth, firestore
 from datetime import datetime
+from firebase_admin import db
+from config import firestore_db, realtime_db 
 
 cred = credentials.Certificate('firebase_service_account_key.json')
 
@@ -41,6 +43,9 @@ def create_job():
         firestore_db = firestore.client()
         job_ref = firestore_db.collection(f'recruiters/{uid}/jobposting').document(job_id)
         job_ref.set(job_with_metadata)
+
+        realtime_db_ref = db.reference('/')  # Reference to the root level 'jobs' node
+        realtime_db_ref.child(job_id).set(job_with_metadata)
 
         return jsonify({"success": True, "jobId": job_id}), 200
 

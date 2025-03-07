@@ -33,11 +33,6 @@ app.register_blueprint(edit_job_bp)
 
 
 FIREBASE_DATABASE_URL = "https://hiretrack-7b035-default-rtdb.europe-west1.firebasedatabase.app/"
-import base64
-
-import base64
-from io import BytesIO
-from PyPDF2 import PdfReader
 
 def decode_pdf(base64_pdf):
     try:

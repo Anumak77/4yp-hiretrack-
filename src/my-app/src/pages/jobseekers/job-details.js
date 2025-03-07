@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { auth, firestore, realtimeDb } from '../../components/firebaseconfigs.js';
 import axios from 'axios';
 import '../../components/style.css';
 
@@ -21,33 +22,32 @@ const JobDetails = () => {
 
   const fetchPdfFromFlaskBackend = async () => {
     try {
-      const user = JSON.parse(localStorage.getItem('user')); 
+      const user = auth.currentUser;
       if (!user) throw new Error('User not authenticated');
   
-      
-      const idToken = await user.getIdToken(); 
+      const idToken = await user.getIdToken();
       if (!idToken) throw new Error('Failed to get ID token');
   
-      
+      console.log('Fetching CV from Flask backend...');
       const response = await fetch('http://localhost:5000/fetch-pdf', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': idToken, 
+          'Authorization': idToken,
         },
       });
   
-      
+      console.log('Response Status:', response.status);
       if (!response.ok) {
-        throw new Error('Failed to fetch CV');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch CV');
       }
   
-      
       const result = await response.json();
+      console.log('CV Data from Backend:', result.fileData);
   
-      
       if (result.fileData) {
-        return result.fileData; 
+        return result.fileData;
       } else {
         throw new Error(result.error || 'No CV found for user');
       }
@@ -59,39 +59,74 @@ const JobDetails = () => {
 
   const compareWithDescription = async () => {
     try {
-        let cvBase64;
-
-        
-        if (base64Data) {
-            cvBase64 = base64Data;
-        } else {
-            
-            cvBase64 = await fetchPdfFromFlaskBackend();
-        }
-
-        console.log("CV Base64 Data:", cvBase64); 
-
-        const jobDescription = job['JobDescription'];
-
-        if (!cvBase64) {
-            alert('No CV found for the user. Please upload a CV.');
-            return;
-        }
-
-        const response = await axios.post('http://127.0.0.1:5000/compare_with_description', {
-            JobDescription: jobDescription,
-            cv: cvBase64.split(',')[1], 
-        });
-
-        const similarityScore = response.data['cosine similarity'];
-        console.log(similarityScore);
-        setMatchScore((similarityScore * 100).toFixed(2));
-        setShowPopup(true); 
+      let cvBase64;
+  
+      // Check if CV data is already available
+      if (base64Data) {
+        cvBase64 = base64Data;
+      } else {
+        // Fetch CV data from the Flask backend
+        cvBase64 = await fetchPdfFromFlaskBackend();
+      }
+  
+      // Log the CV data for debugging
+      console.log('CV Base64 Data (before split):', cvBase64);
+  
+      // Get the job description
+      const jobDescription = job['JobDescription'];
+      console.log('Job Description:', jobDescription);
+  
+      // Validate CV data
+      if (!cvBase64) {
+        alert('No CV found for the user. Please upload a CV.');
+        return;
+      }
+  
+      // Trim any leading/trailing whitespace
+      cvBase64 = cvBase64.trim();
+  
+      // Handle both data URL and pure base64 strings
+      let cv;
+      if (cvBase64.startsWith('data:')) {
+        // If cvBase64 is a data URL, split it to extract the base64 data
+        cv = cvBase64.split(',')[1];
+      } else {
+        // If cvBase64 is already a pure base64 string, use it directly
+        cv = cvBase64;
+      }
+  
+      console.log('CV Base64 Data (after handling):', cv);
+  
+      // Prepare the payload
+      const payload = {
+        JobDescription: jobDescription,
+        cv: cv, // Use the processed value
+      };
+      console.log('Request Payload:', payload);
+  
+      // Send the CV and job description to the Flask backend for comparison
+      const response = await axios.post('http://127.0.0.1:5000/compare_with_description', payload, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      // Log the response for debugging
+      console.log('Comparison Response:', response.data);
+  
+      // Extract the similarity score
+      const similarityScore = response.data['cosine_similarity']; // Ensure the key matches the backend response
+      console.log('Similarity Score:', similarityScore);
+  
+      // Convert the similarity score to a percentage and update the state
+      const matchScorePercentage = (similarityScore * 100).toFixed(2);
+      setMatchScore(matchScorePercentage);
+      setShowPopup(true);
     } catch (error) {
-        console.error('Error comparing CV with job description:', error);
-        alert('An error occurred. Please try again.');
+      console.error('Error comparing CV with job description:', error);
+      alert('An error occurred. Please try again.');
     }
-};
+  };
 
   const handleSubmitofsaveJobUpload = async (e) => {
     e.preventDefault();
@@ -124,6 +159,28 @@ const JobDetails = () => {
     }
   };
 
+  const checkForCV = async (userId) => {
+    try {
+        const response = await fetch(`http://127.0.0.1:5000/fetch-pdf`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': await auth.currentUser.getIdToken(),
+            },
+        });
+
+        const result = await response.json();
+        if (result.fileData) {
+            return true; // CV exists
+        } else {
+            return false; // CV does not exist
+        }
+    } catch (error) {
+        console.error('Error checking for CV:', error);
+        return false;
+    }
+};
+
   const handleSubmitofapplyJobUpload = async (e) => {
     e.preventDefault();
 
@@ -133,7 +190,20 @@ const JobDetails = () => {
     }
 
     try {
-        const userId = "actualUserId"; 
+      const user = auth.currentUser;
+      if (!user) {
+          console.error('User not authenticated.');
+          return;
+      }
+
+      const userId = user.uid; 
+      
+      const hasCV = await checkForCV(userId);
+        if (!hasCV) {
+            alert('No CV found. Please upload a CV before applying.');
+            return;
+        }
+
         console.log("Sending request with userId:", userId);
         const response = await fetch('http://127.0.0.1:5000/apply-job', {
             method: 'POST',
@@ -203,7 +273,6 @@ const JobDetails = () => {
 {showPopup && (
   <div className="popup-overlay">
     <div className="popup-content">
-      <h2>Application Submitted</h2>
       {matchScore !== null ? (
         <p>Your match score with this job is: {matchScore}%</p>
       ) : (
