@@ -6,14 +6,7 @@ cypress-run:
   stage: test
   script:
     - npm install
-    - npx cypress run
-  artifacts:
-    when: always
-    paths:
-      - test-results/
-      - cypress/screenshots/
-      - cypress/videos/
+    - npx cypress run  # No need for --config-file if cypress.config.js is at root
   only:
     - main
     - new-branch
-
