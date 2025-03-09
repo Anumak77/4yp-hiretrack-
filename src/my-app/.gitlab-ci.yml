@@ -6,20 +6,16 @@ cypress-run:
   stage: test
   script:
     - npm install
-    - npx cypress run --config cypress.config.js
+    - npx cypress run --config-file=cypress.config.js
   artifacts:
     when: always
-    expire_in: 1 week
     paths:
       - test-results/
       - cypress/screenshots/
       - cypress/videos/
-
   only:
     - main
     - new-branch
-
-cache:
-  key: npm-cache
-  paths:
-    - node_modules/
+  cache:
+    paths:
+      - node_modules/
