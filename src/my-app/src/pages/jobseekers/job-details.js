@@ -99,14 +99,12 @@ const JobDetails = () => {
         },
       });
   
-      // Log the response for debugging
+     
       console.log('Comparison Response:', response.data);
   
-      // Extract the similarity score
-      const similarityScore = response.data['cosine_similarity']; // Ensure the key matches the backend response
+      const similarityScore = response.data['cosine_similarity']; 
       console.log('Similarity Score:', similarityScore);
   
-      // Convert the similarity score to a percentage and update the state
       const matchScorePercentage = (similarityScore * 100).toFixed(2);
       setMatchScore(matchScorePercentage);
       setShowPopup(true);
@@ -151,17 +149,15 @@ const JobDetails = () => {
     e.preventDefault();
 
     try {
-        // Get the current authenticated user
         const user = auth.currentUser;
         if (!user) {
             console.error('User not authenticated.');
-            alert('Please sign in to apply for jobs.'); // Notify the user
+            alert('Please sign in to apply for jobs.'); 
             return;
         }
 
         const userId = user.uid; // Get the user's UID
 
-        // Fetch the user's CV
         let cvBase64;
         if (base64Data) {
             cvBase64 = base64Data;
@@ -176,22 +172,22 @@ const JobDetails = () => {
             return;
         }
 
-        // Process the CV data
+        
         cvBase64 = cvBase64.trim();
         let cv;
         if (cvBase64.startsWith('data:')) {
-            cv = cvBase64.split(',')[1]; // Use the part after the comma
+            cv = cvBase64.split(',')[1]; 
         } else {
-            cv = cvBase64; // Use the entire string if no comma is found
+            cv = cvBase64; 
         }
 
         console.log('CV Base64 Data (after handling):', cv);
 
-        // Prepare the payload for the backend
+        
         const payload = {
-            userId: userId, // Include the user's UID
-            job: job, // Include the job object
-            cv: cv, // Include the processed CV data
+            userId: userId, 
+            job: job, 
+            cv: cv, 
         };
 
         console.log('Request Payload:', payload);
@@ -208,14 +204,14 @@ const JobDetails = () => {
 
         if (response.status === 200) {
             console.log('Job applied successfully:', result.message);
-            alert('Job applied successfully!'); // Notify the user
+            alert('Job applied successfully!'); 
         } else {
             console.error('Error applying to job:', result.error);
-            alert('Error applying to job. Please try again.'); // Notify the user
+            alert('Error applying to job. Please try again.'); 
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('An error occurred. Please try again.'); // Notify the user
+        alert('An error occurred. Please try again.'); 
     }
 };
 

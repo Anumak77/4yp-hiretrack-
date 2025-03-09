@@ -74,14 +74,22 @@ def save_job_application(firestore_db, user_id, job, match_score):
     })
     return job_id
 
-def update_recruiter_metadata(firestore_db, recruiter_id, job_id, user_id):
+def update_recruiter_metadata(firestore_db, recruiter_id, job_id, user_id, match_score):
     recruiter_job_ref = firestore_db.collection(f'recruiters/{recruiter_id}/jobposting/{job_id}/applicants').document(user_id)
     recruiter_job_ref.set({
         "userId": user_id,
         "appliedAt": datetime.now().isoformat(),
+        "matchScore": match_score
     })
+    recruiter_ref = firestore_db.collection(f'recruiters/{recruiter_id}/applicantsum').document('metadata')
 
-    recruiter_ref = firestore_db.collection(f'recruiters/{recruiter_id}').document('metadata')
+    metadata_doc = recruiter_ref.get()
+
+    if not metadata_doc.exists:
+        recruiter_ref.set({
+            "applicantsnum": 1  # Initialize with 1
+        })
+
     recruiter_ref.update({
         "applicantsnum": firestore.Increment(1)
     })
@@ -98,7 +106,7 @@ def apply_job():
         if not user_id or not job or not recruiter_id:
             return jsonify({"error": "User ID, job data, and recruiter ID are required"}), 400
 
-        # Fetch the user's CV
+        # Fetch the users CV
         cv_base64, error = fetch_user_cv(firestore_db, user_id)
         if error:
             return jsonify(error), 404
@@ -118,12 +126,7 @@ def apply_job():
         job_id = save_job_application(firestore_db, user_id, job, match_score)
 
         # Update recruiter metadata
-        update_recruiter_metadata(firestore_db, recruiter_id, job_id, user_id)
-
-        # Log paths for debugging
-        print('Job Ref Path:', f'jobseekers/{user_id}/appliedjobs/{job_id}')
-        print('Recruiter Job Ref Path:', f'recruiters/{recruiter_id}/jobposting/{job_id}/applicants/{user_id}')
-        print('Recruiter Ref Path:', f'recruiters/{recruiter_id}/metadata')
+        update_recruiter_metadata(firestore_db, recruiter_id, job_id, user_id, match_score)
 
         return jsonify({"success": True, "message": "Job applied successfully", "matchScore": match_score}), 200
     except Exception as e:

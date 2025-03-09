@@ -50,6 +50,9 @@ const Login = () => {
         setError("User data not found. Please contact support.");
       }
 
+      const idToken = await user.getIdToken();
+        console.log("Firebase ID token:", idToken);
+
     } catch (error) {
       if (error.code === 'auth/wrong-password') {
         setError('Incorrect password. Please try again.');
