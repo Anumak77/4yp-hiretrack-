@@ -108,20 +108,22 @@ def decode_pdf(base64_pdf):
 def compare_with_description():
     try:
         data = request.json
-        job_description = data.get('JobDescription')
+        job_description = data.get('JobDescription', '')
         job_requirements = data.get('JobRequirment', '')
         requirement_qual = data.get('RequiredQual', '')
         cv_base64 = data.get('cv')
 
-        # Combine job description, requirements, and qualifications
+        # Handle CV data splitting safely
+        cv_parts = cv_base64.split(',')
+        if len(cv_parts) > 1:
+            cv_base64 = cv_parts[1] 
+            
         combined_job_description = f"{job_description}\n\n{job_requirements}\n\n{requirement_qual}"
 
-        # Validate input
         if not combined_job_description or not cv_base64:
             return jsonify({"error": "Job description and CV are required"}), 400
 
         try:
-            # Decode the CV PDF and extract text
             user_cv_text = decode_pdf(cv_base64)
         except ValueError as e:
             return jsonify({"error": str(e)}), 400

@@ -36,6 +36,56 @@ def save_job():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+def fetch_user_cv(firestore_db, user_id):
+    cv_ref = firestore_db.collection(f'jobseekers/{user_id}/cv').document('cvFile')
+    cv_snap = cv_ref.get()
+
+    if not cv_snap.exists:
+        return None, {"error": "No CV found for the user", "debug": f"Checked path: jobseekers/{user_id}/cv/cvFile"}
+
+    cv_base64 = cv_snap.to_dict().get('fileData')
+    return cv_base64, None
+
+def process_cv_data(cv_base64):
+    cv_parts = cv_base64.split(',')
+    if len(cv_parts) > 1:
+        return cv_parts[1]  # Use the part after the comma
+    return cv_base64  # Use the entire string if no comma is found
+
+def compare_cv_with_job_description(job_description, job_requirements, required_qual, cv_data):
+    response = requests.post('http://127.0.0.1:5000/compare_with_description', json={
+        "JobDescription": job_description,
+        "JobRequirment": job_requirements,
+        "RequiredQual": required_qual,
+        "cv": cv_data,
+    })
+
+    similarity_score = response.json().get('cosine similarity', 0)
+    return round(similarity_score * 100, 2)
+
+def save_job_application(firestore_db, user_id, job, match_score):
+    job_id = job.get('id') or f"{job.get('Company')}-{job.get('Title')}".replace(" ", "-").lower()
+    job_ref = firestore_db.collection(f'jobseekers/{user_id}/appliedjobs').document(job_id)
+    job_ref.set({
+        **job,
+        "savedAt": datetime.now().isoformat(),
+        "matchScore": match_score,
+        "applicationstatus": "applied"
+    })
+    return job_id
+
+def update_recruiter_metadata(firestore_db, recruiter_id, job_id, user_id):
+    recruiter_job_ref = firestore_db.collection(f'recruiters/{recruiter_id}/jobposting/{job_id}/applicants').document(user_id)
+    recruiter_job_ref.set({
+        "userId": user_id,
+        "appliedAt": datetime.now().isoformat(),
+    })
+
+    recruiter_ref = firestore_db.collection(f'recruiters/{recruiter_id}').document('metadata')
+    recruiter_ref.update({
+        "applicantsnum": firestore.Increment(1)
+    })
+
 @seekeractions_bp.route('/apply-job', methods=['POST'])
 def apply_job():
     try:
@@ -49,55 +99,31 @@ def apply_job():
             return jsonify({"error": "User ID, job data, and recruiter ID are required"}), 400
 
         # Fetch the user's CV
-        cv_ref = firestore_db.collection(f'jobseekers/{user_id}/cv').document('cvFile')
-        cv_snap = cv_ref.get()
+        cv_base64, error = fetch_user_cv(firestore_db, user_id)
+        if error:
+            return jsonify(error), 404
 
-        if not cv_snap.exists:
-            return jsonify({
-        "error": "No CV found for the user",
-        "debug": f"Checked path: jobseekers/{user_id}/cv/cvFile"}), 404
+        # Process CV data
+        cv_data = process_cv_data(cv_base64)
 
-        cv_base64 = cv_snap.to_dict().get('fileData')
+        # Compare CV with job description
+        match_score = compare_cv_with_job_description(
+            job.get('JobDescription', ""),
+            job.get('JobRequirment', ""),
+            job.get('RequiredQual', ""),
+            cv_data
+        )
 
-         # Handle CV data splitting safely
-        cv_parts = cv_base64.split(',')
-        if len(cv_parts) > 1:
-            cv_data = cv_parts[1]  # Use the part after the comma
-        else:
-            cv_data = cv_base64 
+        # Save job application
+        job_id = save_job_application(firestore_db, user_id, job, match_score)
 
-        # Compare CV with job description (optional)
-        response = requests.post('http://127.0.0.1:5000/compare_with_description', json={
-            "JobDescription": job.get('JobDescription'),
-            "JobRequirment": job.get('JobRequirment', ""),
-            "RequiredQual": job.get('RequiredQual', ""),
-            "cv": cv_data,
-        })
+        # Update recruiter metadata
+        update_recruiter_metadata(firestore_db, recruiter_id, job_id, user_id)
 
-        similarity_score = response.json().get('cosine similarity', 0)
-        match_score = round(similarity_score * 100, 2)
-
-        job_id = job.get('id') or f"{job.get('Company')}-{job.get('Title')}".replace(" ", "-").lower()
-        job_ref = firestore_db.collection(f'jobseekers/{user_id}/appliedjobs').document(job_id)
-        job_ref.set({
-            **job,
-            "savedAt": datetime.now().isoformat(),
-            "matchScore": match_score,
-            "applicationstatus": "applied"
-        })
-
-        recruiter_job_ref = firestore_db.collection(f'recruiters/{recruiter_id}/jobposting/{job_id}'/'applicants').document(user_id)
-        recruiter_job_ref.set({
-            "userId": user_id,
-            "appliedAt": datetime.now().isoformat(),
-        })
-
-
-        recruiter_ref = firestore_db.collection(f'recruiters/{recruiter_id}/applicantsnum').document('metadata')
-        recruiter_ref.update({
-            "applicantsnum": firestore.Increment(1)
-        })
-
+        # Log paths for debugging
+        print('Job Ref Path:', f'jobseekers/{user_id}/appliedjobs/{job_id}')
+        print('Recruiter Job Ref Path:', f'recruiters/{recruiter_id}/jobposting/{job_id}/applicants/{user_id}')
+        print('Recruiter Ref Path:', f'recruiters/{recruiter_id}/metadata')
 
         return jsonify({"success": True, "message": "Job applied successfully", "matchScore": match_score}), 200
     except Exception as e:
