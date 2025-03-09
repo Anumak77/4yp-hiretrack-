@@ -1,20 +1,23 @@
-image: mcr.microsoft.com/playwright:v1.38.0-focal  # Official Playwright image
-
 stages:
   - test
 
-cache:
-  paths:
-    - node_modules/
-
-test:
+cypress-run:
+  image: cypress/included:14.1.0
   stage: test
   script:
     - npm install
-    - npx playwright install --with-deps
-    - npx playwright test  # Runs tests in headless mode
+    - npx cypress run --config-file cypress.config.js
   artifacts:
     when: always
     paths:
       - test-results/
-    expire_in: 1 day
+      - cypress/screenshots/
+      - cypress/videos/
+  only:
+    - main
+    - new-branch
+
+  cache:
+  paths:
+    - node_modules/
+
