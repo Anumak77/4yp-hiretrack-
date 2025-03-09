@@ -2,10 +2,13 @@ stages:
   - test
 
 cypress-run:
-  image: cypress/included:14.1.0
+  image:
+    name: cypress/included:14.1.0
+    entrypoint: [""]   # <-- Forces a blank entrypoint
   stage: test
   script:
-    - npx cypress run  
+    - npm ci
+    - npx cypress run
   only:
     - main
     - new-branch
