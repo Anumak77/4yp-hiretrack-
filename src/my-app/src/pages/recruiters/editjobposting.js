@@ -1,98 +1,66 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import '../../components/style.css';
 
-const EditJob = ({ jobPostings, setJobPostings }) => {
-  const { id } = useParams();
+const EditJob = () => {
   const navigate = useNavigate();
+  const { id } = useParams(); 
 
-  const jobToEdit = jobPostings.find((job) => job.id === parseInt(id));
-
-  const [editedJob, setEditedJob] = useState({
-    id: '',
-    title: '',
-    company: '',
-    location: '',
-    description: ''
-  });
-
-  useEffect(() => {
-    if (jobToEdit) {
-      setEditedJob(jobToEdit);
-    }
-  }, [jobToEdit]);
-
-  if (!jobToEdit) {
-    return <div>Job not found!</div>;
-  }
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setEditedJob((prev) => ({ ...prev, [name]: value }));
+  // fake job data (Just placeholders)
+  const fakeJob = {
+    title: "Test Job Title",
+    company: "Test Company",
+    location: "Test Location",
+    description: "This is a test description for the job.",
   };
 
+  const [jobData, setJobData] = useState(fakeJob);
+
+  const handleChange = (e) => {
+    setJobData({ ...jobData, [e.target.name]: e.target.value });
+  };
+
+  // (No backend, just logs the updated data)
   const handleSubmit = (e) => {
     e.preventDefault();
-    setJobPostings((prevPostings) =>
-      prevPostings.map((job) => (job.id === editedJob.id ? editedJob : job))
-    );
-    navigate('/viewjobpostings');
+    console.log("Updated Job Data:", jobData);
+    alert("Job updated successfully! (Mock Data)");
+    navigate('/viewjobpostings'); // Redirect back
   };
 
   return (
-    <main className="edit-job-container">
-      <h1 className="edit-job-title">Edit Job</h1>
-      <form onSubmit={handleSubmit} className="edit-job-form">
-        <div className="input-group">
-          <label>Job Title:</label>
-          <input
-            name="title"
-            value={editedJob.title}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="input-group">
-          <label>Company:</label>
-          <input
-            name="company"
-            value={editedJob.company}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="input-group">
-          <label>Location:</label>
-          <input
-            name="location"
-            value={editedJob.location}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="input-group">
-          <label>Description:</label>
-          <textarea
-            name="description"
-            value={editedJob.description}
-            onChange={handleChange}
-            required
-          />
-        </div>
+    <main>
+      <h1 className="post-job-title">Edit Job</h1>
+      <section className="post-job-container">
+        <section className="post-job-card">
+          <button type="button" className="back-button" onClick={() => navigate('/viewjobpostings')}>
+            Go Back
+          </button>
+          <form onSubmit={handleSubmit}>
+            <div className="input-group">
+              <label>Job Title</label>
+              <input type="text" name="title" value={jobData.title} onChange={handleChange} required />
+            </div>
 
-        <div className="button-container">
-          <button type="submit" className="save-button">
-            Save Changes
-          </button>
-          <button
-            type="button"
-            className="cancel-button"
-            onClick={() => navigate('/viewjobpostings')}
-          >
-            Cancel
-          </button>
-        </div>
-      </form>
+            <div className="input-group">
+              <label>Company</label>
+              <input type="text" name="company" value={jobData.company} onChange={handleChange} required />
+            </div>
+
+            <div className="input-group">
+              <label>Location</label>
+              <input type="text" name="location" value={jobData.location} onChange={handleChange} required />
+            </div>
+
+            <div className="input-group">
+              <label>Job Description</label>
+              <textarea name="description" value={jobData.description} onChange={handleChange} required></textarea>
+            </div>
+
+            <button type="submit" className="post-job-button">Update Job</button>
+          </form>
+        </section>
+      </section>
     </main>
   );
 };

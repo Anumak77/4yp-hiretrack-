@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import {getAuth} from 'firebase/auth'
 import '../../components/style.css';
+import { getFirestore, collection, addDoc } from "firebase/firestore";
+
 
 const countryOptions = [
   'United States',
@@ -20,7 +22,6 @@ const countryOptions = [
 const PostJob = () => {
   const navigate = useNavigate();
 
-  // Include all fields that you say are important:
   const [jobData, setJobData] = useState({
     AboutC: '',
     ApplicationP: '',
@@ -39,11 +40,11 @@ const PostJob = () => {
 
   const [alertMessage, setAlertMessage] = useState(null);
   const [alertType, setAlertType] = useState('error');
+  const [showConfirmation, setShowConfirmation] = useState(false);
 
   const showAlert = (message, type = 'error') => {
     setAlertMessage(message);
     setAlertType(type);
-    // Clear the alert after 3 seconds
     setTimeout(() => setAlertMessage(null), 3000);
   };
 
@@ -53,52 +54,42 @@ const PostJob = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    const missingFields = [];
+    setShowConfirmation(true);
+  };
 
-    Object.entries("").forEach(([key, value]) => {
-      if (typeof value === "string" && value.trim() === "") {
-        missingFields.push(key);
-      } else if (value === undefined || value === null) {
-        missingFields.push(key);
-      }
-    });
-    
-    if (missingFields.length > 0) {
-      console.log("Missing fields:", missingFields);
-      console.log("Form Data:", "");
-      showAlert(`Please fill out all fields: ${missingFields.join(", ")}`, 'error');
-
-      return;
-    }
-    
+  const confirmSubmission = async () => {
+    setShowConfirmation(false);
     try {
-      
       const user = getAuth().currentUser;
-      if (!user) throw new Error('User not authenticated');
-
-      const idToken = await user.getIdToken();
-      if (!idToken) throw new Error('Failed to get ID token');
-
-
-      const response = await axios.post('http://localhost:5000/create-job', jobData, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': idToken, 
-        },
-      });
-
-      if (response.data.success) {
-        showAlert('Job Posted Successfully!', 'success');
-        console.log('Job posted with ID:', response.data.jobId);
-    
-        navigate('/dashboard-recruiter');
-      } else {
-        throw new Error(response.data.error || "Failed to post job");
-      }
+      if (!user) throw new Error("User not authenticated");
+  
+      const db = getFirestore();
+      const newJob = {
+        AboutC: jobData.AboutC,
+        ApplicationP: jobData.ApplicationP,
+        Company: jobData.Company,
+        Deadline: jobData.Deadline,
+        JobDescription: jobData.JobDescription,
+        JobRequirment: jobData.JobRequirment,
+        Location: jobData.Location,
+        OpeningDate: jobData.OpeningDate,
+        RequiredQual: jobData.RequiredQual,
+        StartDate: jobData.StartDate,
+        Title: jobData.Title,
+        date: new Date().toISOString(),
+        jobpost: user.uid, 
+      };
+  
+      console.log("Posting job data to Firestore:", newJob);
+  
+      // adds job posting directly to Firestore
+      await addDoc(collection(db, "jobposting"), newJob);
+  
+      showAlert("Job Posted Successfully!", "success");
+      navigate("/dashboard-recruiter");
     } catch (error) {
-      console.error('Error posting job:', error);
-      showAlert(error.message || 'An error occurred while posting the job.', 'error');
+      console.error("Error posting job:", error.message);
+      showAlert(error.message || "An error occurred while posting the job.", "error");
     }
   };
 
@@ -109,7 +100,6 @@ const PostJob = () => {
 
       <section className='post-job-container'>
         <section className='post-job-card'>
-          {/* Alert box (error or success) */}
           {alertMessage && <div className={`alert-box ${alertType}`}>{alertMessage}</div>}
 
           <button
@@ -237,6 +227,19 @@ const PostJob = () => {
           </form>
         </section>
       </section>
+
+      {showConfirmation && (
+        <div className='confirmation-modal'>
+          <div className='confirmation-content'>
+            <h2>Confirm Job Posting</h2>
+            <p>Are you sure you want to submit this job?</p>
+            <div className='confirmation-buttons'>
+              <button className='confirm-button' onClick={confirmSubmission}>Confirm</button>
+              <button className='cancel-button' onClick={() => setShowConfirmation(false)}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 };
