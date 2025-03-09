@@ -7,7 +7,7 @@ cypress-run:
     entrypoint: [""]   # <-- Forces a blank entrypoint
   stage: test
   script:
-    - npm ci
+    - npm install
     - npx cypress run
   only:
     - main
