@@ -13,8 +13,8 @@ import NavbarJobseeker from './pages/jobseekers/NavbarJobseeker';
 import NavbarRecruiters from './pages/recruiters/NavbarRecruiters';
 import NavbarAdmin from './pages/admin/navbar-admin';
 
-import Login from './pages/SignUp/Login';
-import Signup from './pages/SignUp/Signup';
+import Login from './pages/auth/Login';
+import Signup from './pages/auth/Signup';
 import JobDetails from './pages/jobseekers/job-details';
 import JobSearch from './pages/jobseekers/JobSearch';
 import DashJobseeker from './pages/jobseekers/dashboard-jobseeker';
