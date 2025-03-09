@@ -6,7 +6,7 @@ cypress-run:
   stage: test
   script:
     - npm install
-    - npx cypress run --config-file=cypress.config.js
+    - npx cypress run
   artifacts:
     when: always
     paths:
@@ -16,6 +16,4 @@ cypress-run:
   only:
     - main
     - new-branch
-  cache:
-    paths:
-      - node_modules/
+
