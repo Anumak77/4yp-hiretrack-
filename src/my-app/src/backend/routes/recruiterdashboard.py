@@ -103,3 +103,24 @@ def delete_job(job_id):
         return jsonify({"error": str(e)}), 500
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@recruiterdash_bp.route('/numjobpostings', methods=['GET'])
+def num_jobpostings():
+    try:
+        recruiter_id = request.args.get('recruiter_id')
+        if not recruiter_id:
+            return jsonify({"error": "recruiter_id is required"}), 400
+        
+        job_postings_ref = firestore_db.collection(f'recruiters/{recruiter_id}/jobposting')
+
+        
+        job_postings_count = len(list(job_postings_ref.stream()))
+
+        return jsonify({
+            "success": True,
+            "recruiter_id": recruiter_id,
+            "num_jobpostings": job_postings_count
+        }), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

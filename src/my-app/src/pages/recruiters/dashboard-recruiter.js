@@ -12,27 +12,52 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
 const DashRecruiter = () => {
   const [userRole, setUserRole] = useState(localStorage.getItem('userRole') || null);
+  const [numJobPostings, setNumJobPostings] = useState(0)
   useEffect(() => {
     const auth = getAuth();
     auth.onAuthStateChanged((user) => {
       if (user) {
         const storedRole = localStorage.getItem('userRole');
         setUserRole(storedRole);
+
+        fetchNumJobPostings(user.uid);
       }
     });
   }, []);
 
   const navigate = useNavigate();
 
+
+  const fetchNumJobPostings = async (recruiterId) => {
+    try {
+      const idToken = await getAuth().currentUser.getIdToken(); 
+      const response = await fetch(`http://localhost:5000/numjobpostings?recruiter_id=${recruiterId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': idToken, 
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch number of job postings');
+      }
+
+      const data = await response.json();
+      setNumJobPostings(data.num_jobpostings); 
+    } catch (error) {
+      console.error('Error fetching number of job postings:', error);
+    }
+  };
+
+  const totalApplications = 5;
+  const avgViewsPerJob = 7;
+
   const jobPostings = [
     { id: 1, title: 'Software Engineer', views: 150, applications: 25 },
     { id: 2, title: 'Product Manager', views: 90, applications: 10 },
     { id: 3, title: 'Data Analyst', views: 120, applications: 18 },
   ];
-
-  const totalJobs = jobPostings.length;
-  const totalApplications = jobPostings.reduce((acc, job) => acc + job.applications, 0);
-  const avgViewsPerJob = (jobPostings.reduce((acc, job) => acc + job.views, 0) / totalJobs).toFixed(2);
 
   const chartData = {
     labels: jobPostings.map((job) => job.title),
@@ -95,7 +120,7 @@ logIdToken();
           <h2>Job Postings Overview</h2>
 
           <div className="recruiter-insights-panel">
-            <div className="recruiter-insight-card">Total Job Postings: {totalJobs}</div>
+            <div className="recruiter-insight-card">Total Job Postings: {numJobPostings}</div>
             <div className="recruiter-insight-card">Total Applications: {totalApplications}</div>
             <div className="recruiter-insight-card">Avg. Views per Job: {avgViewsPerJob}</div>
           </div>
