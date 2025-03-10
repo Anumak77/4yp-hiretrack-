@@ -1953,3 +1953,575 @@ body {
 .jobtracker-status-button:hover {
   background-color: #e6e6e6;
 }
+
+/* ✅ Job Postings Page Styles */
+.view-job-container {
+  background-color: #ffffff; /* White background */
+  color: #0b3d2e; /* Dark green text */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px;
+}
+
+/* Page Header */
+.view-job-header {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 20px;
+}
+
+/* Back Button */
+.back-button-viewjob-back {
+  background-color: #1f3a52; /* Deep Navy Blue */
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s ease-in-out;
+  margin-top: 30px;
+}
+
+.back-button-viewjob-back:hover {
+  background-color: #172a3d; /* Darker Navy */
+}
+
+/* Job Postings Title */
+.view-job-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #0b3d2e;
+  margin-top: 50px;
+}
+
+/* Job List */
+.job-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  max-width: 800px;
+}
+
+/* Individual Job Card */
+.job-card {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+/* Job Card Header */
+.job-card-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+/* Job Card Title */
+.job-card-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #0b3d2e;
+  margin-bottom: 5px;
+}
+
+/* Job Card Company */
+.job-card-company {
+  font-size: 14px;
+  font-weight: bold;
+  color: #3e5f48; /* Olive Green */
+}
+
+/* Job Description */
+.job-card-description {
+  font-size: 14px;
+  color: #555;
+  margin: 10px 0;
+}
+
+/* Job Card Actions */
+.job-card-actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* ✅ View Applicants Button */
+.view-applicants-button {
+  background-color: #1f3a52; /* Deep Navy Blue */
+  color: white;
+  padding: 8px;
+  font-size: 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s ease-in-out, transform 0.1s ease-in-out;
+  flex: 1;
+}
+
+.view-applicants-button:hover {
+  background-color: #172a3d;
+  transform: scale(1.05);
+}
+
+/* ✅ Delete Button */
+.delete-button {
+  background-color: #d9534f; /* Red */
+  color: white;
+  padding: 8px;
+  font-size: 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s ease-in-out, transform 0.1s ease-in-out;
+  flex: 1;
+}
+
+.delete-button:hover {
+  background-color: #c9302c; /* Darker Red */
+  transform: scale(1.05);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .view-job-container {
+    padding: 20px;
+  }
+
+  .job-list {
+    width: 100%;
+  }
+
+  .job-card-actions {
+    flex-direction: column;
+  }
+
+  .view-applicants-button, .delete-button {
+    width: 100%;
+  }
+}
+
+.view-applicants-container {
+  background-color: #ffffff;
+  color: #0b3d2e;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px;
+}
+
+.view-applicants-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.applicant-list {
+  width: 100%;
+  max-width: 800px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.applicant-card {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.applicant-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.interview-button {
+  background-color: #1f3a52;
+  color: white;
+  padding: 8px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.reject-button {
+  background-color: #b22222;
+  color: white;
+  padding: 8px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.chat-button {
+  background-color: #0b3d2e;
+  color: white;
+  padding: 8px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* Unique styles for View Applicants page */
+.view-applicants-container {
+  max-width: 90%;
+  margin: 40px auto;
+  padding: 20px;
+  text-align: center;
+}
+
+.view-applicants-title {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #2c3e50;
+  margin-bottom: 20px;
+}
+
+/* Grid Layout for Applicants */
+.applicant-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  justify-items: center;
+}
+
+.applicant-card {
+  background: #ffffff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  padding: 20px;
+  width: 300px;
+  transition: transform 0.3s ease-in-out;
+}
+
+.applicant-card:hover {
+  transform: translateY(-5px);
+}
+
+.applicant-name {
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.applicant-email,
+.applicant-location,
+.applicant-phone {
+  font-size: 1rem;
+  color: #555;
+  margin: 5px 0;
+}
+
+/* Actions Container */
+.applicant-actions {
+  margin-top: 15px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+/* Buttons */
+.interview-button,
+.reject-button,
+.chat-button,
+.match-score-button {
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s;
+  width: 48%;
+}
+
+/* Custom Colors */
+.interview-button {
+background-color: #0b3d2e;
+color: white;
+}
+
+.reject-button {
+background-color: #1f3a52;
+color: white;
+}
+
+.chat-button {
+background-color: #3e5f48;
+color: white;
+}
+
+.match-score-button {
+background-color: #ad4450;
+color: white;
+}
+
+/* Hover Effects */
+.interview-button:hover {
+background-color: #05231a;
+}
+
+.reject-button:hover {
+background-color: #52291f;
+}
+
+.chat-button:hover {
+background-color: #36433a;
+}
+
+.match-score-button:hover {
+background-color: #912d3a;
+}
+
+/* No Applicants Message */
+.no-applicants {
+  font-size: 1.2rem;
+  color: #777;
+}
+
+/* Back Button */
+.back-button-view {
+background-color: #34495e;
+color: white;
+padding: 10px 15px;
+border-radius: 8px;
+cursor: pointer;
+margin-bottom: 20px;
+border: none;
+margin-right: 75%;
+margin-top: 5%;
+font-weight: bold;
+font-size: 14px;
+}
+
+.back-button-view:hover {
+background-color: #2c3e50;
+}
+
+/* Confirmation Modal */
+.confirmation-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  padding: 20px;
+  z-index: 1000;
+  text-align: center;
+}
+
+/* Modal Overlay */
+.confirmation-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+/* Confirmation Content */
+.confirmation-content {
+  padding: 20px;
+}
+
+.confirmation-content h2 {
+  font-size: 20px;
+  font-weight: bold;
+  color: #1f3a52;
+  margin-bottom: 10px;
+}
+
+.confirmation-content p {
+  font-size: 16px;
+  color: #555;
+  margin-bottom: 20px;
+}
+
+/* Confirmation Buttons */
+.confirmation-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.confirm-button {
+  padding: 10px 15px;
+  background-color: #0b3d2e; /* Dark Green */
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s ease-in-out, transform 0.1s ease-in-out;
+}
+
+.confirm-button:hover {
+  background-color: #08522c;
+  transform: scale(1.05);
+}
+
+.cancel-button {
+  padding: 10px 15px;
+  background-color: #b22222; /* Dark Red */
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s ease-in-out, transform 0.1s ease-in-out;
+}
+
+.cancel-button:hover {
+  background-color: #8b0000;
+  transform: scale(1.05);
+}
+
+/* Edit Button */
+.edit-button {
+  background-color: #0b3d2e; 
+  color: #ffffff;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s ease-in-out;
+}
+
+.edit-button:hover {
+  background-color: #115e47; 
+}
+
+
+.visibility-button {
+  margin-right: 2%;
+  margin-bottom: 2%;
+}
+
+.visibility-button.selected {
+  background-color: #122c24; 
+  transform: scale(1.05);
+}
+
+.status-filter {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.filter-button {
+  padding: 8px 16px;
+  border: none;
+  cursor: pointer;
+  background-color: #ddd;
+  color: black;
+  border-radius: 5px;
+  transition: 0.2s;
+  margin-bottom: 15%;
+}
+
+.filter-button.selected {
+  background-color: #2c3e50;
+  color: white;
+  font-weight: bold;
+}
+
+.filter-button:hover {
+  background-color: #1d2a38;
+  color: white;
+}
+
+/* Tags UI */
+.applicant-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+  align-items: center;
+}
+
+.applicant-tag {
+  background-color: #3a9765;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 15px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+}
+
+.remove-tag {
+  margin-left: 6px;
+  cursor: pointer;
+  color: white;
+  font-weight: bold;
+}
+
+.remove-tag:hover {
+  color: rgb(164, 10, 10);
+}
+
+.tag-input {
+  border: 1px solid #ccc;
+  padding: 6px 8px;
+  border-radius: 5px;
+  font-size: 12px;
+  outline: none;
+}
+
+/* Job Posting Tags UI */
+.job-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+  align-items: center;
+  margin-bottom: 1.5%;
+}
+
+.job-tag {
+  background-color: #2ba373;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 15px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+}
+
+.remove-tag {
+  margin-left: 6px;
+  cursor: pointer;
+  color: white;
+  font-weight: bold;
+}
+
+.remove-tag:hover {
+  color: red;
+}
+
+.tag-input {
+  border: 1px solid #ccc;
+  padding: 6px 8px;
+  border-radius: 5px;
+  font-size: 12px;
+  outline: none;
+}
+

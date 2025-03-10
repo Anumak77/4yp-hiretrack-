@@ -19,6 +19,7 @@ from routes.seekeractions import seekeractions_bp
 from routes.recruiterdashboard import recruiterdash_bp
 from routes.recruitersearch import recruitersearch_bp
 from routes.edit_job import edit_job_bp
+from routes.viewapplicants import viewapplicants_bp
 
 app = Flask(__name__)
 CORS(app)
@@ -30,6 +31,7 @@ app.register_blueprint(seekeractions_bp)
 app.register_blueprint(recruiterdash_bp)
 app.register_blueprint(recruitersearch_bp)
 app.register_blueprint(edit_job_bp)
+app.register_blueprint(viewapplicants_bp)
 
 
 FIREBASE_DATABASE_URL = "https://hiretrack-7b035-default-rtdb.europe-west1.firebasedatabase.app/"

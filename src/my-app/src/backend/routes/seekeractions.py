@@ -93,6 +93,19 @@ def update_recruiter_metadata(firestore_db, recruiter_id, job_id, user_id, match
     recruiter_ref.update({
         "applicantsnum": firestore.Increment(1)
     })
+    
+    job_ref = firestore_db.collection(f'recruiters/{recruiter_id}/jobposting').document(job_id)
+    job_doc = job_ref.get()
+
+    if not job_doc.exists:
+        job_ref.set({
+            "applicantsnum": 1
+        })
+    else:
+        job_ref.update({
+            "applicantsnum": firestore.Increment(1)
+        })
+
 
 @seekeractions_bp.route('/apply-job', methods=['POST'])
 def apply_job():
@@ -105,6 +118,14 @@ def apply_job():
 
         if not user_id or not job or not recruiter_id:
             return jsonify({"error": "User ID, job data, and recruiter ID are required"}), 400
+        
+        job_id = job.get('id') or f"{job.get('Company')}-{job.get('Title')}".replace(" ", "-").lower()
+        
+        applicant_ref = firestore_db.collection(f'recruiters/{recruiter_id}/jobposting/{job_id}/applicants').document(user_id)
+        applicant_doc = applicant_ref.get()
+        
+        if applicant_doc.exists:
+            return jsonify({"error": "User has already applied for this job"}), 200
 
         # Fetch the users CV
         cv_base64, error = fetch_user_cv(firestore_db, user_id)

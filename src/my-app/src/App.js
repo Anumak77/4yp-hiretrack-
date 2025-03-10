@@ -27,6 +27,7 @@ import JobSeekerChat from './pages/chat/jobseekerchat';
 import PostJob from './pages/recruiters/postjob';
 import EditJob from './pages/recruiters/edit-job';
 import ViewJobPostings from './pages/recruiters/viewjob-postings';
+import ViewApplicants from './pages/recruiters/ViewApplicants';
 
 function App() {
   return (
@@ -107,6 +108,7 @@ function MainApp() {
         <Route path="/createpost" element={<PostJob />} />
         <Route path="/viewjobpostings" element={<ViewJobPostings jobPostings={jobPostings} setJobPostings={setJobPostings} />} />
         <Route path="/edit-job/:id" element={<EditJob />} />
+        <Route path="/viewapplicants" element={<ViewApplicants />} />
         <Route path="*" element={<h1>404 - Page Not Found</h1>} />
       </Routes>
     </>

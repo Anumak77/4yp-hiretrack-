@@ -85,26 +85,112 @@ const ViewJobPostings = () => {
     }
   };
 
+
+  const handleTagInput = async (id, event) => {
+    if (event.key === "Enter" && event.target.value.trim()) {
+        const newTag = event.target.value.trim();
+
+        try {
+            const idToken = await getAuth().currentUser.getIdToken();
+            const response = await fetch('http://localhost:5000/add-tag', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': idToken,
+                },
+                body: JSON.stringify({
+                    job_id: id,
+                    tag: newTag,
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to add tag');
+            }
+
+            const data = await response.json();
+            setJobPostings(prev => prev.map(job => job.id === id ? { ...job, tags: data.tags } : job));
+            event.target.value = "";
+        } catch (error) {
+            console.error('Error adding tag:', error);
+        }
+    }
+};
+
+const handleRemoveTag = async (id, tagToRemove) => {
+  try {
+      const idToken = await getAuth().currentUser.getIdToken();
+      const response = await fetch('http://localhost:5000/remove-tag', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+              'Authorization': idToken,
+          },
+          body: JSON.stringify({
+              job_id: id,
+              tag: tagToRemove,
+          }),
+      });
+
+      if (!response.ok) {
+          throw new Error('Failed to remove tag');
+      }
+
+      const data = await response.json();
+      setJobPostings(prev => prev.map(job => job.id === id ? { ...job, tags: data.tags } : job));
+  } catch (error) {
+      console.error('Error removing tag:', error);
+  }
+};
+
+
+
   return (
     <main className="view-job-container">
       <div className="view-job-header">
-        <button type="button" className="back-button-jobposting" onClick={() => navigate('/dashboard-recruiter')}>Go Back</button>
+        <button className="back-button-viewjob-back" onClick={() => navigate("/dashboard-recruiter")}>
+          Go Back
+        </button>
       </div>
       <h1 className="view-job-title">Job Postings</h1>
+
       <section className="job-list">
-        {jobPostings.map((job) => (
-          <div key={job.id} className="job-card">
-            <button className="delete-button" onClick={() => handleDelete(job.id)}>Delete</button>
-            <div className="job-card-header">
-              <h2 className="job-card-title">{job.Title}</h2>
-              <p className="job-card-company">{job.AboutC} - {job.Location}</p>
+        {jobPostings.length > 0 ? (
+          jobPostings.map((job) => (
+            <div key={job.id} className="job-card">
+              <div className="job-card-header">
+                <h2 className="job-card-title">{job.Title}</h2>
+                <p className="job-card-company">{job.Company} - {job.Location}</p>
+              </div>
+              <p className="job-card-description">{job.Description}</p>
+
+
+
+              <div className="job-tags">
+                {job.tags && job.tags.map((tag, index) => (
+                  <span key={index} className="job-tag">
+                    {tag} <span className="remove-tag" onClick={() => handleRemoveTag(job.id, tag)}>❌</span>
+                  </span>
+                ))}
+                <input type="text" placeholder="Add a tag..." className="tag-input" onKeyDown={(e) => handleTagInput(job.id, e)} />
+              </div>
+
+              <div className="job-card-actions">
+                <button className="view-applicants-button" onClick={() => navigate(`/viewapplicants`)}>
+                  View Applicants
+                </button>
+                <button className="edit-button" onClick={() => handleEdit(job.id)}>
+                  Edit
+                </button>
+                <button className="delete-button" onClick={() => handleDelete(job.id)}>
+                  Delete
+                </button>
+              </div>
             </div>
-            <p className="job-card-description">{job.JobDescription}</p>
-            <div className="job-card-actions">
-              <button className="action-button" onClick={() => handleEdit(job.id)}>Edit</button>
-            </div>
-          </div>
-        ))}
+          ))
+        ) : (
+          <p>No job postings found.</p>
+        )}
       </section>
     </main>
   );

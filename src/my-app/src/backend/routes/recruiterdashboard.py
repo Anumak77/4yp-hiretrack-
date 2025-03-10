@@ -124,3 +124,30 @@ def num_jobpostings():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@recruiterdash_bp.route('/numapplicants', methods=['GET'])
+def num_applicants():
+    try:
+        recruiter_id = request.args.get('recruiter_id')
+        if not recruiter_id:
+            return jsonify({"error": "recruiter_id is required"}), 400
+        
+        # Correct Firestore path
+        doc_ref = firestore_db.collection(f'recruiters/{recruiter_id}/metadata').document('applicantsnum')
+        doc = doc_ref.get()
+
+        if doc.exists:
+            total_applicants = doc.to_dict().get('applicantsnum', 0)
+        else:
+            total_applicants = 0
+
+        return jsonify({
+            "success": True,
+            "recruiter_id": recruiter_id,
+            "total_applicants": total_applicants
+        }), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+

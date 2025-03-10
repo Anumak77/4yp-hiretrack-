@@ -13,6 +13,7 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 const DashRecruiter = () => {
   const [userRole, setUserRole] = useState(localStorage.getItem('userRole') || null);
   const [numJobPostings, setNumJobPostings] = useState(0)
+  const [numApplicants, setnumApplicants] = useState(0)
   useEffect(() => {
     const auth = getAuth();
     auth.onAuthStateChanged((user) => {
@@ -21,6 +22,7 @@ const DashRecruiter = () => {
         setUserRole(storedRole);
 
         fetchNumJobPostings(user.uid);
+        fetchTotalApplicants(user.uid);
       }
     });
   }, []);
@@ -50,30 +52,106 @@ const DashRecruiter = () => {
     }
   };
 
-  const totalApplications = 5;
-  const avgViewsPerJob = 7;
+  const fetchTotalApplicants = async (recruiterId) => {
+    try {
+      const idToken = await getAuth().currentUser.getIdToken(); 
+      const response = await fetch(`http://localhost:5000/numapplicants?recruiter_id=${recruiterId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': idToken, 
+        },
+      });
 
-  const jobPostings = [
-    { id: 1, title: 'Software Engineer', views: 150, applications: 25 },
-    { id: 2, title: 'Product Manager', views: 90, applications: 10 },
-    { id: 3, title: 'Data Analyst', views: 120, applications: 18 },
-  ];
+      if (!response.ok) {
+        throw new Error('Failed to fetch number of applicants');
+      }
 
-  const chartData = {
-    labels: jobPostings.map((job) => job.title),
+      const data = await response.json();
+      console.log("Total Applicants:", data.total_applicants);
+      setnumApplicants(data.total_applicants); 
+    } catch (error) {
+      console.error('Error fetching number applicnnta:', error);
+    }
+  };
+
+  
+  const avgViewsPerJob = 7; //placeholder
+
+  const [chartData, setChartData] = useState({
+    labels: [],
     datasets: [
-        {
-            label: 'Applications',
-            data: jobPostings.map((job) => job.applications),
-            backgroundColor: '#1f3a52', // Dark Green
-        },
-        {
-            label: 'Views',
-            data: jobPostings.map((job) => job.views),
-            backgroundColor: '#3F7D5D', 
-        },
+      {
+        label: 'Applications',
+        data: [],
+        backgroundColor: '#1f3a52', // Dark Green
+      },
+      {
+        label: 'Views',
+        data: [],
+        backgroundColor: '#3F7D5D',
+      },
     ],
-};
+  });
+
+  useEffect(() => {
+    const fetchJobPostings = async () => {
+      const auth = getAuth();
+      const user = auth.currentUser;
+  
+      if (!user) {
+        console.error('User not authenticated');
+        return;
+      }
+  
+      try {
+        const idToken = await user.getIdToken();
+  
+        const response = await fetch('http://localhost:5000/fetch-jobs', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': idToken,
+          },
+        });
+  
+        if (!response.ok) {
+          throw new Error('Failed to fetch job postings');
+        }
+  
+        const jobs = await response.json();
+        console.log("Fetched Jobs:", jobs); // Log the fetched data
+  
+        if (jobs.length === 0) {
+          console.log("No job postings found");
+          return;
+        }
+  
+        const newChartData = {
+          labels: jobs.map((job) => job.Title),
+          datasets: [
+            {
+              label: 'Applications',
+              data: jobs.map((job) => job.applicantnum || 0),
+              backgroundColor: '#1f3a52', // Dark Green
+            },
+            {
+              label: 'Views',
+              data: jobs.map((job) => job.views || 0),
+              backgroundColor: '#3F7D5D',
+            },
+          ],
+        };
+  
+        console.log("Chart Data:", newChartData); // Log the chart data
+        setChartData(newChartData);
+      } catch (error) {
+        console.error('Error fetching job postings:', error);
+      }
+    };
+  
+    fetchJobPostings();
+  }, []);
 
 const logIdToken = async () => {
   try {
@@ -121,7 +199,7 @@ logIdToken();
 
           <div className="recruiter-insights-panel">
             <div className="recruiter-insight-card">Total Job Postings: {numJobPostings}</div>
-            <div className="recruiter-insight-card">Total Applications: {totalApplications}</div>
+            <div className="recruiter-insight-card">Total Applications: {numApplicants}</div>
             <div className="recruiter-insight-card">Avg. Views per Job: {avgViewsPerJob}</div>
           </div>
 
