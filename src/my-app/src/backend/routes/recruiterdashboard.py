@@ -133,7 +133,7 @@ def num_applicants():
             return jsonify({"error": "recruiter_id is required"}), 400
         
         # Correct Firestore path
-        doc_ref = firestore_db.collection(f'recruiters/{recruiter_id}/metadata').document('applicantsnum')
+        doc_ref = firestore_db.collection(f'recruiters/{recruiter_id}/applicantsum').document('metadata')
         doc = doc_ref.get()
 
         if doc.exists:
