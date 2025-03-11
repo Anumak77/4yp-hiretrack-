@@ -6,7 +6,7 @@ import NavbarAdmin from '../admin/navbar-admin';
 import { useNavigate } from 'react-router-dom';
 import '../../components/style.css';
 import { Bar } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, scales } from 'chart.js';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -94,6 +94,18 @@ const DashRecruiter = () => {
     ],
   });
 
+  const chartOptions = {
+    scales: {
+      y: {
+        min: 0,
+        max: 30,
+        ticks: {
+          stepSize: 1
+        }
+      }
+    }
+  }
+
   useEffect(() => {
     const fetchJobPostings = async () => {
       const auth = getAuth();
@@ -132,7 +144,7 @@ const DashRecruiter = () => {
           datasets: [
             {
               label: 'Applications',
-              data: jobs.map((job) => job.applicantnum || 0),
+              data: jobs.map((job) => job.applicantsnum || 0),
               backgroundColor: '#1f3a52', // Dark Green
             },
             {
@@ -205,7 +217,7 @@ logIdToken();
 
           <div className="recruiter-chart-container">
             <h3>Job Postings Stats</h3>
-            <Bar data={chartData} />
+            <Bar data={chartData} options={chartOptions}/>
           </div>
         </section>
       </div>
