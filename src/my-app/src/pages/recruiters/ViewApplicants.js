@@ -1,18 +1,55 @@
-import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { getAuth } from "firebase/auth";
 import "../../components/style.css";
 
 const ViewApplicants = () => {
     const { id: jobId } = useParams(); 
+    console.log("Job ID from URL:", jobId);
     const navigate = useNavigate();
-
-    const mockApplicants = [
-        { id: "1", first_name: "Test", last_name: "Applicant", email: "test@example.com", location: "Test City", phone_number: "123-456-7890", status: "Pending", tags: [] },
-        { id: "2", first_name: "John", last_name: "Doe", email: "johndoe@example.com", location: "Somewhere, Earth", phone_number: "987-654-3210", status: "Shortlisted", tags: [] },
-    ];
-
-    const [applicants, setApplicants] = useState(mockApplicants);
+    const [applicants, setApplicants] = useState([]);
     const [filter, setFilter] = useState("All");
+    const [loading, setLoading] = useState(true); 
+    const [error, setError] = useState(null); 
+
+    useEffect(() => {
+        const fetchApplicants = async () => {
+            try {
+                const auth = getAuth();
+                const user = auth.currentUser;
+
+                if (!user) {
+                    throw new Error("User not authenticated");
+                }
+
+                const idToken = await user.getIdToken();
+                console.log("job id" + jobId)
+
+                const response = await fetch(`http://localhost:5000/fetch-applicants/${user.uid}/${jobId}`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": idToken,
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error("Failed to fetch applicants");
+                }
+
+                const data = await response.json();
+                console.log("Fetched Data:", data);
+                setApplicants(data.applicants);
+            } catch (error) {
+                console.error("Error fetching applicants:", error);
+                setError(error.message); 
+            } finally {
+                setLoading(false); 
+            }
+        };
+
+        fetchApplicants();
+    }, [jobId]);
 
     const handleStatusChange = (applicantId, newStatus) => {
         setApplicants(prevApplicants =>

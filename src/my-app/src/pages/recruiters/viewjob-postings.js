@@ -176,7 +176,7 @@ const handleRemoveTag = async (id, tagToRemove) => {
               </div>
 
               <div className="job-card-actions">
-                <button className="view-applicants-button" onClick={() => navigate(`/viewapplicants`)}>
+                <button className="view-applicants-button" onClick={() => navigate(`/view-applicants/${job.id}`)}>
                   View Applicants
                 </button>
                 <button className="edit-button" onClick={() => handleEdit(job.id)}>

@@ -108,7 +108,7 @@ function MainApp() {
         <Route path="/createpost" element={<PostJob />} />
         <Route path="/viewjobpostings" element={<ViewJobPostings jobPostings={jobPostings} setJobPostings={setJobPostings} />} />
         <Route path="/edit-job/:id" element={<EditJob />} />
-        <Route path="/viewapplicants" element={<ViewApplicants />} />
+        <Route path="/view-applicants/:id" element={<ViewApplicants />} />
         <Route path="*" element={<h1>404 - Page Not Found</h1>} />
       </Routes>
     </>
