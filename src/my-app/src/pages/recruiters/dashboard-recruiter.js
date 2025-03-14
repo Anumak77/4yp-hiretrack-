@@ -202,6 +202,9 @@ logIdToken();
     <button onClick={() => navigate('/jobseekerchat')} className="recruiter-action-button inbox-button">
         Inbox
     </button>
+    <button onClick={() => navigate('/login')} className="recruiter-action-button post-job-button">
+          Logout
+    </button>
 </aside>
 
 

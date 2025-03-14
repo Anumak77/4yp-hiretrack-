@@ -13,8 +13,8 @@ import NavbarJobseeker from './pages/jobseekers/NavbarJobseeker';
 import NavbarRecruiters from './pages/recruiters/NavbarRecruiters';
 import NavbarAdmin from './pages/admin/navbar-admin';
 
-import Login from './pages/SignUp/Login';
-import Signup from './pages/SignUp/Signup';
+import Login from './pages/auth/Login';
+import Signup from './pages/auth/Signup';
 import JobDetails from './pages/jobseekers/job-details';
 import JobSearch from './pages/jobseekers/JobSearch';
 import DashJobseeker from './pages/jobseekers/dashboard-jobseeker';
@@ -25,7 +25,11 @@ import RecruiterSearch from './pages/recruiters/RecruiterSearch';
 import JobSeekerDetails from './pages/recruiters/jobseeker-details';
 import JobSeekerChat from './pages/chat/jobseekerchat';
 import PostJob from './pages/recruiters/postjob';
-import EditJob from './pages/recruiters/edit-job';
+import EditJob from './pages/recruiters/editjobposting';
+
+import ViewApplicants from './pages/recruiters/ViewApplicants';
+
+
 import ViewJobPostings from './pages/recruiters/viewjob-postings';
 import ViewApplicants from './pages/recruiters/ViewApplicants';
 
@@ -107,8 +111,8 @@ function MainApp() {
         <Route path="/jobseekerchat" element={<JobSeekerChat />} />
         <Route path="/createpost" element={<PostJob />} />
         <Route path="/viewjobpostings" element={<ViewJobPostings jobPostings={jobPostings} setJobPostings={setJobPostings} />} />
-        <Route path="/edit-job/:id" element={<EditJob />} />
-        <Route path="/view-applicants/:id" element={<ViewApplicants />} />
+        <Route path="/editjobpostings/:id" element={<EditJob />} />
+        <Route path="/viewapplicants" element={<ViewApplicants />} />
         <Route path="*" element={<h1>404 - Page Not Found</h1>} />
       </Routes>
     </>
