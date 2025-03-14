@@ -8,35 +8,14 @@ const ViewJobPostings = () => {
   const navigate = useNavigate();
   const [jobPostings, setJobPostings] = useState([]);
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   const db = getFirestore();
   const auth = getAuth();
 
-  useEffect(() => {
-    const unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser) => {
-      setUser(firebaseUser ? firebaseUser : null);
-    });
 
-    return () => unsubscribeAuth();
-  }, []);
-
-  useEffect(() => {
-    if (!user) return;
-
-    const unsubscribe = onSnapshot(collection(db, "jobposting"), (snapshot) => {
-      const jobs = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      setJobPostings(jobs);
-    });
-
-    return () => unsubscribe();
-  }, [user]);
-
-  const handleEdit = (id) => {
-    navigate(`/editjobpostings/${id}`);
-  };
-
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this job posting?")) return;
-
+  const fetchJobPostings = async () => {
     try {
       const user = getAuth().currentUser;
       if (!user) throw new Error('User not authenticated');
@@ -46,8 +25,8 @@ const ViewJobPostings = () => {
       if (!idToken) throw new Error('Failed to get ID token');
   
       
-      const response = await fetch(`http://localhost:5000/delete-job/${id}`, {
-        method: 'DELETE',
+      const response = await fetch('http://localhost:5000//fetch-jobs', {
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': idToken, 
@@ -56,108 +35,124 @@ const ViewJobPostings = () => {
   
       
       if (!response.ok) {
-        throw new Error('Failed to delete job');
+        throw new Error('Failed to fetch jobs');
       }
   
       
-      setJobPostings(jobPostings.filter(job => job.id !== id));
-      console.log(`Deleted job posting with ID: ${id}`);
+      const jobs = await response.json();
+      setJobPostings(jobs);
+      setLoading(false);
     } catch (error) {
-      alert("Error deleting job. Please try again.");
+      console.error('Error fetching job postings:', error);
+      setError(error.message);
+      setLoading(false);
     }
   };
+  useEffect(() => {
+    fetchJobPostings();
+  }, []);
 
-
-
-
-  const handleTagInput = async (id, event) => {
-    if (event.key === "Enter" && event.target.value.trim()) {
-      const newTag = event.target.value.trim();
-      const jobRef = doc(db, "jobposting", id);
-      const job = jobPostings.find(job => job.id === id);
-      const updatedTags = [...(job.tags || []), newTag];
-
-      await updateDoc(jobRef, { tags: updatedTags });
-      setJobPostings(prev => prev.map(job => job.id === id ? { ...job, tags: updatedTags } : job));
-      event.target.value = "";
-    }
-  };
-
-  const handleRemoveTag = async (id, tagToRemove) => {
-    const jobRef = doc(db, "jobposting", id);
-    const job = jobPostings.find(job => job.id === id);
-    const updatedTags = job.tags.filter(tag => tag !== tagToRemove);
-
-    await updateDoc(jobRef, { tags: updatedTags });
-    setJobPostings(prev => prev.map(job => job.id === id ? { ...job, tags: updatedTags } : job));
-  };
-
-
-  const handleTagInput = async (id, event) => {
-    if (event.key === "Enter" && event.target.value.trim()) {
-        const newTag = event.target.value.trim();
-
-        try {
-            const idToken = await getAuth().currentUser.getIdToken();
-            const response = await fetch('http://localhost:5000/add-tag', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': idToken,
-                },
-                body: JSON.stringify({
-                    job_id: id,
-                    tag: newTag,
-                }),
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to add tag');
-            }
-
-            const data = await response.json();
-            setJobPostings(prev => prev.map(job => job.id === id ? { ...job, tags: data.tags } : job));
-            event.target.value = "";
-        } catch (error) {
-            console.error('Error adding tag:', error);
-        }
-    }
+const handleEdit = (id) => {
+  navigate(`/edit-job/${id}`);
 };
 
-const handleRemoveTag = async (id, tagToRemove) => {
+const handleViewInsights = (id) => {
+  console.log(`View insights for job posting with ID: ${id}`);
+};
+
+const handleDelete = async (id) => {
   try {
-      const idToken = await getAuth().currentUser.getIdToken();
-      const response = await fetch('http://localhost:5000/remove-tag', {
-          method: 'POST',
-          headers: {
-              'Content-Type': 'application/json',
-              'Authorization': idToken,
-          },
-          body: JSON.stringify({
-              job_id: id,
-              tag: tagToRemove,
-          }),
-      });
+    const user = getAuth().currentUser;
+    if (!user) throw new Error('User not authenticated');
 
-      if (!response.ok) {
-          throw new Error('Failed to remove tag');
-      }
+    
+    const idToken = await user.getIdToken();
+    if (!idToken) throw new Error('Failed to get ID token');
 
-      const data = await response.json();
-      setJobPostings(prev => prev.map(job => job.id === id ? { ...job, tags: data.tags } : job));
+    
+    const response = await fetch(`http://localhost:5000/delete-job/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': idToken, 
+      },
+    });
+
+    
+    if (!response.ok) {
+      throw new Error('Failed to delete job');
+    }
+
+    
+    setJobPostings(jobPostings.filter(job => job.id !== id));
+    console.log(`Deleted job posting with ID: ${id}`);
   } catch (error) {
-      console.error('Error removing tag:', error);
+    console.error('Error deleting job:', error);
   }
 };
 
+
+const handleTagInput = async (id, event) => {
+  if (event.key === "Enter" && event.target.value.trim()) {
+      const newTag = event.target.value.trim();
+
+      try {
+          const idToken = await getAuth().currentUser.getIdToken();
+          const response = await fetch('http://localhost:5000/add-tag', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': idToken,
+              },
+              body: JSON.stringify({
+                  job_id: id,
+                  tag: newTag,
+              }),
+          });
+
+          if (!response.ok) {
+              throw new Error('Failed to add tag');
+          }
+
+          const data = await response.json();
+          setJobPostings(prev => prev.map(job => job.id === id ? { ...job, tags: data.tags } : job));
+          event.target.value = "";
+      } catch (error) {
+          console.error('Error adding tag:', error);
+      }
+  }
+};
+
+const handleRemoveTag = async (id, tagToRemove) => {
+try {
+    const idToken = await getAuth().currentUser.getIdToken();
+    const response = await fetch('http://localhost:5000/remove-tag', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': idToken,
+        },
+        body: JSON.stringify({
+            job_id: id,
+            tag: tagToRemove,
+        }),
+    });
+
+    if (!response.ok) {
+        throw new Error('Failed to remove tag');
+    }
+
+    const data = await response.json();
+    setJobPostings(prev => prev.map(job => job.id === id ? { ...job, tags: data.tags } : job));
+} catch (error) {
+    console.error('Error removing tag:', error);
+}
+};
 
 
   return (
     <main className="view-job-container">
       <div className="view-job-header">
-        <button className="back-button-viewjob-back" onClick={() => navigate("/dashboard-recruiter")}>
-          Go Back
-        </button>
         <button className="back-button-viewjob-back" onClick={() => navigate("/dashboard-recruiter")}>
           Go Back
         </button>
@@ -187,7 +182,7 @@ const handleRemoveTag = async (id, tagToRemove) => {
               </div>
 
               <div className="job-card-actions">
-                <button className="view-applicants-button" onClick={() => navigate(`/view-applicants/${job.id}`)}>
+                <button className="view-applicants-button" onClick={() => navigate(`/viewapplicants/${job.id}`)}>
                   View Applicants
                 </button>
                 <button className="edit-button" onClick={() => handleEdit(job.id)}>
@@ -195,21 +190,16 @@ const handleRemoveTag = async (id, tagToRemove) => {
                 </button>
                 <button className="delete-button" onClick={() => handleDelete(job.id)}>
                   Delete
-                </button>
-              </div>
-            </div>
-          ))
-        ) : (
-          <p>No job postings found.</p>
-        )}
-          ))
-        ) : (
-          <p>No job postings found.</p>
-        )}
-      </section>
-    </main>
-  );
-};
+                  </button>
+          </div>
+        </div>
+      ))
+    ) : (
+      <p>No job postings found.</p>
+    )}
+  </main>
+);
+}
 
 export default ViewJobPostings;
 

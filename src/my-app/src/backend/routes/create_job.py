@@ -1,8 +1,12 @@
-from flask import Flask, request, jsonify, Blueprint
+from flask import Blueprint, request, jsonify
 from firebase_admin import firestore
-from flask_cors import CORS, cross_origin
+from firebase_admin.exceptions import FirebaseError
+from firebase_admin import credentials, initialize_app, auth, firestore
+from datetime import datetime
+from firebase_admin import db
+from config import firestore_db, realtime_db 
 
-db = firestore.client()
+cred = credentials.Certificate('firebase_service_account_key.json')
 
 create_job_bp = Blueprint('create_job', __name__)
 

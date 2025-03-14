@@ -219,30 +219,6 @@ const ViewApplicants = () => {
         );
     };
 
-    const handleAddTag = (applicantId, event) => {
-        if (event.key === "Enter" && event.target.value.trim()) {
-            const newTag = event.target.value.trim();
-            setApplicants(prevApplicants =>
-                prevApplicants.map(applicant =>
-                    applicant.id === applicantId
-                        ? { ...applicant, tags: [...applicant.tags, newTag] }
-                        : applicant
-                )
-            );
-            event.target.value = "";
-        }
-    };
-
-    const handleRemoveTag = (applicantId, tagToRemove) => {
-        setApplicants(prevApplicants =>
-            prevApplicants.map(applicant =>
-                applicant.id === applicantId
-                    ? { ...applicant, tags: applicant.tags.filter(tag => tag !== tagToRemove) }
-                    : applicant
-            )
-        );
-    };
-
     const handleMatchScore = (applicantId) => {
         const mockScore = Math.floor(Math.random() * 100);
         alert(`Mock Match Score for Applicant ${applicantId}: ${mockScore}%`);
@@ -252,8 +228,6 @@ const ViewApplicants = () => {
         alert(`Chat initiated with Applicant ${applicantId}`);
     };
 
-    const filteredApplicants = filter === "All" ? applicants : applicants.filter(applicant => applicant.status === filter);
-
     return (
         <main className="view-applicants-container">
             <button className="back-button-view" onClick={() => navigate(-1)}>Go Back</button>
@@ -261,7 +235,7 @@ const ViewApplicants = () => {
 
             <label>Filter by Status</label>
             <div className="status-filter">
-                {["All", "Pending", "Rejected"].map(status => (
+                {["All", "Interview", "Rejected"].map(status => (
                     <button 
                         key={status} 
                         className={`filter-button ${filter === status ? "selected" : ""}`} 
@@ -322,3 +296,4 @@ const ViewApplicants = () => {
 };
 
 export default ViewApplicants;
+

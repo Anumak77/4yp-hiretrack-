@@ -57,41 +57,59 @@ const PostJob = () => {
     setShowConfirmation(true);
   };
 
-  const confirmSubmission = async () => {
-    setShowConfirmation(false);
+  const confirmSubmission = async (e) => {
+    e.preventDefault();
+    
+    const missingFields = [];
+
+    Object.entries("").forEach(([key, value]) => {
+      if (typeof value === "string" && value.trim() === "") {
+        missingFields.push(key);
+      } else if (value === undefined || value === null) {
+        missingFields.push(key);
+      }
+    });
+    
+    if (missingFields.length > 0) {
+      console.log("Missing fields:", missingFields);
+      console.log("Form Data:", "");
+      showAlert(`Please fill out all fields: ${missingFields.join(", ")}`, 'error');
+
+      return;
+    }
+    
     try {
+      
       const user = getAuth().currentUser;
-      if (!user) throw new Error("User not authenticated");
-  
-      const db = getFirestore();
-      const newJob = {
-        AboutC: jobData.AboutC,
-        ApplicationP: jobData.ApplicationP,
-        Company: jobData.Company,
-        Deadline: jobData.Deadline,
-        JobDescription: jobData.JobDescription,
-        JobRequirment: jobData.JobRequirment,
-        Location: jobData.Location,
-        OpeningDate: jobData.OpeningDate,
-        RequiredQual: jobData.RequiredQual,
-        StartDate: jobData.StartDate,
-        Title: jobData.Title,
-        date: new Date().toISOString(),
-        jobpost: user.uid, 
-      };
-  
-      console.log("Posting job data to Firestore:", newJob);
-  
-      // adds job posting directly to Firestore
-      await addDoc(collection(db, "jobposting"), newJob);
-  
-      showAlert("Job Posted Successfully!", "success");
-      navigate("/dashboard-recruiter");
+      if (!user) throw new Error('User not authenticated');
+
+      const idToken = await user.getIdToken();
+      if (!idToken) throw new Error('Failed to get ID token');
+
+
+      const response = await axios.post('http://localhost:5000/create-job', jobData, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': idToken, 
+        },
+      });
+
+      if (response.data.success) {
+        showAlert('Job Posted Successfully!', 'success');
+        console.log('Job posted with ID:', response.data.jobId);
+    
+        navigate('/dashboard-recruiter');
+      } else {
+        throw new Error(response.data.error || "Failed to post job");
+      }
     } catch (error) {
-      console.error("Error posting job:", error.message);
-      showAlert(error.message || "An error occurred while posting the job.", "error");
+      console.error('Error posting job:', error);
+      showAlert(error.message || 'An error occurred while posting the job.', 'error');
     }
   };
+
+
+  
 
 
   return (
