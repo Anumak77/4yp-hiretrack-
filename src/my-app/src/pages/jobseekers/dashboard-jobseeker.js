@@ -20,6 +20,23 @@ const DashJobseeker = () => {
     });
   }, [auth]);
 
+  const logIdToken = async () => {
+    try {
+      const user = getAuth().currentUser; 
+      if (!user) {
+        console.log('No user is currently signed in.');
+        return;
+      }  
+      // Get the Firebase ID token
+      const idToken = await user.getIdToken();
+      console.log('Firebase ID Token:', idToken); 
+    } catch (error) {
+      console.error('Error fetching ID token:', error);
+    }
+  };
+
+  logIdToken();
+
   const handleLogout = () => {
     signOut(auth)
       .then(() => {
@@ -134,33 +151,68 @@ const DashJobseeker = () => {
 
 
   // ================= DRAG AND DROP STATES =================
-  //"Offered" separate and NOT included in drag & drop.
   const [jobColumns, setJobColumns] = useState({
-    saved: [
-      { id: 1, title: "Front-End Developer" },
-      { id: 2, title: "Data Analyst" },
-      { id: 3, title: "Business Analyst" },
-    ],
-    interviewed: [
-      { id: 4, title: "Software Developer" },
-      { id: 5, title: "Back-End Developer" },
-    ],
-    applied: [
-      { id: 6, title: "Quality Assurance Engineer" },
-      { id: 7, title: "Scrum Master" },
-    ],
-    unapply: [
-      { id: 8, title: "Product Owner" },
-      { id: 9, title: "Solutions Architect" },
-      { id: 10, title: "DevOps Engineer" },
-    ],
+    saved: [],
+    applied: [],
+    unapply: [],
   });
 
-  // Offered jobs (non-draggable)
-  const [offeredJobs] = useState([
-    { id: 11, title: "Marketing Specialist" },
-    { id: 12, title: "Project Manager" },
-  ]);
+  const [offeredJobs, setOfferedJobs] = useState([]);
+  const [interviewJobs, setInterviewJobs] = useState([]);
+
+  const fetchJobs = async (jobList) => {
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        console.error("User is not authenticated");
+        return [];
+      }
+  
+      const idToken = await user.getIdToken();
+  
+      const response = await axios.get(`http://127.0.0.1:5000/fetch-jobseeker-jobs/${jobList}`, {
+        headers: {
+          Authorization: idToken,
+        },
+      });
+  
+      if (response.data && Array.isArray(response.data)) {
+        return response.data;
+      }
+      return [];
+    } catch (error) {
+      console.error(`Error fetching ${jobList} jobs:`, error);
+      return [];
+    }
+  };
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const loadJobs = async () => {
+          const savedJobs = await fetchJobs("savedjobs");
+          const appliedJobs = await fetchJobs("appliedjobs");
+          const interviewedJobs = await fetchJobs("interviewedjobs");
+          const unapplyJobs = await fetchJobs("unapplyjobs");
+          const offeredJobs = await fetchJobs("offeredjobs");
+  
+          setJobColumns({
+            saved: savedJobs || [],
+            applied: appliedJobs || [],
+            unapply: unapplyJobs || [],
+          });
+  
+          setOfferedJobs(offeredJobs || []);
+          setInterviewJobs(interviewedJobs || []);
+        };
+  
+        loadJobs();
+      } else {
+        console.error("User is not authenticated");
+      }
+    });
+    return () => unsubscribe();
+  }, [auth]);
 
   // Drag & Drop Handlers
   const handleDragStart = (e, job, sourceColumn) => {
@@ -280,7 +332,7 @@ const DashJobseeker = () => {
                   onDragStart={(e) => handleDragStart(e, job, "saved")}
                 >
                   <div className="dash-jobseeker__job-info">
-                    <h3>{job.title}</h3>
+                    <h3>{job.Title}</h3>
                   </div>
                 </div>
               ))}
@@ -295,7 +347,7 @@ const DashJobseeker = () => {
           >
             <h2 className="dash-jobseeker__column-title">Interviewed</h2>
             <div className="dash-jobseeker__job-list">
-              {jobColumns.interviewed.map((job) => (
+              {interviewJobs.map((job) => (
                 <div
                   key={job.id}
                   className="dash-jobseeker__job-card"
@@ -303,7 +355,7 @@ const DashJobseeker = () => {
                   onDragStart={(e) => handleDragStart(e, job, "interviewed")}
                 >
                   <div className="dash-jobseeker__job-info">
-                    <h3>{job.title}</h3>
+                    <h3>{job.Title}</h3>
                   </div>
                 </div>
               ))}
@@ -326,7 +378,7 @@ const DashJobseeker = () => {
                   onDragStart={(e) => handleDragStart(e, job, "applied")}
                 >
                   <div className="dash-jobseeker__job-info">
-                    <h3>{job.title}</h3>
+                    <h3>{job.Title}</h3>
                   </div>
                 </div>
               ))}
@@ -349,7 +401,7 @@ const DashJobseeker = () => {
                   onDragStart={(e) => handleDragStart(e, job, "unapply")}
                 >
                   <div className="dash-jobseeker__job-info">
-                    <h3>{job.title}</h3>
+                    <h3>{job.Title}</h3>
                   </div>
                 </div>
               ))}
