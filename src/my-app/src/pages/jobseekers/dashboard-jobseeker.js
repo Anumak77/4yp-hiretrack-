@@ -4,12 +4,14 @@ import { firebaseapp } from "../../components/firebaseconfigs";
 import "../../components/style.css";
 import NavbarJobseeker from './NavbarJobseeker';
 import axios from 'axios';
+import { useNavigate } from "react-router-dom";
 
 const DashJobseeker = () => {
   // ================= Auth / Profile =================
   const [name, setName] = useState("Guest");
   const [profileImage, setProfileImage] = useState(null);
   const auth = getAuth(firebaseapp);
+   const navigate = useNavigate();
 
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
@@ -299,6 +301,11 @@ const DashJobseeker = () => {
     }
   };
 
+
+  const handleMoreInfoClick = (job) => {
+    navigate("/job-details2", { state: job });
+  };
+
   return (
     <div className="dash-jobseeker__container">
       <NavbarJobseeker />
@@ -387,6 +394,12 @@ const DashJobseeker = () => {
                 >
                   <div className="dash-jobseeker__job-info">
                     <h3>{job.Title}</h3>
+                    <button
+                    className="more-info-button"
+                    onClick={() => handleMoreInfoClick(job)}
+                  >
+                    More Info
+                  </button>
                   </div>
                 </div>
               ))}
@@ -410,6 +423,12 @@ const DashJobseeker = () => {
                 >
                   <div className="dash-jobseeker__job-info">
                     <h3>{job.Title}</h3>
+                    <button
+                    className="more-info-button"
+                    onClick={() => handleMoreInfoClick(job)}
+                  >
+                    More Info
+                  </button>
                   </div>
                 </div>
               ))}
@@ -433,6 +452,12 @@ const DashJobseeker = () => {
                 >
                   <div className="dash-jobseeker__job-info">
                     <h3>{job.Title}</h3>
+                    <button
+                    className="more-info-button"
+                    onClick={() => handleMoreInfoClick(job)}
+                  >
+                    More Info
+                  </button>
                   </div>
                 </div>
               ))}
@@ -456,6 +481,12 @@ const DashJobseeker = () => {
                 >
                   <div className="dash-jobseeker__job-info">
                     <h3>{job.Title}</h3>
+                    <button
+                    className="more-info-button"
+                    onClick={() => handleMoreInfoClick(job)}
+                  >
+                    More Info
+                  </button>
                   </div>
                 </div>
               ))}
@@ -471,6 +502,12 @@ const DashJobseeker = () => {
               <div key={job.id} className="dash-jobseeker__job-card">
                 <div className="dash-jobseeker__job-info">
                   <h3>{job.title}</h3>
+                  <button
+                    className="more-info-button"
+                    onClick={() => handleMoreInfoClick(job)}
+                  >
+                    More Info
+                  </button>
                 </div>
               </div>
             ))}

@@ -28,6 +28,7 @@ import PostJob from './pages/recruiters/postjob';
 import EditJob from './pages/recruiters/editjobposting';
 import ViewJobPostings from './pages/recruiters/viewjob-postings';
 import ViewApplicants from './pages/recruiters/ViewApplicants';
+import JobDetails2 from './pages/jobseekers/job-details2';
 
 function App() {
   return (
@@ -99,6 +100,7 @@ function MainApp() {
         <Route path="/dashboard-jobseeker" element={<DashJobseeker />} />
         <Route path="/dashboard-recruiter" element={<DashRecruiter />} />
         <Route path="/job-details" element={<JobDetails />} />
+        <Route path="/job-details2" element={<JobDetails2 />} />
         <Route path="/job-search" element={<JobSearch />} />
         <Route path="/jobtracker-jobseeker" element={<JobTrackerJobseeker />} />
         <Route path="/jobtracker-recruiter" element={<JobTrackerRecruiter />} />
