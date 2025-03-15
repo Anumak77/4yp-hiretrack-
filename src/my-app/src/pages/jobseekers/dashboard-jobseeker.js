@@ -224,7 +224,15 @@ const DashJobseeker = () => {
     e.preventDefault();
   };
 
-  const handleDrop = (e, targetColumn) => {
+  const columnToCollectionMap = {
+    saved: "savedjobs",       
+    applied: "appliedjobs",   
+    interviewed: "interviewedjobs", 
+    withdraw: "unapplyjobs",  
+    offered: "offeredjobs",
+  };
+
+  const handleDrop = async (e, targetColumn) => {
     e.preventDefault();
     const data = e.dataTransfer.getData("jobData");
     if (data) {
@@ -232,16 +240,62 @@ const DashJobseeker = () => {
       if (sourceColumn === targetColumn) return; // No change if same column
 
       setJobColumns((prev) => {
-        // Remove from source
-        const sourceJobs = prev[sourceColumn].filter((j) => j.id !== job.id);
-        // Add to target
-        const targetJobs = [...prev[targetColumn], job];
+        const sourceJobs = prev[sourceColumn] ? prev[sourceColumn].filter((j) => j.id !== job.id): [];
+        const targetJobs = prev[targetColumn] ? [...prev[targetColumn], job] : [job];
         return {
           ...prev,
           [sourceColumn]: sourceJobs,
           [targetColumn]: targetJobs,
         };
       });
+  
+      try {
+        const user = auth.currentUser;
+        if (!user) {
+          console.error("User is not authenticated");
+          return;
+        }
+  
+        const idToken = await user.getIdToken();
+        console.log(job.id)
+        console.log(sourceColumn)
+        console.log(targetColumn)
+
+      const sourceCollection = columnToCollectionMap[sourceColumn];
+      const targetCollection = columnToCollectionMap[targetColumn];
+
+      if (!sourceCollection || !targetCollection) {
+        console.error("Invalid source or target collection");
+        return;
+      }
+  
+        await axios.post(
+          "http://localhost:5000/move-job",
+          {
+            job_id: job.id, 
+            source_collection: sourceCollection, 
+            target_collection: targetCollection, 
+          },
+          {
+            headers: {
+              Authorization: idToken,
+            },
+          }
+        );
+  
+        console.log("Job moved successfully");
+      } catch (error) {
+        console.error("Error moving job:", error);
+        setJobColumns((prev) => {
+          const targetJobs = prev[targetColumn] ? prev[targetColumn].filter((j) => j.id !== job.id) : [];
+          const sourceJobs = prev[sourceColumn] ? [...prev[sourceColumn], job] : [job]
+          return {
+            ...prev,
+            [sourceColumn]: sourceJobs,
+            [targetColumn]: targetJobs,
+          };
+        });
+      }
     }
   };
 

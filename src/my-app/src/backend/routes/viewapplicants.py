@@ -64,7 +64,7 @@ def interview_applicants(recruiter_id, jobposting_id):
         interview_applicant_ref = firestore_db.collection('recruiters').document(recruiter_id).collection('jobposting').document(jobposting_id).collection('interviewapplicants').document(applicant_id)
         interview_applicant_ref.set(applicant_data.to_dict())
 
-        interview_job_ref = firestore_db.collection('jobseekers').document(applicant_id).collection('interviewjobs').document(jobposting_id)
+        interview_job_ref = firestore_db.collection('jobseekers').document(applicant_id).collection('interviewedjobs').document(jobposting_id)
         interview_job_ref.set(job_posting_data.to_dict())
 
         return jsonify({
