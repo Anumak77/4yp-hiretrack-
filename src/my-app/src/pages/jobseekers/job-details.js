@@ -69,6 +69,9 @@ const JobDetails = () => {
       console.log('CV Base64 Data (before split):', cvBase64);
 
       const jobDescription = job['JobDescription'];
+      const jobRequirment = job['JobRequirment'];
+      const requiredQual = job['RequiredQual'];
+
       console.log('Job Description:', jobDescription);
   
       if (!cvBase64) {
@@ -88,9 +91,11 @@ const JobDetails = () => {
   
       const payload = {
         JobDescription: jobDescription,
+        JobRequirment: jobRequirment,
+        RequiredQual: requiredQual,
         cv: cv, // Use the processed value
       };
-      console.log('Request Payload:', payload);
+      //console.log('Request Payload:', payload);
   
       // Send the CV and job description to the Flask backend for comparison
       const response = await axios.post('http://127.0.0.1:5000/compare_with_description', payload, {
@@ -156,7 +161,8 @@ const JobDetails = () => {
             return;
         }
 
-        const userId = user.uid; // Get the user's UID
+        const userId = user.uid;
+        const recruiterId = job.recruiterId;
 
         let cvBase64;
         if (base64Data) {
@@ -165,7 +171,7 @@ const JobDetails = () => {
             cvBase64 = await fetchPdfFromFlaskBackend();
         }
 
-        console.log('CV Base64 Data (before split):', cvBase64);
+       // console.log('CV Base64 Data (before split):', cvBase64);
 
         if (!cvBase64) {
             alert('No CV found for the user. Please upload a CV.');
@@ -181,13 +187,35 @@ const JobDetails = () => {
             cv = cvBase64; 
         }
 
-        console.log('CV Base64 Data (after handling):', cv);
+        //console.log('CV Base64 Data (after handling):', cv);
 
+        const jobDescription = job['JobDescription'];
+        const jobRequirment = job['JobRequirment'];
+        const requiredQual = job['RequiredQual'];
+
+        const matchScoreResponse = await axios.post('http://127.0.0.1:5000/compare_with_description', {
+          JobDescription: jobDescription,
+          JobRequirment: jobRequirment,
+          RequiredQual: requiredQual,
+          cv: cv,
+      }, {
+          headers: {
+              'Content-Type': 'application/json',
+          },
+      });
+
+      const similarityScore = matchScoreResponse.data.cosine_similarity;
+      const matchScorePercentage = (similarityScore * 100).toFixed(2);
         
         const payload = {
             userId: userId, 
             job: job, 
-            cv: cv, 
+            cv: cv,
+            recruiterId: recruiterId,
+            JobDescription: jobDescription,
+            JobRequirment: jobRequirment,
+            RequiredQual: requiredQual,
+            matchScore: matchScorePercentage
         };
 
         console.log('Request Payload:', payload);

@@ -63,8 +63,7 @@ def compare_cv_with_job_description(job_description, job_requirements, required_
     similarity_score = response.json().get('cosine similarity', 0)
     return round(similarity_score * 100, 2)
 
-def save_job_application(firestore_db, user_id, job, match_score):
-    job_id = job.get('id') or f"{job.get('Company')}-{job.get('Title')}".replace(" ", "-").lower()
+def save_job_application(firestore_db, user_id, job, match_score, job_id):
     job_ref = firestore_db.collection(f'jobseekers/{user_id}/appliedjobs').document(job_id)
     job_ref.set({
         **job,
@@ -75,36 +74,50 @@ def save_job_application(firestore_db, user_id, job, match_score):
     return job_id
 
 def update_recruiter_metadata(firestore_db, recruiter_id, job_id, user_id, match_score):
-    recruiter_job_ref = firestore_db.collection(f'recruiters/{recruiter_id}/jobposting/{job_id}/applicants').document(user_id)
-    recruiter_job_ref.set({
-        "userId": user_id,
-        "appliedAt": datetime.now().isoformat(),
-        "matchScore": match_score
-    })
-    recruiter_ref = firestore_db.collection(f'recruiters/{recruiter_id}/applicantsum').document('metadata')
+    try:
 
-    metadata_doc = recruiter_ref.get()
+        user_ref = firestore_db.collection('jobseekers').document(user_id)
+        user_data = user_ref.get()
 
-    if not metadata_doc.exists:
-        recruiter_ref.set({
-            "applicantsnum": 1  # Initialize with 1
+        if not user_data.exists:
+            raise ValueError(f"User with ID {user_id} not found in jobseekers collection.")
+
+        recruiter_job_ref = firestore_db.collection(f'recruiters/{recruiter_id}/jobposting/{job_id}/applicants').document(user_id)
+        recruiter_job_ref.set({
+            **user_data.to_dict(),
+            "appliedAt": datetime.now().isoformat(),
+            "matchScore": match_score
         })
+        recruiter_ref = firestore_db.collection(f'recruiters/{recruiter_id}/applicantsum').document('metadata')
 
-    recruiter_ref.update({
-        "applicantsnum": firestore.Increment(1)
-    })
-    
-    job_ref = firestore_db.collection(f'recruiters/{recruiter_id}/jobposting').document(job_id)
-    job_doc = job_ref.get()
+        metadata_doc = recruiter_ref.get()
 
-    if not job_doc.exists:
-        job_ref.set({
-            "applicantsnum": 1
-        })
-    else:
-        job_ref.update({
+        if not metadata_doc.exists:
+            recruiter_ref.set({
+                "applicantsnum": 1  # Initialize with 1
+            })
+
+        recruiter_ref.update({
             "applicantsnum": firestore.Increment(1)
         })
+        
+        job_ref = firestore_db.collection(f'recruiters/{recruiter_id}/jobposting').document(job_id)
+        job_doc = job_ref.get()
+
+        if not job_doc.exists:
+            job_ref.set({
+                "applicantsnum": 1
+            })
+        else:
+            job_ref.update({
+                "applicantsnum": firestore.Increment(1)
+            })
+        print(f"Successfully updated recruiter metadata for recruiter {recruiter_id} and job {job_id}.")
+        return True
+
+    except Exception as e:
+        print(f"Error updating recruiter metadata: {e}")
+        return False
 
 
 @seekeractions_bp.route('/apply-job', methods=['POST'])
@@ -115,6 +128,7 @@ def apply_job():
         user_id = data.get('userId')
         job = data.get('job')
         recruiter_id = job.get('recruiterId')
+        match_score = data.get('matchScore')
 
         if not user_id or not job or not recruiter_id:
             return jsonify({"error": "User ID, job data, and recruiter ID are required"}), 400
@@ -135,16 +149,8 @@ def apply_job():
         # Process CV data
         cv_data = process_cv_data(cv_base64)
 
-        # Compare CV with job description
-        match_score = compare_cv_with_job_description(
-            job.get('JobDescription', ""),
-            job.get('JobRequirment', ""),
-            job.get('RequiredQual', ""),
-            cv_data
-        )
-
         # Save job application
-        job_id = save_job_application(firestore_db, user_id, job, match_score)
+        save_job_application(firestore_db, user_id, job, match_score, job_id)
 
         # Update recruiter metadata
         update_recruiter_metadata(firestore_db, recruiter_id, job_id, user_id, match_score)

@@ -95,6 +95,12 @@ def rejected_applicants(recruiter_id, jobposting_id):
 
         if not job_posting_data.exists:
             return jsonify({"error": "Job posting not found"}), 404
+        
+        interview_applicant_ref = firestore_db.collection('recruiters').document(recruiter_id).collection('jobposting').document(jobposting_id).collection('interviewapplicants').document(applicant_id)
+        interview_applicant_data = interview_applicant_ref.get()
+
+        if interview_applicant_data.exists:
+            interview_applicant_ref.delete()
 
         rejected_applicant_ref = firestore_db.collection('recruiters').document(recruiter_id).collection('jobposting').document(jobposting_id).collection('rejectedapplicants').document(applicant_id)
         rejected_applicant_ref.set(applicant_data.to_dict())
