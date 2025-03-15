@@ -5,8 +5,7 @@ from firebase_admin import credentials, firestore, auth
 from firebase_admin.exceptions import FirebaseError  # Import FirebaseError
 from datetime import datetime
 from fuzzywuzzy import process
-
-db = firestore.client()
+from config import firestore_db, realtime_db 
 
 view_jobpostings_bp = Blueprint('view_jobpostings', __name__)
 
@@ -15,7 +14,7 @@ view_jobpostings_bp = Blueprint('view_jobpostings', __name__)
 def fetch_job(user_id, job_id):
     try:
         
-        job_ref = db.collection('recruiters').document(user_id).collection('jobposting').document(job_id)
+        job_ref = firestore_db.collection('recruiters').document(user_id).collection('jobposting').document(job_id)
         job = job_ref.get()
 
         if not job.exists:
@@ -32,7 +31,7 @@ def update_job(user_id, job_id):
     try:
         updated_data = request.json
 
-        job_ref = db.collection('recruiters').document(user_id).collection('jobposting').document(job_id)
+        job_ref = firestore_db.collection('recruiters').document(user_id).collection('jobposting').document(job_id)
         job_ref.update(updated_data)
 
         return jsonify({"success": True, "message": "Job updated successfully"}), 200
@@ -51,8 +50,6 @@ def fetch_jobs():
         decoded_token = auth.verify_id_token(id_token)
         uid = decoded_token.get('uid')
 
-        
-        firestore_db = firestore.client()
         jobs_ref = firestore_db.collection(f'recruiters/{uid}/jobposting')
         jobs_snapshot = jobs_ref.get()
 
@@ -77,7 +74,6 @@ def delete_job(job_id):
         decoded_token = auth.verify_id_token(id_token)
         uid = decoded_token.get('uid')
 
-        firestore_db = firestore.client()
         job_ref = firestore_db.collection(f'recruiters/{uid}/jobposting').document(job_id)
         job_ref.delete()
 

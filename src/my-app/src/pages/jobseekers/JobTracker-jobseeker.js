@@ -36,23 +36,46 @@ const JobTrackerJobseeker = () => {
         return;
       }
 
-      const firestore = getFirestore();
-      const appliedJobsRef = collection(firestore, `users/${user.uid}/appliedjobs`);
-      const snapshot = await getDocs(appliedJobsRef);
+      const idToken = await user.getIdToken();
 
-      if (!snapshot.empty) {
-        const appliedJobs = snapshot.docs.map((doc) => ({
-          jobTitle: doc.data().Title || "Unknown Job",
-          dueDate: doc.data().Deadline || "No Deadline",
-          status: "Applied",
-        }));
-        
-        setJobApplications(appliedJobs);
-      } else {
-        console.log("No applied jobs found");
+      const [appliedResponse, rejectedResponse, interviewResponse] = await Promise.all([
+        fetch(`http://localhost:5000/fetch-jobseeker-jobs/appliedjobs`, {
+          method: "GET",
+          headers: {
+            "Authorization": idToken,
+          },
+        }),
+        fetch(`http://localhost:5000/fetch-jobseeker-jobs/rejectedjobs`, {
+          method: "GET",
+          headers: {
+            "Authorization": idToken,
+          },
+        }),
+        fetch(`http://localhost:5000/fetch-jobseeker-jobs/interviewjobs`, {
+          method: "GET",
+          headers: {
+            "Authorization": idToken,
+          },
+        }),
+      ]);
+
+      if (!appliedResponse.ok || !rejectedResponse.ok || !interviewResponse.ok) {
+        throw new Error("Failed to fetch jobs");
       }
+
+      const appliedJobs = await appliedResponse.json();
+      const rejectedJobs = await rejectedResponse.json();
+      const interviewJobs = await interviewResponse.json();
+
+      const jobs = [
+        ...appliedJobs.map((job) => ({ ...job, status: "Applied" })),
+        ...rejectedJobs.map((job) => ({ ...job, status: "Rejected" })),
+        ...interviewJobs.map((job) => ({ ...job, status: "Interviewed" })),
+      ];
+
+      setJobApplications(jobs);
     } catch (error) {
-      console.error("Error fetching applied jobs", error);
+      console.error("Error fetching jobs", error);
     }
   };
 
@@ -81,22 +104,36 @@ const JobTrackerJobseeker = () => {
   };
 
   const barChartData = {
-    labels: jobApplications.map((app) => app.jobTitle),
+    labels: ["Applied", "Interviewed", "Rejected"], 
     datasets: [
       {
-        label: "Applications",
-        data: jobApplications.map(() => 1),
+        label: "Number of Applications",
+        data: [
+          jobApplications.filter((app) => app.status === "Applied").length,
+          jobApplications.filter((app) => app.status === "Interviewed").length, 
+          jobApplications.filter((app) => app.status === "Rejected").length, 
+        ],
         backgroundColor: [
-          "#192231",
-          "#404a42",
-          "#c0b283",
-          "#eddbcd",
-          "#f4f4f4",
+          "#c0b283", 
+          "#404a42", 
+          "#192231", 
         ],
         borderColor: "f4f4f4", 
         borderWidth: 1,
       },
-    ],
+    ],    
+  };
+
+  const chartOptions = {
+    scales: {
+      y: {
+        min: 0,
+        max: 30,
+        ticks: {
+          stepSize: 1,
+        },
+      },
+    },
   };
   
   const pieChartData = {
@@ -158,18 +195,17 @@ const JobTrackerJobseeker = () => {
     Rejected
   </button>
 </div>
-
-
         <button onClick={handleAddApplication} className="jobtracker-add-button">
           Add Application
         </button>
       
       </section>
 
+      <div className="jobtracker-charts-container">
       <div className="jobtracker-chart-container">
-        <h2 className="jobtracker-chart-heading">Bar Chart - Applications Per Job</h2>
+        <h2 className="jobtracker-chart-heading">Bar Chart - Applications Per Status</h2>
         <div className="jobtracker-bar-chart">
-          <Bar data={barChartData} />
+          <Bar data={barChartData} options={chartOptions}/>
         </div>
       </div>
 
@@ -178,6 +214,7 @@ const JobTrackerJobseeker = () => {
         <div className="jobtracker-pie-chart">
           <Pie data={pieChartData} />
         </div>
+      </div>
       </div>
       </section>
     </main>
