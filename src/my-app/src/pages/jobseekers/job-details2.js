@@ -69,6 +69,9 @@ const JobDetails2 = () => {
       console.log('CV Base64 Data (before split):', cvBase64);
 
       const jobDescription = job['JobDescription'];
+      const jobRequirment = job['JobRequirment'];
+      const requiredQual = job['RequiredQual'];
+
       console.log('Job Description:', jobDescription);
   
       if (!cvBase64) {
@@ -88,9 +91,11 @@ const JobDetails2 = () => {
   
       const payload = {
         JobDescription: jobDescription,
+        JobRequirment: jobRequirment,
+        RequiredQual: requiredQual,
         cv: cv, // Use the processed value
       };
-      console.log('Request Payload:', payload);
+      //console.log('Request Payload:', payload);
   
       // Send the CV and job description to the Flask backend for comparison
       const response = await axios.post('http://127.0.0.1:5000/compare_with_description', payload, {
