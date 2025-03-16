@@ -8,6 +8,9 @@ import {
 } from 'react-router-dom';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 
 import NavbarJobseeker from './pages/jobseekers/NavbarJobseeker';
 import NavbarRecruiters from './pages/recruiters/NavbarRecruiters';
@@ -32,9 +35,22 @@ import JobDetails2 from './pages/jobseekers/job-details2';
 
 function App() {
   return (
+    <div>
     <Router>
       <MainApp />
     </Router>
+
+    <ToastContainer
+                position="top-right"
+                autoClose={5000} 
+                hideProgressBar={false}
+                newestOnTop={true}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover />
+    </div>
   );
 }
 

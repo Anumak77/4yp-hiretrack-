@@ -4,6 +4,10 @@ import { firebaseapp } from "../../components/firebaseconfigs";
 import "../../components/style.css";
 import NavbarJobseeker from './NavbarJobseeker';
 import axios from 'axios';
+import { getFirestore, collection, query, orderBy, onSnapshot } from "firebase/firestore";
+import "react-toastify/dist/ReactToastify.css";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 
 const DashJobseeker = () => {
@@ -306,10 +310,41 @@ const DashJobseeker = () => {
     navigate("/job-details2", { state: job });
   };
 
+  const listenForNotifications = () => {
+    const auth = getAuth();
+    const user = auth.currentUser;
+
+    if (!user) {
+        throw new Error("User not authenticated");
+    }
+
+    const db = getFirestore();
+    const notificationsRef = collection(db, `jobseekers/${user.uid}/notifications`);
+    const q = query(notificationsRef, orderBy("timestamp", "desc")); 
+
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        querySnapshot.docChanges().forEach((change) => {
+            if (change.type === "added") {
+                const notification = change.doc.data();
+                toast.info(notification.message); 
+            }
+        });
+    });
+
+    return unsubscribe; 
+};
+
+useEffect(() => {
+    const unsubscribe = listenForNotifications();
+
+    return () => unsubscribe();
+}, []);
+
   return (
     <div className="dash-jobseeker__container">
       <NavbarJobseeker />
       <aside className="dash-jobseeker__sidebar">
+        
         <div className="dash-jobseeker__profile">
           <label
             htmlFor="profile-upload"
@@ -514,6 +549,18 @@ const DashJobseeker = () => {
           </div>
         </div>
       </main>
+
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={true}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </div>
   );
 };

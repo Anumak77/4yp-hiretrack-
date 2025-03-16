@@ -10,6 +10,7 @@ from firebase_admin import credentials, firestore, auth
 from firebase_admin.exceptions import FirebaseError  # Import FirebaseError
 from datetime import datetime
 from fuzzywuzzy import process
+from routes.notifications import notifications_bp
 app = Flask(__name__)
 
 viewapplicants_bp = Blueprint('viewapplicants', __name__)
@@ -67,6 +68,8 @@ def interview_applicants(recruiter_id, jobposting_id):
         interview_job_ref = firestore_db.collection('jobseekers').document(applicant_id).collection('interviewedjobs').document(jobposting_id)
         interview_job_ref.set(job_posting_data.to_dict())
 
+        create_notification(applicant_id, f"You have been scheduled for an interview for Job ID: {job_id}.", job_id)
+
         return jsonify({
             "success": True,
             "message": "Applicant added to interview list",
@@ -108,9 +111,11 @@ def rejected_applicants(recruiter_id, jobposting_id):
         rejected_job_ref = firestore_db.collection('jobseekers').document(applicant_id).collection('rejectedjobs').document(jobposting_id)
         rejected_job_ref.set(job_posting_data.to_dict())
 
+        create_notification(applicant_id, f"Your application for Job ID: {job_id} has been rejected.", job_id)
+
         return jsonify({
             "success": True,
-            "message": "Applicant added to interview list",
+            "message": "Applicant added to rejected list",
         }), 200
 
     except Exception as e:
