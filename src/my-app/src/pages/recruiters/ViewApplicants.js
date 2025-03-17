@@ -219,10 +219,40 @@ const ViewApplicants = () => {
         );
     };
 
-    const handleMatchScore = (applicantId) => {
-        const mockScore = Math.floor(Math.random() * 100);
-        alert(`Mock Match Score for Applicant ${applicantId}: ${mockScore}%`);
+    const handleMatchScore = async (applicantId, jobId) => {
+        try {
+            const auth = getAuth();
+            const user = auth.currentUser;
+            if (!user) {
+                throw new Error("User not authenticated");
+            }
+    
+            const idToken = await user.getIdToken();
+            const response = await fetch(
+                `http://localhost:5000/matchscore-applicants/${user.uid}/${jobId}?applicant_id=${applicantId}`,
+                {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": idToken,
+                    },
+                }
+            );
+            if (!response.ok) {
+                throw new Error("Failed to fetch match score");}
+    
+            const data = await response.json();
+            if (data.success) {
+                alert(`Match Score for Applicant ${applicantId}: ${data.matchscore}%`);
+            } else {
+                alert(`Error: ${data.error}`);
+            }
+        } catch (error) {
+            console.error("Error fetching match score:", error);
+            alert("Error fetching match score");
+        }
     };
+    
 
     const handleChat = (applicantId) => {
         alert(`Chat initiated with Applicant ${applicantId}`);
@@ -259,7 +289,7 @@ const ViewApplicants = () => {
                                 <button className="interview-button" onClick={() => handleInterview(applicant.uid, jobId) }>
                                     Interview
                                 </button>
-                                <button className="match-score-button" onClick={() => handleMatchScore(applicant.uid)}>
+                                <button className="match-score-button" onClick={() => handleMatchScore(applicant.uid, jobId)}>
                                     Match Score
                                 </button>
                                 <button className="chat-button" onClick={() => handleChat(applicant.uid)}>
