@@ -255,7 +255,7 @@ const ViewApplicants = () => {
     
 
     const handleChat = (applicantId) => {
-        alert(`Chat initiated with Applicant ${applicantId}`);
+        navigate(`/recruiterchat/${applicantId}`);
     };
 
     return (

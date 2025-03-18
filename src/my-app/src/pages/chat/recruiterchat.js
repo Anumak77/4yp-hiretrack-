@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { db, collection, addDoc, query, where, onSnapshot, orderBy } from "./../components/firebaseconfigs";
 import { getAuth } from 'firebase/auth';
 import "../../components/style.css";
-import { getFirestore, collection, query, where, onSnapshot, orderBy} from "firebase/firestore";
-import { db } from "../../components/firebaseconfigs"; 
 
 const RecruiterChat = () => {
   const navigate = useNavigate();
@@ -12,6 +11,12 @@ const RecruiterChat = () => {
   const [selectedChat, setSelectedChat] = useState(null);
   const [chatList, setChatList] = useState([]); 
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (applicantId) {
+      setSelectedChat(applicantId);
+    }
+  }, [applicantId]);
 
 
   useEffect(() => {
