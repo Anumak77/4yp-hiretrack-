@@ -1,0 +1,42 @@
+stages:
+  - install
+  - test
+  - build
+  - deploy
+
+# Install dependencies
+install:
+  stage: install
+  script:
+    - npm ci  # Use npm ci for faster and consistent installs
+  cache:
+    key: node-modules
+    paths:
+      - node_modules/
+
+# Run tests
+test:
+  stage: test
+  script:
+    - npm test
+
+# Build the React app
+build:
+  stage: build
+  script:
+    - npm run build
+  artifacts:
+    paths:
+      - build/
+
+# Deploy to Firebase (if using Firebase Hosting)
+deploy:
+  stage: deploy
+  script:
+    - npm install -g firebase-tools
+    - firebase deploy --token "$FIREBASE_DEPLOY_TOKEN"
+  only:
+    - main
+    - phase-2-backend
+
+

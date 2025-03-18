@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { getAuth } from 'firebase/auth';
-import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { firebaseapp } from "../../components/firebaseconfigs";
-import axios from 'axios/dist/browser/axios.cjs';
+import axios from 'axios';
 import '../../components/style.css';
 
 const Login = () => {
@@ -14,7 +13,6 @@ const Login = () => {
   const [error, setError] = useState('');
   const [Loading, setLoading] = useState(false);
   const auth = getAuth(firebaseapp);
-  const db = getFirestore(firebaseapp);  // Firestore reference
 
   const onLogin = async (e) => {
     e.preventDefault();
@@ -22,35 +20,35 @@ const Login = () => {
     setError('');
 
     try {
+      
+      const auth = getAuth(firebaseapp);
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
-
-      // Fetch user role from Firestore
-      const userDocRef = doc(db, "users", user.uid); // Get user document
-      const userDocSnap = await getDoc(userDocRef);
+  
+      // Get the Firebase ID token
+      const idToken = await user.getIdToken();
+      console.log(idToken);
+  
       
-      if (userDocSnap.exists()) {
-        const userType = userDocSnap.data().userType; // Get userType from Firestore
-        console.log("User Role:", userType);
+      const response = await axios.post('http://127.0.0.1:5000/login', {
+        idToken, // Send the Firebase ID token instead of email/password
+      });
+  
+      
+      console.log('Login successful:', response.data);
+      const { uid, userType } = response.data;
 
-        // Store role in localStorage
-        localStorage.setItem('userRole', userType);
-
-        // Redirect based on role
-        if (userType === 'Job Seeker') {
-          navigate('/dashboard-jobseeker');
-        } else if (userType === 'Recruiter') {
-          navigate('/dashboard-recruiter');
-        } else if (userType === 'Admin') {
-          navigate('/admin');
-        } else {
-          navigate('/');
-        }
+  
+      // Redirect based on user type
+      if (userType === 'Job Seeker') {
+        navigate('/dashboard_jobseeker');
+      } else if (userType === 'Recruiter') {
+        navigate('/dashboard_recruiter');
       } else {
-        setError("User data not found. Please contact support.");
+        navigate('/'); // default redirect
       }
-
     } catch (error) {
+      // Handle errors
       if (error.code === 'auth/wrong-password') {
         setError('Incorrect password. Please try again.');
       } else if (error.code === 'auth/user-not-found') {
@@ -63,6 +61,7 @@ const Login = () => {
       setLoading(false);
     }
   };
+  
 
   return (
     <main className="login-main-container">

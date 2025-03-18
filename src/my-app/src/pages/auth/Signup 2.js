@@ -4,8 +4,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { firebaseapp } from '../../components/firebaseconfigs';
 import { getFirestore, doc, setDoc } from 'firebase/firestore';
 import '../../components/style.css';
-import axios from 'axios/dist/browser/axios.cjs';
-
+import axios from 'axios';
 
 const countryOptions = [
   "United States", "United Kingdom", "India", "Canada", "Germany",
