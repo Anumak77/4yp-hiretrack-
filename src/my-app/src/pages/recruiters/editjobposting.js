@@ -1,31 +1,117 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import axios from 'axios';
+import { getAuth } from 'firebase/auth';
 import '../../components/style.css';
+
+const countryOptions = [
+  "United States",
+  "United Kingdom",
+  "India",
+  "Canada",
+  "Germany",
+  "France",
+  "Australia",
+  "Armenia",
+  "Singapore",
+  "United Arab Emirates"
+];
 
 const EditJob = () => {
   const navigate = useNavigate();
   const { id } = useParams(); 
+  const [jobData, setJobData] = useState({
+    AboutC: '',
+    ApplicationP: '',
+    Company: '',
+    Deadline: '',
+    JobDescription: '',
+    JobRequirment: '',
+    Location: '',
+    OpeningDate: '',
+    RequiredQual: '',
+    StartDate: '',
+    Title: '',
+    date: '',
+    jobpost: ''
+  });
 
-  // fake job data (Just placeholders)
-  const fakeJob = {
-    title: "Test Job Title",
-    company: "Test Company",
-    location: "Test Location",
-    description: "This is a test description for the job.",
+  const [alertMessage, setAlertMessage] = useState(null);
+  const [alertType, setAlertType] = useState('error');
+
+  useEffect(() => {
+    const fetchJobData = async () => {
+      try {
+        const user = getAuth().currentUser;
+        if (!user) throw new Error('User not authenticated');
+  
+        const idToken = await user.getIdToken();
+        if (!idToken) throw new Error('Failed to get ID token');
+  
+        const user_id = user.uid; // Get the current user's ID
+        const response = await fetch(`http://localhost:5000/fetch_job/${user_id}/${id}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': idToken,
+          },
+        });
+  
+        if (!response.ok) {
+          throw new Error('Failed to fetch job data');
+        }
+  
+        const job = await response.json();
+        setJobData(job); // Pre-fill the form with the fetched job data
+      } catch (error) {
+        console.error('Error fetching job data:', error);
+        showAlert(error.message || 'An error occurred while fetching the job data.', 'error');
+      }
+    };
+  
+    fetchJobData();
+  }, [id]);
+
+  const showAlert = (message, type = 'error') => {
+    setAlertMessage(message);
+    setAlertType(type);
+    setTimeout(() => setAlertMessage(null), 3000);
   };
-
-  const [jobData, setJobData] = useState(fakeJob);
 
   const handleChange = (e) => {
     setJobData({ ...jobData, [e.target.name]: e.target.value });
   };
 
-  // (No backend, just logs the updated data)
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Updated Job Data:", jobData);
-    alert("Job updated successfully! (Mock Data)");
-    navigate('/viewjobpostings'); // Redirect back
+  
+    try {
+      const user = getAuth().currentUser;
+      if (!user) throw new Error('User not authenticated');
+  
+      const idToken = await user.getIdToken();
+      if (!idToken) throw new Error('Failed to get ID token');
+  
+      const user_id = user.uid; // Get the current user's ID
+      const response = await fetch(`http://localhost:5000/update_job/${user_id}/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': idToken,
+        },
+        body: JSON.stringify(jobData),
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to update job');
+      }
+  
+      showAlert('Job updated successfully!', 'success');
+      navigate('/dashboard-recruiter');
+    } catch (error) {
+      console.error('Error updating job:', error);
+      showAlert(error.message || 'An error occurred while updating the job.', 'error');
+    }
   };
 
   return (
@@ -33,28 +119,64 @@ const EditJob = () => {
       <h1 className="post-job-title">Edit Job</h1>
       <section className="post-job-container">
         <section className="post-job-card">
-          <button type="button" className="back-button" onClick={() => navigate('/viewjobpostings')}>
-            Go Back
-          </button>
+          {alertMessage && <div className={`alert-box ${alertType}`}>{alertMessage}</div>}
+          <button type="button" className="back-button" onClick={() => navigate('/dashboard-recruiter')}>Go Back</button>
           <form onSubmit={handleSubmit}>
             <div className="input-group">
               <label>Job Title</label>
-              <input type="text" name="title" value={jobData.title} onChange={handleChange} required />
+              <input type="text" name="Title" value={jobData.Title} onChange={handleChange} placeholder="Enter job title" required />
             </div>
 
             <div className="input-group">
               <label>Company</label>
-              <input type="text" name="company" value={jobData.company} onChange={handleChange} required />
+              <input type="text" name="Company" value={jobData.Company} onChange={handleChange} placeholder="Enter company name" required />
             </div>
 
             <div className="input-group">
-              <label>Location</label>
-              <input type="text" name="location" value={jobData.location} onChange={handleChange} required />
+              <label htmlFor="Location">Location</label>
+              <select
+                name="Location"
+                value={jobData.Location}
+                onChange={handleChange}
+                required
+                className="location-dropdown"
+              >
+                <option value="">Select a country</option>
+                {countryOptions.map((country, index) => (
+                  <option key={index} value={country}>{country}</option>
+                ))}
+              </select>
             </div>
 
             <div className="input-group">
               <label>Job Description</label>
-              <textarea name="description" value={jobData.description} onChange={handleChange} required></textarea>
+              <textarea name="JobDescription" value={jobData.JobDescription} onChange={handleChange} placeholder="Enter job description" required></textarea>
+            </div>
+
+            <div className="input-group">
+              <label>Job Requirements</label>
+              <textarea name="JobRequirment" value={jobData.JobRequirment} onChange={handleChange} placeholder="Enter job requirements" required></textarea>
+            </div>
+
+            <div className="input-group">
+              <label>Required Qualifications</label>
+              <textarea name="RequiredQual" value={jobData.RequiredQual} onChange={handleChange} placeholder="Enter required qualifications" required></textarea>
+            </div>
+
+            <div className="input-group">
+              <label>Application Process</label>
+              <textarea name="ApplicationP" value={jobData.ApplicationP} onChange={handleChange} placeholder="Enter application process" required></textarea>
+            </div>
+
+            <div className="date-container">
+              <div className="input-group">
+                <label>Opening Date</label>
+                <input type="date" name="OpeningDate" value={jobData.OpeningDate} onChange={handleChange} required />
+              </div>
+              <div className="input-group">
+                <label>Deadline</label>
+                <input type="date" name="Deadline" value={jobData.Deadline} onChange={handleChange} required />
+              </div>
             </div>
 
             <button type="submit" className="post-job-button">Update Job</button>

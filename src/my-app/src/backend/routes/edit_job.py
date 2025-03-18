@@ -3,6 +3,7 @@ from firebase_admin import firestore
 from flask_cors import CORS, cross_origin
 
 db = firestore.client()
+cred = credentials.Certificate('firebase_service_account_key.json')
 
 edit_job_bp = Blueprint('edit_job', __name__)
 

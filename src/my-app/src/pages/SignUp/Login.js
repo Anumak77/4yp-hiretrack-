@@ -25,7 +25,7 @@ const Login = () => {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // Fetch user role from Firestore
+      localStorage.setItem('user', JSON.stringify(user));
       const userDocRef = doc(db, "users", user.uid); // Get user document
       const userDocSnap = await getDoc(userDocRef);
       
@@ -49,6 +49,9 @@ const Login = () => {
       } else {
         setError("User data not found. Please contact support.");
       }
+
+      const idToken = await user.getIdToken();
+        console.log("Firebase ID token:", idToken);
 
     } catch (error) {
       if (error.code === 'auth/wrong-password') {

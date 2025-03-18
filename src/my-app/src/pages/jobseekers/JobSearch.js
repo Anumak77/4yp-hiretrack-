@@ -44,7 +44,6 @@ const JobSearch = () => {
       return;
     }
 
-    // Configure Fuse.js options
     const fuseOptions = {
       keys: ["Title", "Company", "Location"], // Fields to search
       threshold: 0.6, // Adjust the threshold for fuzzy matching

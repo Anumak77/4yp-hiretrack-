@@ -1,47 +1,220 @@
-import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { getAuth } from "firebase/auth";
 import "../../components/style.css";
 
 const ViewApplicants = () => {
     const { id: jobId } = useParams(); 
+    console.log("Job ID from URL:", jobId);
     const navigate = useNavigate();
-
-    const mockApplicants = [
-        { id: "1", first_name: "Test", last_name: "Applicant", email: "test@example.com", location: "Test City", phone_number: "123-456-7890", status: "Pending", tags: [] },
-        { id: "2", first_name: "John", last_name: "Doe", email: "johndoe@example.com", location: "Somewhere, Earth", phone_number: "987-654-3210", status: "Shortlisted", tags: [] },
-    ];
-
-    const [applicants, setApplicants] = useState(mockApplicants);
+    const [applicants, setApplicants] = useState([]);
     const [filter, setFilter] = useState("All");
+    const [loading, setLoading] = useState(true); 
+    const [error, setError] = useState(null); 
+
+        const fetchApplicants = async () => {
+            try {
+                const auth = getAuth();
+                const user = auth.currentUser;
+
+                if (!user) {
+                    throw new Error("User not authenticated");
+                }
+
+                const idToken = await user.getIdToken();
+                console.log("job id" + jobId)
+
+                const response = await fetch(`http://localhost:5000/fetch-applicants/${user.uid}/${jobId}`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": idToken,
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error("Failed to fetch applicants");
+                }
+
+                const data = await response.json();
+                console.log("Fetched Data:", data);
+                setApplicants(data.applicants);
+            } catch (error) {
+                console.error("Error fetching applicants:", error);
+                setError(error.message); 
+            } finally {
+                setLoading(false); 
+            }
+        };
+
+    useEffect(() => {
+        fetchApplicants()
+    },
+        [jobId]
+)
+
+        const fetchInterviewApplicants = async () => {
+        try {
+            const auth = getAuth();
+            const user = auth.currentUser;
+
+            if (!user) {
+                throw new Error("User not authenticated");
+            }
+
+            const idToken = await user.getIdToken();
+
+            const response = await fetch(`http://localhost:5000/fetch-interview-applicants/${user.uid}/${jobId}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": idToken,
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to fetch interview applicants");
+            }
+
+            const data = await response.json();
+            setApplicants(data.applicants);
+        } catch (error) {
+            console.error("Error fetching interview applicants:", error);
+            setError(error.message);
+        }
+    };
+
+    const fetchRejectedApplicants = async () => {
+        try {
+            const auth = getAuth();
+            const user = auth.currentUser;
+
+            if (!user) {
+                throw new Error("User not authenticated");
+            }
+
+            const idToken = await user.getIdToken();
+
+            const response = await fetch(`http://localhost:5000/fetch-rejected-applicants/${user.uid}/${jobId}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": idToken,
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to fetch rejected applicants");
+            }
+
+            const data = await response.json();
+            setApplicants(data.applicants);
+        } catch (error) {
+            console.error("Error fetching rejected applicants:", error);
+            setError(error.message);
+        }
+    };
+
+    useEffect(() => {
+        if (filter === "All") {
+            fetchApplicants();
+        } else if (filter === "Interview") {
+            fetchInterviewApplicants();
+        } else if (filter === "Rejected") {
+            fetchRejectedApplicants();
+        }
+    }, [filter, jobId]);
+
+    const handleInterview = async (applicantId) => {
+        try {
+            const auth = getAuth();
+            const user = auth.currentUser;
+
+            if (!user) {
+                throw new Error("User not authenticated");
+            }
+
+            const idToken = await user.getIdToken();
+
+            const response = await fetch(`http://localhost:5000/interview-applicants/${user.uid}/${jobId}?applicant_id=${applicantId}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": idToken,
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to add applicant to interview list");
+            }
+
+            const data = await response.json();
+            console.log("Interview Response:", data);
+
+
+            if (filter === "All") {
+                await fetchApplicants();
+            } else if (filter === "Interview") {
+                await fetchInterviewApplicants();
+            } else if (filter === "Rejected") {
+                await fetchRejectedApplicants();
+            }
+
+            alert("Applicant added to interview list");
+        } catch (error) {
+            console.error("Error adding applicant to interview list:", error);
+            alert("Error adding applicant to interview list");
+        }
+    };
+
+    const handleReject = async (applicantId) => {
+        try {
+            const auth = getAuth();
+            const user = auth.currentUser;
+
+            if (!user) {
+                throw new Error("User not authenticated");
+            }
+
+            const idToken = await user.getIdToken();
+
+            const response = await fetch(`http://localhost:5000/rejected-applicants/${user.uid}/${jobId}?applicant_id=${applicantId}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": idToken,
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to add applicant to rejected list");
+            }
+
+            const data = await response.json();
+            console.log("Reject Response:", data);
+
+            
+            if (filter === "All") {
+                await fetchApplicants();
+            } else if (filter === "Interview") {
+                await fetchInterviewApplicants();
+            } else if (filter === "Rejected") {
+                await fetchRejectedApplicants();
+            }
+
+            alert("Applicant added to rejected list");
+        } catch (error) {
+            console.error("Error adding applicant to rejected list:", error);
+            alert("Error adding applicant to rejected list");
+        }
+    };
+
+
 
     const handleStatusChange = (applicantId, newStatus) => {
         setApplicants(prevApplicants =>
             prevApplicants.map(applicant =>
                 applicant.id === applicantId ? { ...applicant, status: newStatus } : applicant
-            )
-        );
-    };
-
-    const handleAddTag = (applicantId, event) => {
-        if (event.key === "Enter" && event.target.value.trim()) {
-            const newTag = event.target.value.trim();
-            setApplicants(prevApplicants =>
-                prevApplicants.map(applicant =>
-                    applicant.id === applicantId
-                        ? { ...applicant, tags: [...applicant.tags, newTag] }
-                        : applicant
-                )
-            );
-            event.target.value = "";
-        }
-    };
-
-    const handleRemoveTag = (applicantId, tagToRemove) => {
-        setApplicants(prevApplicants =>
-            prevApplicants.map(applicant =>
-                applicant.id === applicantId
-                    ? { ...applicant, tags: applicant.tags.filter(tag => tag !== tagToRemove) }
-                    : applicant
             )
         );
     };
@@ -55,8 +228,6 @@ const ViewApplicants = () => {
         alert(`Chat initiated with Applicant ${applicantId}`);
     };
 
-    const filteredApplicants = filter === "All" ? applicants : applicants.filter(applicant => applicant.status === filter);
-
     return (
         <main className="view-applicants-container">
             <button className="back-button-view" onClick={() => navigate(-1)}>Go Back</button>
@@ -64,7 +235,7 @@ const ViewApplicants = () => {
 
             <label>Filter by Status</label>
             <div className="status-filter">
-                {["All", "Pending", "Rejected"].map(status => (
+                {["All", "Interview", "Rejected"].map(status => (
                     <button 
                         key={status} 
                         className={`filter-button ${filter === status ? "selected" : ""}`} 
@@ -76,8 +247,8 @@ const ViewApplicants = () => {
             </div>
 
             <section className="applicant-list">
-                {filteredApplicants.length > 0 ? (
-                    filteredApplicants.map(applicant => (
+                {applicants.length > 0 ? (
+                    applicants.map(applicant => (
                         <div key={applicant.id} className="applicant-card">
                             <h2 className="applicant-name">{applicant.first_name} {applicant.last_name}</h2>
                             <p className="applicant-email"><strong>Email:</strong> {applicant.email}</p>
@@ -85,33 +256,34 @@ const ViewApplicants = () => {
                             <p className="applicant-phone"><strong>Phone:</strong> {applicant.phone_number || "Not provided"}</p>
 
                             <div className="applicant-actions">
-                                <button className="interview-button" onClick={() => handleStatusChange(applicant.id, "Interview")}>
+                                <button className="interview-button" onClick={() => handleInterview(applicant.uid, jobId) }>
                                     Interview
                                 </button>
-                                <button className="match-score-button" onClick={() => handleMatchScore(applicant.id)}>
+                                <button className="match-score-button" onClick={() => handleMatchScore(applicant.uid)}>
                                     Match Score
                                 </button>
-                                <button className="chat-button" onClick={() => handleChat(applicant.id)}>
+                                <button className="chat-button" onClick={() => handleChat(applicant.uid)}>
                                     Chat
                                 </button>
-                                <button className="reject-button" onClick={() => handleStatusChange(applicant.id, "Rejected")}>
+                                <button className="reject-button" onClick={() => handleReject(applicant.uid, jobId)}>
                                     Reject
                                 </button>
                             </div>
-
-                            <div className="applicant-tags">
-                                {applicant.tags.map(tag => (
-                                    <span key={tag} className="applicant-tag">
-                                        {tag} <span className="remove-tag" onClick={() => handleRemoveTag(applicant.id, tag)}>❌</span>
-                                    </span>
-                                ))}
-                                <input 
-                                    type="text"
-                                    placeholder="Add a tag..."
-                                    className="tag-input"
-                                    onKeyDown={(event) => handleAddTag(applicant.id, event)}
-                                />
-                            </div>
+                        
+                           {/*
+                                <div className="applicant-tags">
+                                    {applicant.tags.map(tag => (
+                                        <span key={tag} className="applicant-tag">
+                                            {tag} <span className="remove-tag"></span>
+                                        </span>
+                                    ))}
+                                    <input 
+                                        type="text"
+                                        placeholder="Add a tag..."
+                                        className="tag-input"
+                                    />
+                                </div>
+                                */}
 
                         </div>
                     ))
@@ -124,3 +296,4 @@ const ViewApplicants = () => {
 };
 
 export default ViewApplicants;
+

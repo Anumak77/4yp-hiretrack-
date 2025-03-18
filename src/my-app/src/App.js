@@ -8,6 +8,9 @@ import {
 } from 'react-router-dom';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 
 import NavbarJobseeker from './pages/jobseekers/NavbarJobseeker';
 import NavbarRecruiters from './pages/recruiters/NavbarRecruiters';
@@ -26,17 +29,28 @@ import JobSeekerDetails from './pages/recruiters/jobseeker-details';
 import JobSeekerChat from './pages/chat/jobseekerchat';
 import PostJob from './pages/recruiters/postjob';
 import EditJob from './pages/recruiters/editjobposting';
-
-import ViewApplicants from './pages/recruiters/ViewApplicants';
-
-
 import ViewJobPostings from './pages/recruiters/viewjob-postings';
+import ViewApplicants from './pages/recruiters/ViewApplicants';
+import JobDetails2 from './pages/jobseekers/job-details2';
 
 function App() {
   return (
+    <div>
     <Router>
       <MainApp />
     </Router>
+
+    <ToastContainer
+                position="top-right"
+                autoClose={5000} 
+                hideProgressBar={false}
+                newestOnTop={true}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover />
+    </div>
   );
 }
 
@@ -102,6 +116,7 @@ function MainApp() {
         <Route path="/dashboard-jobseeker" element={<DashJobseeker />} />
         <Route path="/dashboard-recruiter" element={<DashRecruiter />} />
         <Route path="/job-details" element={<JobDetails />} />
+        <Route path="/job-details2" element={<JobDetails2 />} />
         <Route path="/job-search" element={<JobSearch />} />
         <Route path="/jobtracker-jobseeker" element={<JobTrackerJobseeker />} />
         <Route path="/jobtracker-recruiter" element={<JobTrackerRecruiter />} />
@@ -111,7 +126,7 @@ function MainApp() {
         <Route path="/createpost" element={<PostJob />} />
         <Route path="/viewjobpostings" element={<ViewJobPostings jobPostings={jobPostings} setJobPostings={setJobPostings} />} />
         <Route path="/editjobpostings/:id" element={<EditJob />} />
-        <Route path="/viewapplicants" element={<ViewApplicants />} />
+        <Route path="/viewapplicants/:id" element={<ViewApplicants />} />
         <Route path="*" element={<h1>404 - Page Not Found</h1>} />
       </Routes>
     </>

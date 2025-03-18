@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { auth, firestore, realtimeDb } from '../../components/firebaseconfigs.js';
 import axios from 'axios';
 import '../../components/style.css';
 
@@ -21,33 +22,32 @@ const JobDetails = () => {
 
   const fetchPdfFromFlaskBackend = async () => {
     try {
-      const user = JSON.parse(localStorage.getItem('user')); 
+      const user = auth.currentUser;
       if (!user) throw new Error('User not authenticated');
   
-      
-      const idToken = await user.getIdToken(); 
+      const idToken = await user.getIdToken();
       if (!idToken) throw new Error('Failed to get ID token');
   
-      
+      console.log('Fetching CV from Flask backend...');
       const response = await fetch('http://localhost:5000/fetch-pdf', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': idToken, 
+          'Authorization': idToken,
         },
       });
   
-      
+      console.log('Response Status:', response.status);
       if (!response.ok) {
-        throw new Error('Failed to fetch CV');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch CV');
       }
   
-      
       const result = await response.json();
+      console.log('CV Data from Backend:', result.fileData);
   
-      
       if (result.fileData) {
-        return result.fileData; 
+        return result.fileData;
       } else {
         throw new Error(result.error || 'No CV found for user');
       }
@@ -59,39 +59,65 @@ const JobDetails = () => {
 
   const compareWithDescription = async () => {
     try {
-        let cvBase64;
-
-        
+      let cvBase64;
         if (base64Data) {
-            cvBase64 = base64Data;
-        } else {
-            
-            cvBase64 = await fetchPdfFromFlaskBackend();
-        }
+        cvBase64 = base64Data;
+      } else {
+        cvBase64 = await fetchPdfFromFlaskBackend();
+      }
+  
+      console.log('CV Base64 Data (before split):', cvBase64);
 
-        console.log("CV Base64 Data:", cvBase64); 
+      const jobDescription = job['JobDescription'];
+      const jobRequirment = job['JobRequirment'];
+      const requiredQual = job['RequiredQual'];
 
-        const jobDescription = job['JobDescription'];
-
-        if (!cvBase64) {
-            alert('No CV found for the user. Please upload a CV.');
-            return;
-        }
-
-        const response = await axios.post('http://127.0.0.1:5000/compare_with_description', {
-            JobDescription: jobDescription,
-            cv: cvBase64.split(',')[1], 
-        });
-
-        const similarityScore = response.data['cosine similarity'];
-        console.log(similarityScore);
-        setMatchScore((similarityScore * 100).toFixed(2));
-        setShowPopup(true); 
+      console.log('Job Description:', jobDescription);
+  
+      if (!cvBase64) {
+        alert('No CV found for the user. Please upload a CV.');
+        return;
+      }
+        cvBase64 = cvBase64.trim();
+  
+      let cv;
+      if (cvBase64.startsWith('data:')) {
+        cv = cvBase64.split(',')[1];
+      } else {
+        cv = cvBase64;
+      }
+  
+      console.log('CV Base64 Data (after handling):', cv);
+  
+      const payload = {
+        JobDescription: jobDescription,
+        JobRequirment: jobRequirment,
+        RequiredQual: requiredQual,
+        cv: cv, // Use the processed value
+      };
+      //console.log('Request Payload:', payload);
+  
+      // Send the CV and job description to the Flask backend for comparison
+      const response = await axios.post('http://127.0.0.1:5000/compare_with_description', payload, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+  
+     
+      console.log('Comparison Response:', response.data);
+  
+      const similarityScore = response.data['cosine_similarity']; 
+      console.log('Similarity Score:', similarityScore);
+  
+      const matchScorePercentage = (similarityScore * 100).toFixed(2);
+      setMatchScore(matchScorePercentage);
+      setShowPopup(true);
     } catch (error) {
-        console.error('Error comparing CV with job description:', error);
-        alert('An error occurred. Please try again.');
+      console.error('Error comparing CV with job description:', error);
+      alert('An error occurred. Please try again.');
     }
-};
+  };
 
   const handleSubmitofsaveJobUpload = async (e) => {
     e.preventDefault();
@@ -127,35 +153,93 @@ const JobDetails = () => {
   const handleSubmitofapplyJobUpload = async (e) => {
     e.preventDefault();
 
-    if (!job) {
-        console.error('Please select a job to apply.');
-        return;
-    }
-
     try {
-        const userId = "actualUserId"; 
-        console.log("Sending request with userId:", userId);
-        const response = await fetch('http://127.0.0.1:5000/apply-job', {
-            method: 'POST',
+        const user = auth.currentUser;
+        if (!user) {
+            console.error('User not authenticated.');
+            alert('Please sign in to apply for jobs.'); 
+            return;
+        }
+
+        const userId = user.uid;
+        const recruiterId = job.recruiterId;
+
+        let cvBase64;
+        if (base64Data) {
+            cvBase64 = base64Data;
+        } else {
+            cvBase64 = await fetchPdfFromFlaskBackend();
+        }
+
+       // console.log('CV Base64 Data (before split):', cvBase64);
+
+        if (!cvBase64) {
+            alert('No CV found for the user. Please upload a CV.');
+            return;
+        }
+
+        
+        cvBase64 = cvBase64.trim();
+        let cv;
+        if (cvBase64.startsWith('data:')) {
+            cv = cvBase64.split(',')[1]; 
+        } else {
+            cv = cvBase64; 
+        }
+
+        //console.log('CV Base64 Data (after handling):', cv);
+
+        const jobDescription = job['JobDescription'];
+        const jobRequirment = job['JobRequirment'];
+        const requiredQual = job['RequiredQual'];
+
+        const matchScoreResponse = await axios.post('http://127.0.0.1:5000/compare_with_description', {
+          JobDescription: jobDescription,
+          JobRequirment: jobRequirment,
+          RequiredQual: requiredQual,
+          cv: cv,
+      }, {
+          headers: {
+              'Content-Type': 'application/json',
+          },
+      });
+
+      const similarityScore = matchScoreResponse.data.cosine_similarity;
+      const matchScorePercentage = (similarityScore * 100).toFixed(2);
+        
+        const payload = {
+            userId: userId, 
+            job: job, 
+            cv: cv,
+            recruiterId: recruiterId,
+            JobDescription: jobDescription,
+            JobRequirment: jobRequirment,
+            RequiredQual: requiredQual,
+            matchScore: matchScorePercentage
+        };
+
+        console.log('Request Payload:', payload);
+
+        // Send the payload to the backend
+        const response = await axios.post('http://127.0.0.1:5000/apply-job', payload, {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-                userId: userId,
-                job: job,
-            }),
         });
 
-        const result = await response.json();
+        const result = response.data;
         console.log("Response received:", result);
 
-        if (response.ok) {
+        if (response.status === 200) {
             console.log('Job applied successfully:', result.message);
+            alert('Job applied successfully!'); 
         } else {
             console.error('Error applying to job:', result.error);
+            alert('Error applying to job. Please try again.'); 
         }
     } catch (error) {
         console.error('Error:', error);
+        alert('An error occurred. Please try again.'); 
     }
 };
 
@@ -203,7 +287,6 @@ const JobDetails = () => {
 {showPopup && (
   <div className="popup-overlay">
     <div className="popup-content">
-      <h2>Application Submitted</h2>
       {matchScore !== null ? (
         <p>Your match score with this job is: {matchScore}%</p>
       ) : (
