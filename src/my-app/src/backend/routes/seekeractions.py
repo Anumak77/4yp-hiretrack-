@@ -130,8 +130,11 @@ def apply_job():
         recruiter_id = job.get('recruiterId')
         match_score = data.get('matchScore')
 
-        if not user_id or not job or not recruiter_id:
+        if not user_id or not job:
             return jsonify({"error": "User ID, job data, and recruiter ID are required"}), 400
+
+        if not recruiter_id:
+            recruiter_id = "recruiter_id"
         
         job_id = job.get('id') or f"{job.get('Company')}-{job.get('Title')}".replace(" ", "-").lower()
         

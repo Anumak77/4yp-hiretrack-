@@ -1,21 +1,24 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { db, collection, addDoc, query, where, onSnapshot, orderBy } from "./../components/firebaseconfigs";
+import { useNavigate, useParams } from "react-router-dom";
 import { getAuth } from 'firebase/auth';
 import "../../components/style.css";
 
 const RecruiterChat = () => {
+  console.log("RecruiterChat component rendered"); 
   const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [selectedChat, setSelectedChat] = useState(null);
   const [chatList, setChatList] = useState([]); 
   const [loading, setLoading] = useState(true);
+  const { applicantId } = useParams();
 
   useEffect(() => {
     if (applicantId) {
       setSelectedChat(applicantId);
     }
+
+    console.log(applicantId)
   }, [applicantId]);
 
 
@@ -29,20 +32,65 @@ const RecruiterChat = () => {
     }
 
     const recruiterId = user.uid; 
-    const chatsRef = collection(db, "chats");
-    const q = query(chatsRef, where("recruiterId", "==", recruiterId));
+    const fetchRecruiterChats = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:5000/get_recruiter_chats?recruiter_id=${recruiterId}`
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setChatList(data.chats);
+          setLoading(false);
+        } else {
+          console.error("Failed to fetch recruiter chats");
+        }
+      } catch (error) {
+        console.error("Error fetching recruiter chats:", error);
+      }
+    };
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const chats = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setChatList(chats);
-      setLoading(false);
-    });
-
-    return () => unsubscribe(); 
+    fetchRecruiterChats(); 
   }, [navigate]);
+
+  useEffect(() => {
+    const auth = getAuth();
+    const user = auth.currentUser;
+
+    if (!user || !applicantId) {
+      return;
+    }
+
+    const recruiterId = user.uid;
+
+    const createNewChat = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/create_chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            recruiter_id: recruiterId,
+            applicant_id: applicantId,
+          }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setChatList((prevChats) => [
+            ...prevChats,
+            { id: data.chat_id, recruiterId, applicantId, messages: [] },
+          ]);
+        } else {
+          console.error("Failed to create new chat");
+        }
+      } catch (error) {
+        console.error("Error creating new chat:", error);
+      }
+    };
+
+    createNewChat();
+  }, [navigate, applicantId]);
 
 
   useEffect(() => {
@@ -69,7 +117,11 @@ const RecruiterChat = () => {
 
 
   const handleSendMessage = async () => {
+
     if (input.trim() && selectedChat) {
+      const auth = getAuth();
+      const user = auth.currentUser;
+      const sender_id = user.uid;
         try {
           const response = await fetch("http://localhost:5000/send_message", {
             method: "POST",
@@ -77,7 +129,7 @@ const RecruiterChat = () => {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              sender_id: "recruiter_id", 
+              sender_id: sender_id, 
               recipient_id: selectedChat,
               message: input,
             }),
@@ -85,6 +137,23 @@ const RecruiterChat = () => {
     
           if (response.ok) {
             setInput("");
+            const fetchChatHistory = async () => {
+              try {
+                const response = await fetch(
+                  `http://localhost:5000/get_chat_history?chat_id=${selectedChat}`
+                );
+                if (response.ok) {
+                  const data = await response.json();
+                  setMessages(data.messages);
+                } else {
+                  console.error("Failed to fetch chat history");
+                }
+              } catch (error) {
+                console.error("Error fetching chat history:", error);
+              }
+            };
+  
+            fetchChatHistory();
           } else {
             console.error("Failed to send message");
           }
@@ -131,7 +200,7 @@ const RecruiterChat = () => {
         {/* Chat Box */}
         <section className="chat-box">
           <h1 className="chat-title">
-            Chat with {selectedChat ? chatList.find((chat) => chat.id === selectedChat)?.applicantName : "Select a chat"}
+          Chat with{" "} {selectedChat? chatList.find((chat) => chat.id === selectedChat)?.applicantName: "Select a chat"}
           </h1>
 
           <div className="messages-container">

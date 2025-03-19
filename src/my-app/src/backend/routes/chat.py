@@ -55,3 +55,40 @@ def get_chat_history():
 
     messages = chat_doc.to_dict().get("messages", [])
     return jsonify({"messages": messages})
+
+@chat_bp.route("/get_recruiter_chats", methods=["GET"])
+def get_recruiter_chats():
+    recruiter_id = request.args.get("recruiter_id")
+    if not recruiter_id:
+        return jsonify({"error": "Recruiter ID is required"}), 400
+
+    chats_ref = firestore.client().collection("chats")
+    q = chats_ref.where("recruiterId", "==", recruiter_id)
+    snapshot = q.get()
+
+    chats = [{"id": doc.id, **doc.to_dict()} for doc in snapshot]
+    return jsonify({"chats": chats})
+
+@chat_bp.route("/create_chat", methods=["POST"])
+def create_chat():
+    data = request.json
+    recruiter_id = data.get("recruiter_id")
+    applicant_id = data.get("applicant_id")
+
+    if not recruiter_id or not applicant_id:
+        return jsonify({"error": "Recruiter ID and applicant ID are required"}), 400
+
+    chat_id = f"{recruiter_id}_{applicant_id}"
+    chat_ref = firestore.client().collection("chats").document(chat_id)
+    chat_doc = chat_ref.get()
+
+    if chat_doc.exists:
+        return jsonify({"error": "Chat already exists"}), 400
+
+    chat_ref.set({
+        "recruiterId": recruiter_id,
+        "applicantId": applicant_id,
+        "messages": [],
+    })
+
+    return jsonify({"success": True, "chat_id": chat_id})

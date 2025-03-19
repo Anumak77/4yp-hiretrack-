@@ -32,6 +32,7 @@ import EditJob from './pages/recruiters/editjobposting';
 import ViewJobPostings from './pages/recruiters/viewjob-postings';
 import ViewApplicants from './pages/recruiters/ViewApplicants';
 import JobDetails2 from './pages/jobseekers/job-details2';
+import RecruiterChat from './pages/chat/recruiterchat';
 
 function App() {
   return (
@@ -123,7 +124,7 @@ function MainApp() {
         <Route path="/recruiter-search" element={<RecruiterSearch />} />
         <Route path="/jobseeker-details" element={<JobSeekerDetails />} />
         <Route path="/jobseekerchat/:recruiterId" element={<JobSeekerChat />} />
-        <Route path="/recruiterchat/:applicantId" element={<JobSeekerChat />} />
+        <Route path="/recruiterchat/:applicantId" element={<RecruiterChat />} />
         <Route path="/createpost" element={<PostJob />} />
         <Route path="/viewjobpostings" element={<ViewJobPostings jobPostings={jobPostings} setJobPostings={setJobPostings} />} />
         <Route path="/editjobpostings/:id" element={<EditJob />} />
