@@ -4,7 +4,7 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { firebaseapp } from "../../components/firebaseconfigs";
-import axios from 'axios/dist/browser/axios.cjs';
+import axios from 'axios';
 import '../../components/style.css';
 
 const Login = () => {

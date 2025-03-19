@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import {getAuth} from 'firebase/auth'
+// Remove this line: import axios from 'axios';
+import { getAuth } from 'firebase/auth';
 import '../../components/style.css';
 import { getFirestore, collection, addDoc } from "firebase/firestore";
-
 
 const countryOptions = [
   'United States',
@@ -21,7 +20,6 @@ const countryOptions = [
 
 const PostJob = () => {
   const navigate = useNavigate();
-
   const [jobData, setJobData] = useState({
     AboutC: '',
     ApplicationP: '',
@@ -59,58 +57,60 @@ const PostJob = () => {
 
   const confirmSubmission = async (e) => {
     e.preventDefault();
-    
-    const missingFields = [];
 
-    Object.entries("").forEach(([key, value]) => {
+    // Example check for missing fields:
+    const missingFields = [];
+    // This snippet is just an example – adapt it to match your own logic
+    for (const [key, value] of Object.entries(jobData)) {
       if (typeof value === "string" && value.trim() === "") {
         missingFields.push(key);
       } else if (value === undefined || value === null) {
         missingFields.push(key);
       }
-    });
-    
+    }
+
     if (missingFields.length > 0) {
       console.log("Missing fields:", missingFields);
-      console.log("Form Data:", "");
+      console.log("Form Data:", jobData);
       showAlert(`Please fill out all fields: ${missingFields.join(", ")}`, 'error');
-
       return;
     }
-    
+
     try {
-      
       const user = getAuth().currentUser;
       if (!user) throw new Error('User not authenticated');
 
       const idToken = await user.getIdToken();
       if (!idToken) throw new Error('Failed to get ID token');
 
-
-      const response = await axios.post('http://localhost:5000/create-job', jobData, {
+      // Replace axios.post with fetch
+      const response = await fetch('http://localhost:5000/create-job', {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': idToken, 
+          'Authorization': idToken,
         },
+        body: JSON.stringify(jobData),
       });
 
-      if (response.data.success) {
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
         showAlert('Job Posted Successfully!', 'success');
-        console.log('Job posted with ID:', response.data.jobId);
-    
+        console.log('Job posted with ID:', data.jobId);
         navigate('/dashboard-recruiter');
       } else {
-        throw new Error(response.data.error || "Failed to post job");
+        throw new Error(data.error || "Failed to post job");
       }
     } catch (error) {
       console.error('Error posting job:', error);
       showAlert(error.message || 'An error occurred while posting the job.', 'error');
     }
   };
-
-
-  
-
 
   return (
     <main>
@@ -237,7 +237,6 @@ const PostJob = () => {
                 />
               </div>
             </div>
-
 
             <button type='submit' className='post-job-button'>
               Post Job
