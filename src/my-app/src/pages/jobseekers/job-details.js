@@ -1,16 +1,20 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { auth } from '../../components/firebaseconfigs'; // Adjust if needed
+import { auth } from '../../components/firebaseconfigs'; 
 import '../../components/style.css';
 
 const JobDetails = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const job = location.state; // The job data passed via navigate
+  const job = location.state; 
   const [showPopup, setShowPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState(""); 
+  const [popupType, setPopupType] = useState(""); 
   const [matchScore, setMatchScore] = useState(null);
-  const [base64Data, setBase64Data] = useState(null); // If user has a CV stored in state
+  const [base64Data, setBase64Data] = useState(null); 
 
+
+  
   // ===============================
   // Close the "Match Score" popup
   // ===============================
@@ -70,31 +74,27 @@ const JobDetails = () => {
   // ================================================
   const compareWithDescription = async () => {
     try {
-      // 1) Get CV from state or fetch it
       let cvBase64 = base64Data;
       if (!cvBase64) {
         cvBase64 = await fetchPdfFromFlaskBackend();
       }
       if (!cvBase64) {
-        alert('No CV found for the user. Please upload a CV.');
+        alert("No CV found for the user. Please upload a CV.");
         return;
       }
-
-      // If the Base64 string starts with `data:`, remove that
-      if (cvBase64.startsWith('data:')) {
-        cvBase64 = cvBase64.split(',')[1];
+  
+      if (cvBase64.startsWith("data:")) {
+        cvBase64 = cvBase64.split(",")[1];
       }
-
-      // 2) Prepare the job fields
-      const jobDescription = job.JobDescription || '';
-      const jobRequirment = job.JobRequirment || '';
-      const requiredQual = job.RequiredQual || '';
-
-      // 3) Call your Flask endpoint
-      const response = await fetch('http://127.0.0.1:5000/compare_with_description', {
-        method: 'POST',
+  
+      const jobDescription = job.JobDescription || "";
+      const jobRequirment = job.JobRequirment || "";
+      const requiredQual = job.RequiredQual || "";
+  
+      const response = await fetch("http://127.0.0.1:5000/compare_with_description", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           JobDescription: jobDescription,
@@ -103,23 +103,25 @@ const JobDetails = () => {
           cv: cvBase64,
         }),
       });
-
+  
       if (!response.ok) {
         throw new Error(`Compare request failed: ${response.statusText}`);
       }
-
+  
       const data = await response.json();
-      // Suppose your Flask returns { "cosine_similarity": 0.85 } or similar
       const similarityScore = data.cosine_similarity || 0;
       const matchScorePercentage = (similarityScore * 100).toFixed(2);
-
+  
       setMatchScore(matchScorePercentage);
+      setPopupMessage(""); 
+      setPopupType("match"); 
       setShowPopup(true);
     } catch (error) {
-      console.error('Error comparing CV with job description:', error);
-      alert('An error occurred. Please try again.');
+      console.error("Error comparing CV with job description:", error);
+      alert("An error occurred. Please try again.");
     }
   };
+  
 
   // ===============================
   // 3) Save the job
@@ -127,32 +129,40 @@ const JobDetails = () => {
   const handleSaveJob = async (e) => {
     e.preventDefault();
     if (!job) {
-      console.log('Please select a job to save.');
+      console.log("Please select a job to save.");
       return;
     }
     try {
-      const response = await fetch('http://127.0.0.1:5000/save-job', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("http://127.0.0.1:5000/save-job", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          userId: 'currentUserId', // Replace with actual user ID
+          userId: "currentUserId",
           job: job,
         }),
       });
-
+  
       const result = await response.json();
       if (response.ok) {
-        console.log('Job saved successfully:', result.message);
-        alert('Job saved successfully!');
+        console.log("Job saved successfully:", result.message);
+        setPopupMessage("Job saved successfully!"); 
+        setPopupType("save"); 
+        setShowPopup(true);
       } else {
-        console.log('Error saving job:', result.error);
-        alert('Error saving job.');
+        console.log("Error saving job:", result.error);
+        setPopupMessage("Error saving job. Please try again.");
+        setPopupType("save");
+        setShowPopup(true);
       }
     } catch (error) {
-      console.log('Error saving job:', error);
-      alert('Error saving job.');
+      console.log("Error saving job:", error);
+      setPopupMessage("Error saving job. Please try again.");
+      setPopupType("save"); 
+      setShowPopup(true);
     }
   };
+  
+  
 
   // ===============================
   // 4) Apply for the job
@@ -270,19 +280,21 @@ const JobDetails = () => {
 
       {/* Popup for match score */}
       {showPopup && (
-        <div className="popup-overlay">
-          <div className="popup-content">
-            {matchScore !== null ? (
-              <p>Your match score with this job is: {matchScore}%</p>
-            ) : (
-              <p>You have successfully applied for this job.</p>
-            )}
-            <button className="popup-cancel-button" onClick={closePopup}>
-              Close
-            </button>
-          </div>
+      <div className="popup-overlay">
+        <div className="popup-content">
+          {popupType === "match" ? (
+            <p>Your match score with this job is: {matchScore}%</p>
+          ) : (
+            <p>{popupMessage}</p>
+          )}
+          <button className="popup-cancel-button" onClick={closePopup}>
+            Close
+          </button>
         </div>
-      )}
+      </div>
+    )}
+
+
     </main>
   );
 };
