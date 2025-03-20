@@ -125,16 +125,18 @@ const JobTrackerJobseeker = () => {
   };
 
   const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
     scales: {
       y: {
-        min: 0,
-        max: 30,
+        beginAtZero: true, 
         ticks: {
-          stepSize: 1,
+          stepSize: 1, 
         },
       },
     },
   };
+  
   
   const pieChartData = {
     labels: ["Applied", "Interviewed", "Rejected"],
@@ -205,7 +207,9 @@ const JobTrackerJobseeker = () => {
       <div className="jobtracker-chart-container">
         <h2 className="jobtracker-chart-heading">Bar Chart - Applications Per Status</h2>
         <div className="jobtracker-bar-chart">
-          <Bar data={barChartData} options={chartOptions}/>
+        <div className="jobtracker-bar-chart" style={{ width: "400px", height: "400px" }}>
+          <Bar data={barChartData} options={chartOptions} />
+        </div>
         </div>
       </div>
 
@@ -217,6 +221,13 @@ const JobTrackerJobseeker = () => {
       </div>
       </div>
       </section>
+
+      
+  <section className="google-calendar-integration">
+  <h2>Google Calendar Integration (Coming Soon)</h2>
+  <p>Sync your job application deadlines with Google Calendar to stay on top of your applications.</p>
+  </section>
+
     </main>
   );
 };

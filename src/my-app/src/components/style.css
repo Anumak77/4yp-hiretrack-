@@ -2692,3 +2692,47 @@ background-color: #2c3e50;
   cursor: pointer;
   margin-top: 1rem;
 }
+
+.jobtracker-container,
+.google-calendar-integration {
+  box-sizing: border-box;
+  vertical-align: top;
+}
+
+.jobtracker-container {
+  float: left;
+  width: 50%; 
+  padding-right: 20px;
+  margin-left: -10px;
+}
+
+.google-calendar-integration {
+  float: right;
+  width: 50%; 
+  padding-left: 20px;
+  padding-right: 200px;
+  padding-top: 35px;
+}
+
+main::after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+.jobtracker-charts-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.jobtracker-charts-container .jobtracker-chart-container:first-child {
+  order: 1;
+}
+
+.jobtracker-charts-container .jobtracker-chart-container:last-child {
+  order: 2;
+}
+
+.jobtracker-chart-container {
+  margin-bottom: 20px;
+}
