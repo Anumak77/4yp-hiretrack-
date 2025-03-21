@@ -14,15 +14,21 @@ const RecruiterChat = () => {
   const { applicantId } = useParams();
 
   useEffect(() => {
+    console.log("useEffect 1: Setting selectedChat");
+    const auth = getAuth();
+    const user = auth.currentUser;
+    const recruiterId = user.uid; 
+
     if (applicantId) {
-      setSelectedChat(applicantId);
+      setSelectedChat(recruiterId + "_" + applicantId);
     }
 
-    console.log(applicantId)
+    console.log(selectedChat)
   }, [applicantId]);
 
 
   useEffect(() => {
+    console.log("useEffect 2: Fetching recruiter chats");
     const auth = getAuth();
     const user = auth.currentUser;
 
@@ -53,16 +59,33 @@ const RecruiterChat = () => {
   }, [navigate]);
 
   useEffect(() => {
+    console.log("useEffect 3: Creating new chat");
+    console.log(selectedChat)
     const auth = getAuth();
     const user = auth.currentUser;
-
-    if (!user || !applicantId) {
-      return;
-    }
-
     const recruiterId = user.uid;
 
+
+    if (applicantId) {
+      setSelectedChat(recruiterId + "_" + applicantId);
+    }
+
+    const chatExists = chatList.some((chat) => chat.id === `${recruiterId}_${applicantId}`);
+
+    if (!chatExists){
     const createNewChat = async () => {
+
+      if (!recruiterId || !applicantId) {
+        console.error("Recruiter ID or Applicant ID is missing");
+        return;
+      }
+
+        const payload = {
+          recruiter_id: recruiterId,
+          applicant_id: applicantId,
+        };
+        console.log("Payload:", payload);
+
       try {
         const response = await fetch("http://localhost:5000/create_chat", {
           method: "POST",
@@ -75,11 +98,13 @@ const RecruiterChat = () => {
           }),
         });
 
+        console.log(response)
+
         if (response.ok) {
           const data = await response.json();
           setChatList((prevChats) => [
             ...prevChats,
-            { id: data.chat_id, recruiterId, applicantId, messages: [] },
+            { id: data.chat_id, messages: [] },
           ]);
         } else {
           console.error("Failed to create new chat");
@@ -90,10 +115,20 @@ const RecruiterChat = () => {
     };
 
     createNewChat();
+  }
   }, [navigate, applicantId]);
 
 
   useEffect(() => {
+    const auth = getAuth();
+    const user = auth.currentUser;
+    const recruiterId = user.uid;
+
+    console.log("useEffect 4: Chat History");
+    if (applicantId) {
+      setSelectedChat(recruiterId + "_" + applicantId);
+    }
+    console.log(selectedChat)
     if (selectedChat) {
         const fetchChatHistory = async () => {
           try {
@@ -122,7 +157,25 @@ const RecruiterChat = () => {
       const auth = getAuth();
       const user = auth.currentUser;
       const sender_id = user.uid;
+
+      console.log(selectedChat)
+
+      if (applicantId) {
+        setSelectedChat(sender_id + "_" + applicantId);
+      }
+
+      console.log(selectedChat)
+
         try {
+
+          const payload = {
+            sender_id: sender_id,
+            recipient_id: applicantId,
+            message: input,
+          };
+        
+          console.log("Sending payload:", payload);
+
           const response = await fetch("http://localhost:5000/send_message", {
             method: "POST",
             headers: {
@@ -130,7 +183,7 @@ const RecruiterChat = () => {
             },
             body: JSON.stringify({
               sender_id: sender_id, 
-              recipient_id: selectedChat,
+              recipient_id: applicantId,
               message: input,
             }),
           });

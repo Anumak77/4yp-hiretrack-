@@ -56,6 +56,7 @@ def get_chat_history():
     messages = chat_doc.to_dict().get("messages", [])
     return jsonify({"messages": messages})
 
+
 @chat_bp.route("/get_recruiter_chats", methods=["GET"])
 def get_recruiter_chats():
     recruiter_id = request.args.get("recruiter_id")
@@ -65,15 +66,25 @@ def get_recruiter_chats():
     chats_ref = firestore.client().collection("chats")
     q = chats_ref.where("recruiterId", "==", recruiter_id)
     snapshot = q.get()
-
+    
     chats = [{"id": doc.id, **doc.to_dict()} for doc in snapshot]
     return jsonify({"chats": chats})
+
 
 @chat_bp.route("/create_chat", methods=["POST"])
 def create_chat():
     data = request.json
     recruiter_id = data.get("recruiter_id")
     applicant_id = data.get("applicant_id")
+
+    applicant_ref = firestore_db.collection("jobseekers").document(applicant_id)
+    applicant_doc = applicant_ref.get()
+
+    if not applicant_doc.exists:
+        return jsonify({"error": "Applicant not found"}), 404
+
+    applicant_data = applicant_doc.to_dict()
+    applicant_name = f"{applicant_data.get('first_name', 'Unknown')} {applicant_data.get('last_name', '')}".strip()
 
     if not recruiter_id or not applicant_id:
         return jsonify({"error": "Recruiter ID and applicant ID are required"}), 400
@@ -83,12 +94,28 @@ def create_chat():
     chat_doc = chat_ref.get()
 
     if chat_doc.exists:
-        return jsonify({"error": "Chat already exists"}), 400
+        return jsonify({"error": "Chat already exists"}), 200
 
     chat_ref.set({
         "recruiterId": recruiter_id,
         "applicantId": applicant_id,
         "messages": [],
+        "applicantName": applicant_name
     })
 
     return jsonify({"success": True, "chat_id": chat_id})
+
+@chat_bp.route("/get_jobseeker_details", methods=["GET"])
+def get_jobseeker_details():
+    jobseeker_id = request.args.get("jobseeker_id")
+    if not jobseeker_id:
+        return jsonify({"error": "Jobseeker ID is required"}), 400
+
+    jobseeker_ref = firestore_db.collection("jobseeker").document(jobseeker_id)
+    jobseeker_doc = jobseeker_ref.get()
+
+    if not jobseeker_doc.exists:
+        return jsonify({"error": "Jobseeker not found"}), 404
+
+    jobseeker_data = jobseeker_doc.to_dict()
+    return jsonify(jobseeker_data)
