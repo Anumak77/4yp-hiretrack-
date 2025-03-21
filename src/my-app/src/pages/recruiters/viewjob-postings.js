@@ -92,36 +92,46 @@ const handleDelete = async (id) => {
 };
 
 
-const handleTagInput = async (id, event) => {
-  if (event.key === "Enter" && event.target.value.trim()) {
-      const newTag = event.target.value.trim();
-
-      try {
-          const idToken = await getAuth().currentUser.getIdToken();
-          const response = await fetch('http://localhost:5000/add-tag', {
-              method: 'POST',
-              headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': idToken,
-              },
-              body: JSON.stringify({
-                  job_id: id,
-                  tag: newTag,
-              }),
-          });
-
-          if (!response.ok) {
-              throw new Error('Failed to add tag');
-          }
-
-          const data = await response.json();
-          setJobPostings(prev => prev.map(job => job.id === id ? { ...job, tags: data.tags } : job));
-          event.target.value = "";
-      } catch (error) {
-          console.error('Error adding tag:', error);
+const handleTagInput = async (id, e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();   // Stop default Enter behavior
+    const newTag = e.target.value.trim();
+    if (!newTag) return;
+    
+    try {
+      const user = getAuth().currentUser;
+      if (!user) throw new Error('User not authenticated');
+      const idToken = await user.getIdToken();
+      
+      const response = await fetch('http://localhost:5000/add-tag', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': idToken,
+        },
+        body: JSON.stringify({
+          job_id: id,
+          tag: newTag,
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to add tag');
       }
+      
+      const data = await response.json();
+      setJobPostings(prevJobs =>
+        prevJobs.map(job =>
+          job.id === id ? { ...job, tags: data.tags } : job
+        )
+      );
+      e.target.value = '';
+    } catch (error) {
+      console.error('Error adding tag:', error);
+    }
   }
 };
+
 
 const handleRemoveTag = async (id, tagToRemove) => {
 try {
@@ -172,9 +182,9 @@ try {
 
 
 
-              <div className="job-tags">
+              <div className="custom-tags">
                 {job.tags && job.tags.map((tag, index) => (
-                  <span key={index} className="job-tag">
+                  <span key={index} className="job-tag"> 
                     {tag} <span className="remove-tag" onClick={() => handleRemoveTag(job.id, tag)}>❌</span>
                   </span>
                 ))}
