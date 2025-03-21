@@ -114,55 +114,70 @@ const PostJob = () => {
 
   return (
     <main>
-      <h1 className='post-job-title'>Post a Job</h1>
+    <h1 className="post-job-title">Post a Job</h1>
 
-      <section className='post-job-container'>
-        <section className='post-job-card'>
+      <section className="post-job-container">
+        <section className="post-job-card">
           {alertMessage && <div className={`alert-box ${alertType}`}>{alertMessage}</div>}
 
           <button
-            type='button'
-            className='back-button'
+            type="button"
+            className="back-button"
             onClick={() => navigate('/dashboard-recruiter')}
           >
             Go Back
           </button>
 
           <form onSubmit={handleSubmit}>
-            <div className='input-group'>
+            {/* Job Title */}
+            <div className="input-group">
               <label>Job Title</label>
               <input
-                type='text'
-                name='Title'
+                type="text"
+                name="Title"
                 value={jobData.Title}
                 onChange={handleChange}
-                placeholder='Enter job title'
+                placeholder="Enter job title"
                 required
               />
             </div>
 
-            <div className='input-group'>
+            {/* Company */}
+            <div className="input-group">
               <label>Company</label>
               <input
-                type='text'
-                name='Company'
+                type="text"
+                name="Company"
                 value={jobData.Company}
                 onChange={handleChange}
-                placeholder='Enter company name'
+                placeholder="Enter company name"
                 required
               />
             </div>
 
-            <div className='input-group'>
-              <label htmlFor='Location'>Location</label>
+            {/* About Company */}
+            <div className="input-group">
+              <label>About Company</label>
+              <textarea
+                name="AboutC"
+                value={jobData.AboutC}
+                onChange={handleChange}
+                placeholder="Enter details about the company"
+                required
+              />
+            </div>
+
+            {/* Location */}
+            <div className="input-group">
+              <label htmlFor="Location">Location</label>
               <select
-                name='Location'
+                name="Location"
                 value={jobData.Location}
                 onChange={handleChange}
                 required
-                className='location-dropdown'
+                className="location-dropdown"
               >
-                <option value=''>Select a country</option>
+                <option value="">Select a country</option>
                 {countryOptions.map((country, index) => (
                   <option key={index} value={country}>
                     {country}
@@ -171,74 +186,111 @@ const PostJob = () => {
               </select>
             </div>
 
-            <div className='input-group'>
+            {/* Job Description */}
+            <div className="input-group">
               <label>Job Description</label>
               <textarea
-                name='JobDescription'
+                name="JobDescription"
                 value={jobData.JobDescription}
                 onChange={handleChange}
-                placeholder='Enter job description'
+                placeholder="Enter job description"
                 required
               />
             </div>
 
-            <div className='input-group'>
+            {/* Job Requirements */}
+            <div className="input-group">
               <label>Job Requirements</label>
               <textarea
-                name='JobRequirment'
+                name="JobRequirment"
                 value={jobData.JobRequirment}
                 onChange={handleChange}
-                placeholder='Enter job requirements'
+                placeholder="Enter job requirements"
                 required
               />
             </div>
 
-            <div className='input-group'>
+            {/* Required Qualifications */}
+            <div className="input-group">
               <label>Required Qualifications</label>
               <textarea
-                name='RequiredQual'
+                name="RequiredQual"
                 value={jobData.RequiredQual}
                 onChange={handleChange}
-                placeholder='Enter required qualifications'
+                placeholder="Enter required qualifications"
                 required
               />
             </div>
 
-            <div className='input-group'>
+            {/* Application Process */}
+            <div className="input-group">
               <label>Application Process</label>
               <textarea
-                name='ApplicationP'
+                name="ApplicationP"
                 value={jobData.ApplicationP}
                 onChange={handleChange}
-                placeholder='Enter application process'
+                placeholder="Enter application process"
                 required
               />
             </div>
 
-            <div className='date-container'>
-              <div className='input-group'>
+            {/* jobpost */}
+            <div className="input-group">
+              <label>Job Post</label>
+              <textarea
+                name="jobpost"
+                value={jobData.jobpost}
+                onChange={handleChange}
+                placeholder="Enter any additional job post details"
+              />
+            </div>
+
+            {/* Date fields (OpeningDate, Deadline, StartDate, date) */}
+            <div className="date-container">
+              <div className="input-group">
                 <label>Opening Date</label>
                 <input
-                  type='date'
-                  name='OpeningDate'
+                  type="date"
+                  name="OpeningDate"
                   value={jobData.OpeningDate}
                   onChange={handleChange}
                   required
                 />
               </div>
-              <div className='input-group'>
+
+              <div className="input-group">
                 <label>Deadline</label>
                 <input
-                  type='date'
-                  name='Deadline'
+                  type="date"
+                  name="Deadline"
                   value={jobData.Deadline}
                   onChange={handleChange}
                   required
                 />
               </div>
+
+              <div className="input-group">
+                <label>Start Date</label>
+                <input
+                  type="date"
+                  name="StartDate"
+                  value={jobData.StartDate}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div className="input-group">
+                <label>Date</label>
+                <input
+                  type="date"
+                  name="date"
+                  value={jobData.date}
+                  onChange={handleChange}
+                />
+              </div>
             </div>
 
-            <button type='submit' className='post-job-button'>
+            <button type="submit" className="post-job-button">
               Post Job
             </button>
           </form>
