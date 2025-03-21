@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getAuth } from 'firebase/auth';
-import "../../components/style.css";
+import "../../components/chat.css";
 
 const RecruiterChat = () => {
   console.log("RecruiterChat component rendered"); 
@@ -269,7 +269,7 @@ const RecruiterChat = () => {
                       : "seeker-message"
                   }`}
                 >
-                  <strong>{msg.sender}:</strong> {msg.text}
+                  <strong>"You":</strong> {msg.text}
                 </div>
               ))
             )}

@@ -1,20 +1,34 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { getAuth } from 'firebase/auth';
-import "../../components/style.css";
-import { getFirestore, collection, query, where, onSnapshot, orderBy} from "firebase/firestore";
-import { db } from "../../components/firebaseconfigs"; 
+import "../../components/chat.css";
 
-const RecruiterChat = () => {
+const JobseekerChat = () => {
+ // console.log("RecruiterChat component rendered"); 
   const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [selectedChat, setSelectedChat] = useState(null);
   const [chatList, setChatList] = useState([]); 
   const [loading, setLoading] = useState(true);
+  const { recruiter_id } = useParams();
+
+  useEffect(() => {
+    // console.log("useEffect 1: Setting selectedChat");
+    const auth = getAuth();
+    const user = auth.currentUser;
+    const applicant_id = user.uid; 
+
+    if (recruiter_id) {
+      setSelectedChat(recruiter_id + "_" + applicant_id);
+    }
+
+   // console.log(selectedChat)
+  }, [recruiter_id]);
 
 
   useEffect(() => {
+    // console.log("useEffect 2: Fetching recruiter chats");
     const auth = getAuth();
     const user = auth.currentUser;
 
@@ -23,24 +37,98 @@ const RecruiterChat = () => {
       return;
     }
 
-    const recruiterId = user.uid; 
-    const chatsRef = collection(db, "chats");
-    const q = query(chatsRef, where("recruiterId", "==", recruiterId));
+    const applicant_id = user.uid; 
+    const fetchRecruiterChats = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:5000/get_recruiter_chats?recruiter_id=${applicant_id}`
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setChatList(data.chats);
+          setLoading(false);
+        } else {
+          console.error("Failed to fetch recruiter chats");
+        }
+      } catch (error) {
+        console.error("Error fetching recruiter chats:", error);
+      }
+    };
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const chats = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setChatList(chats);
-      setLoading(false);
-    });
-
-    return () => unsubscribe(); 
+    fetchRecruiterChats(); 
   }, [navigate]);
+
+  useEffect(() => {
+    console.log("useEffect 3: Creating new chat");
+    console.log(selectedChat)
+    const auth = getAuth();
+    const user = auth.currentUser;
+    const applicant_id = user.uid;
+
+
+    if (recruiter_id) {
+      setSelectedChat(applicant_id + "_" + recruiter_id);
+    }
+
+    const chatExists = chatList.some((chat) => chat.id === `${applicant_id}_${recruiter_id}`);
+
+    if (!chatExists){
+    const createNewChat = async () => {
+
+      if (!applicant_id || !recruiter_id) {
+        console.error("Recruiter ID or Applicant ID is missing");
+        return;
+      }
+
+        const payload = {
+          recruiter_id: applicant_id,
+          applicant_id: recruiter_id,
+        };
+       // console.log("Payload:", payload);
+
+      try {
+        const response = await fetch("http://localhost:5000/create_chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            recruiter_id: applicant_id,
+            applicant_id: recruiter_id,
+          }),
+        });
+
+        // console.log(response)
+
+        if (response.ok) {
+          const data = await response.json();
+          setChatList((prevChats) => [
+            ...prevChats,
+            { id: data.chat_id, messages: [] },
+          ]);
+        } else {
+          console.error("Failed to create new chat");
+        }
+      } catch (error) {
+        console.error("Error creating new chat:", error);
+      }
+    };
+
+    createNewChat();
+  }
+  }, [navigate, recruiter_id]);
 
 
   useEffect(() => {
+    const auth = getAuth();
+    const user = auth.currentUser;
+    const applicant_id = user.uid;
+
+    console.log("useEffect 4: Chat History");
+    if (recruiter_id) {
+      setSelectedChat(recruiter_id + "_" + applicant_id);
+    }
+    console.log(selectedChat)
     if (selectedChat) {
         const fetchChatHistory = async () => {
           try {
@@ -64,22 +152,61 @@ const RecruiterChat = () => {
 
 
   const handleSendMessage = async () => {
+
     if (input.trim() && selectedChat) {
+      const auth = getAuth();
+      const user = auth.currentUser;
+      const sender_id = user.uid;
+
+      // console.log(selectedChat)
+
+      if (recruiter_id) {
+        setSelectedChat(recruiter_id + "_" + sender_id);
+      }
+
+     // console.log(selectedChat)
+
         try {
+
+          const payload = {
+            sender_id: sender_id,
+            recipient_id: recruiter_id,
+            message: input,
+          };
+        
+          // console.log("Sending payload:", payload);
+
           const response = await fetch("http://localhost:5000/send_message", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              sender_id: "recruiter_id", 
-              recipient_id: selectedChat,
+              sender_id: sender_id, 
+              recipient_id: recruiter_id,
               message: input,
             }),
           });
     
           if (response.ok) {
             setInput("");
+            const fetchChatHistory = async () => {
+              try {
+                const response = await fetch(
+                  `http://localhost:5000/get_chat_history?chat_id=${selectedChat}`
+                );
+                if (response.ok) {
+                  const data = await response.json();
+                  setMessages(data.messages);
+                } else {
+                  console.error("Failed to fetch chat history");
+                }
+              } catch (error) {
+                console.error("Error fetching chat history:", error);
+              }
+            };
+  
+            fetchChatHistory();
           } else {
             console.error("Failed to send message");
           }
@@ -126,7 +253,7 @@ const RecruiterChat = () => {
         {/* Chat Box */}
         <section className="chat-box">
           <h1 className="chat-title">
-            Chat with {selectedChat ? chatList.find((chat) => chat.id === selectedChat)?.applicantName : "Select a chat"}
+          Chat with{" "} {selectedChat? chatList.find((chat) => chat.id === selectedChat)?.applicantName: "Select a chat"}
           </h1>
 
           <div className="messages-container">
@@ -142,7 +269,7 @@ const RecruiterChat = () => {
                       : "seeker-message"
                   }`}
                 >
-                  <strong>{msg.sender}:</strong> {msg.text}
+                  <strong>"You":</strong> {msg.text}
                 </div>
               ))
             )}
@@ -172,4 +299,4 @@ const RecruiterChat = () => {
   );
 };
 
-export default RecruiterChat;
+export default JobseekerChat;

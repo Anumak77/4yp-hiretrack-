@@ -165,6 +165,7 @@ const DashRecruiter = () => {
     fetchJobPostings();
   }, []);
 
+  /*
 const logIdToken = async () => {
   try {
     const user = getAuth().currentUser; 
@@ -182,7 +183,11 @@ const logIdToken = async () => {
 };
 
 
-logIdToken();
+logIdToken(); */
+
+const handleChat = () => {
+  navigate(`/recruiterchat`);
+};
 
 
   return (
@@ -199,7 +204,7 @@ logIdToken();
     <button onClick={() => navigate('/viewjobpostings')} className="recruiter-action-button view-job-button">
         View Job Postings
     </button>
-    <button onClick={() => navigate('/jobseekerchat')} className="recruiter-action-button inbox-button">
+    <button onClick={() => navigate('/recruiterchat')} className="recruiter-action-button inbox-button">
         Inbox
     </button>
     <button onClick={() => navigate('/login')} className="recruiter-action-button post-job-button">

@@ -123,7 +123,7 @@ function MainApp() {
         <Route path="/jobtracker-recruiter" element={<JobTrackerRecruiter />} />
         <Route path="/recruiter-search" element={<RecruiterSearch />} />
         <Route path="/jobseeker-details" element={<JobSeekerDetails />} />
-        <Route path="/jobseekerchat/:recruiterId" element={<JobSeekerChat />} />
+        <Route path="/jobseekerchat" element={<JobSeekerChat />} />
         <Route path="/recruiterchat/:applicantId" element={<RecruiterChat />} />
         <Route path="/createpost" element={<PostJob />} />
         <Route path="/viewjobpostings" element={<ViewJobPostings jobPostings={jobPostings} setJobPostings={setJobPostings} />} />

@@ -340,6 +340,10 @@ useEffect(() => {
     return () => unsubscribe();
 }, []);
 
+const handleChat = () => {
+  navigate(`/jobseekerchat`);
+};
+
   return (
     <div className="dash-jobseeker__container">
       <NavbarJobseeker />
@@ -395,7 +399,7 @@ useEffect(() => {
         </div>
 
         <button
-          onClick={() => (window.location.href = "/jobseekerchat")}
+          onClick={() => handleChat()}
           className="dash-jobseeker__button"
         >
           Inbox
