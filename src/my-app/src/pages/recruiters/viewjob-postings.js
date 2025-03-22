@@ -59,31 +59,27 @@ const handleEdit = (id) => {
 const handleViewInsights = (id) => {
   console.log(`View insights for job posting with ID: ${id}`);
 };
-
 const handleDelete = async (id) => {
+  const confirmed = window.confirm("Are you sure you want to delete this job posting? This action cannot be undone.");
+  if (!confirmed) return;
+
   try {
     const user = getAuth().currentUser;
     if (!user) throw new Error('User not authenticated');
 
-    
     const idToken = await user.getIdToken();
-    if (!idToken) throw new Error('Failed to get ID token');
-
-    
     const response = await fetch(`http://localhost:5000/delete-job/${id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': idToken, 
+        'Authorization': idToken,
       },
     });
 
-    
     if (!response.ok) {
       throw new Error('Failed to delete job');
     }
 
-    
     setJobPostings(jobPostings.filter(job => job.id !== id));
     console.log(`Deleted job posting with ID: ${id}`);
   } catch (error) {
@@ -92,9 +88,10 @@ const handleDelete = async (id) => {
 };
 
 
+
 const handleTagInput = async (id, e) => {
   if (e.key === 'Enter') {
-    e.preventDefault();   // Stop default Enter behavior
+    e.preventDefault();   
     const newTag = e.target.value.trim();
     if (!newTag) return;
     
@@ -161,53 +158,52 @@ try {
 
 
   return (
-    <main className="view-job-container">
-      <div className="view-job-header">
-        <button className="back-button-viewjob-back" onClick={() => navigate("/dashboard-recruiter")}>
-          Go Back
-        </button>
-      </div>
-      <h1 className="view-job-title">Job Postings</h1>
+<main className="vj-container">
+  <div className="vj-header">
+    <button className="vj-back-button" onClick={() => navigate("/dashboard-recruiter")}>
+      Go Back
+    </button>
+  </div>
 
+  <h1 className="vj-title">Job Postings</h1>
 
-
-        {jobPostings.length > 0 ? (
-          jobPostings.map((job) => (
-            <div key={job.id} className="job-card">
-              <div className="job-card-header">
-                <h2 className="job-card-title">{job.Title}</h2>
-                <p className="job-card-company">{job.Company} - {job.Location}</p>
-              </div>
-              <p className="job-card-description">{job.Description}</p>
-
-
-
-              <div className="custom-tags">
-                {job.tags && job.tags.map((tag, index) => (
-                  <span key={index} className="job-tag"> 
-                    {tag} <span className="remove-tag" onClick={() => handleRemoveTag(job.id, tag)}>❌</span>
-                  </span>
-                ))}
-                <input type="text" placeholder="Add a tag..." className="tag-input" onKeyDown={(e) => handleTagInput(job.id, e)} />
-              </div>
-
-              <div className="job-card-actions">
-                <button className="view-applicants-button" onClick={() => navigate(`/viewapplicants/${job.id}`)}>
-                  View Applicants
-                </button>
-                <button className="edit-button" onClick={() => handleEdit(job.id)}>
-                  Edit
-                </button>
-                <button className="delete-button" onClick={() => handleDelete(job.id)}>
-                  Delete
-                  </button>
-          </div>
+  {jobPostings.length > 0 ? (
+    jobPostings.map((job) => (
+      <div key={job.id} className="vj-card">
+      <div className="vj-left">
+        <div className="vj-card-header">
+          <h2 className="vj-card-title">{job.Title}</h2>
+          <p className="vj-card-subtitle">{job.Company} - {job.Location}</p>
         </div>
-      ))
-    ) : (
-      <p>No job postings found.</p>
-    )}
-  </main>
+        <div className="vj-tags">
+          {job.tags?.map((tag, index) => (
+            <span key={index} className="vj-tag">
+              {tag} <span className="vj-remove-tag" onClick={() => handleRemoveTag(job.id, tag)}>❌</span>
+            </span>
+          ))}
+          <input
+            type="text"
+            placeholder="Add a tag..."
+            className="vj-tag-input"
+            onKeyDown={(e) => handleTagInput(job.id, e)}
+          />
+        </div>
+      </div>
+    
+      <div className="vj-right">
+        <button className="vj-btn view" onClick={() => navigate(`/viewapplicants/${job.id}`)}>View Applicants</button>
+        <button className="vj-btn edit" onClick={() => handleEdit(job.id)}>Edit</button>
+        <button className="vj-btn delete" onClick={() => handleDelete(job.id)}>Delete</button>
+      </div>
+    </div>
+    
+
+    ))
+  ) : (
+    <p className="vj-empty">No job postings found.</p>
+  )}
+</main>
+
 );
 }
 

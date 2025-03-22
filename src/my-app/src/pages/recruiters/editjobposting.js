@@ -41,6 +41,8 @@ const EditJob = () => {
   useEffect(() => {
     const fetchJobData = async () => {
       try {
+        console.log("Editing job ID:", id);
+
         const user = getAuth().currentUser;
         if (!user) throw new Error('User not authenticated');
   

@@ -2897,3 +2897,164 @@ main::after {
 .other-jobs-container {
   align-items: stretch;
 }
+
+/* ==== Container & Layout ==== */
+.vj-container {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 5rem 2rem 2rem; /* extra top padding for navbar */
+  background-color: #ffffff;
+  min-height: 100vh;
+}
+
+/* ==== Header / Go Back Button ==== */
+.vj-header {
+  margin-bottom: 2rem;
+}
+
+.vj-back-button {
+  background-color: #064e3b;
+  color: white;
+  padding: 0.5rem 1.25rem;
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  position: relative;
+  z-index: 1;
+}
+
+.vj-back-button:hover {
+  background-color: #065f46;
+}
+
+/* ==== Page Title ==== */
+.vj-title {
+  font-size: 2rem;
+  font-weight: 700;
+  text-align: center;
+  color: #1f2937;
+  margin-bottom: 2.5rem;
+}
+
+/* ==== Job Card Layout ==== */
+.vj-card {
+  background-color: #ffffff;
+  border-radius: 0.75rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+/* ==== Left Side ==== */
+.vj-left {
+  flex: 1;
+  min-width: 260px;
+}
+
+.vj-card-header {
+  margin-bottom: 0.5rem;
+}
+
+.vj-card-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.vj-card-subtitle {
+  color: #6b7280;
+  font-size: 0.95rem;
+  margin-top: 0.25rem;
+}
+
+/* ==== Tags Section ==== */
+.vj-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.vj-tag {
+  background-color: #d1fae5;
+  color: #065f46;
+  padding: 0.3rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.vj-remove-tag {
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 0.8rem;
+}
+
+.vj-tag-input {
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.85rem;
+  outline: none;
+}
+
+.vj-tag-input:focus {
+  border-color: #065f46;
+  box-shadow: 0 0 0 2px rgba(6, 95, 70, 0.2);
+}
+
+/* ==== Right Side (Buttons) ==== */
+.vj-right {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-end;
+  min-width: 160px;
+}
+
+.vj-btn {
+  padding: 0.45rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.2s ease;
+}
+
+.vj-btn.view,
+.vj-btn.edit {
+  background-color: #064e3b;
+  color: white;
+}
+
+.vj-btn.view:hover,
+.vj-btn.edit:hover {
+  background-color: #065f46;
+}
+
+.vj-btn.delete {
+  background-color: #dc2626;
+  color: white;
+}
+
+.vj-btn.delete:hover {
+  background-color: #b91c1c;
+}
+
+/* ==== Empty Message ==== */
+.vj-empty {
+  text-align: center;
+  color: #6b7280;
+  font-style: italic;
+  margin-top: 2rem;
+}
