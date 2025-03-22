@@ -1741,6 +1741,7 @@ body {
   cursor: grab;
   box-shadow: 0 2px 4px rgba(0,0,0,0.08);
   transition: box-shadow 0.2s ease;
+  
 }
 .dash-jobseeker__job-card:hover {
   box-shadow: 0 3px 6px rgba(0,0,0,0.12);
@@ -1750,7 +1751,21 @@ body {
   color: #004d00;
   margin-bottom: 0;
   font-size: 1rem;
+  padding: 5px;
 }
+
+.dash-jobseeker__job-info h3 {
+  color: #004d00;
+  margin-bottom: 0;
+  font-size: 1rem;
+  padding: 5px;
+}
+
+.dash-jobseeker__job-info p {
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
 
 /* =============== OFFERED COLUMN (NON-DRAG) =============== */
 .dash-jobseeker__offered-column {
@@ -1771,6 +1786,7 @@ body {
   font-size: 1.2rem;
   font-weight: 600;
   color: #004d00;
+  padding: 5px;
 }
 
 .job-option-button {
@@ -3057,4 +3073,105 @@ main::after {
   color: #6b7280;
   font-style: italic;
   margin-top: 2rem;
+}
+
+.edit-jobseeker-profile__card-container {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 32px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  margin-top: 100px;
+}
+
+.edit-jobseeker-profile__title {
+  font-size: 28px;
+  text-align: center;
+  font-weight: 600;
+  margin-bottom: 24px;
+}
+
+.edit-jobseeker-profile__form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.edit-jobseeker-profile__field-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.edit-jobseeker-profile__field-group label {
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.edit-jobseeker-profile__input,
+.edit-jobseeker-profile__textarea {
+  padding: 10px 14px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.edit-jobseeker-profile__textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.edit-jobseeker-profile__full-width {
+  grid-column: span 2;
+}
+
+.edit-jobseeker-profile__button-group {
+  margin-top: 32px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.edit-jobseeker-profile__cancel-button,
+.edit-jobseeker-profile__save-button {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.edit-jobseeker-profile__cancel-button {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.edit-jobseeker-profile__cancel-button:hover {
+  background-color: #c0392b;
+}
+
+.edit-jobseeker-profile__save-button {
+  background-color: #006400;
+  color: white;
+}
+
+.edit-jobseeker-profile__save-button:hover {
+  background-color: #004d00;
+}
+
+.edit-jobseeker-profile__back-button {
+  background: none;
+  border: none;
+  color: #006400;
+  font-weight: 500;
+  font-size: 16px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  text-align: left;
+  transition: color 0.2s ease;
+}
+
+.edit-jobseeker-profile__back-button:hover {
+  color: #004d00;
+  text-decoration: underline;
 }

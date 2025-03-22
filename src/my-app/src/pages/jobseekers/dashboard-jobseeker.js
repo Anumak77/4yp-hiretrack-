@@ -370,6 +370,14 @@ useEffect(() => {
           )}
         </div>
 
+                <button
+          onClick={() => navigate("/edit-profile")}
+          className="dash-jobseeker__button"
+        >
+          Edit Profile
+        </button>
+
+
         <button
           onClick={() => (window.location.href = "/jobseekerchat")}
           className="dash-jobseeker__button"
@@ -404,7 +412,8 @@ useEffect(() => {
                   onDragStart={(e) => handleDragStart(e, job, "saved")}
                 >
                   <div className="dash-jobseeker__job-info">
-                    <h3>{job.Title}</h3>
+                  <h3 className="job-title">{job.Title || 'No title'}</h3>
+                  <p className="job-meta">{job.Company || 'Unknown company'} – {job.Location || 'Unknown location'}</p>
                     <button
                     className="more-info-button"
                     onClick={() => handleMoreInfoClick(job)}
@@ -433,7 +442,8 @@ useEffect(() => {
                   onDragStart={(e) => handleDragStart(e, job, "interviewed")}
                 >
                   <div className="dash-jobseeker__job-info">
-                    <h3>{job.Title}</h3>
+                  <h3 className="job-title">{job.Title || 'No title'}</h3>
+                  <p className="job-meta">{job.Company || 'Unknown company'} – {job.Location || 'Unknown location'}</p>
                     <button
                     className="more-info-button"
                     onClick={() => handleMoreInfoClick(job)}
@@ -462,7 +472,8 @@ useEffect(() => {
                   onDragStart={(e) => handleDragStart(e, job, "applied")}
                 >
                   <div className="dash-jobseeker__job-info">
-                    <h3>{job.Title}</h3>
+                  <h3 className="job-title">{job.Title || 'No title'}</h3>
+                  <p className="job-meta">{job.Company || 'Unknown company'} – {job.Location || 'Unknown location'}</p>
                     <button
                     className="more-info-button"
                     onClick={() => handleMoreInfoClick(job)}
@@ -491,7 +502,8 @@ useEffect(() => {
                   onDragStart={(e) => handleDragStart(e, job, "unapply")}
                 >
                   <div className="dash-jobseeker__job-info">
-                    <h3>{job.Title}</h3>
+                  <h3 className="job-title">{job.Title || 'No title'}</h3>
+                  <p className="job-meta">{job.Company || 'Unknown company'} – {job.Location || 'Unknown location'}</p>
                     <button
                     className="more-info-button"
                     onClick={() => handleMoreInfoClick(job)}
@@ -511,8 +523,9 @@ useEffect(() => {
           <div className="dash-jobseeker__job-list">
             {offeredJobs.map((job) => (
               <div key={job.id} className="dash-jobseeker__job-card">
-                <div className="dash-jobseeker__job-info">
-                  <h3>{job.title}</h3>
+                <div className="dash-jobseeker__job-info p-4">
+                <h3 className="job-title">{job.Title || 'No title'}</h3>
+                <p className="job-meta">{job.Company || 'Unknown company'} – {job.Location || 'Unknown location'}</p>
                   <button
                     className="more-info-button"
                     onClick={() => handleMoreInfoClick(job)}
