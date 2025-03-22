@@ -129,11 +129,9 @@ const RecruiterSearch = () => {
                         ) : (
                           <button
                             className="more-info-button"
-                            onClick={() =>
-                              getMatchScore(seeker.jobDescription, setMatchScores, seeker)
-                            }
+                            onClick={() => navigate('/view-all-applied-jobs', { state: seeker })}
                           >
-                            Get Match Score
+                            View All Applied Jobs
                           </button>
                         )}
                       </td>

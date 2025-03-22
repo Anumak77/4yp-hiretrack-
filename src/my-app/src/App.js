@@ -32,6 +32,8 @@ import EditJob from './pages/recruiters/editjobposting';
 import ViewJobPostings from './pages/recruiters/viewjob-postings';
 import ViewApplicants from './pages/recruiters/ViewApplicants';
 // import JobDetails2 from './pages/jobseekers/job-details2';
+import ViewAllAppliedJobs from './pages/recruiters/View-all-applied-jobs';
+
 
 function App() {
   return (
@@ -122,6 +124,9 @@ function MainApp() {
         <Route path="/jobtracker-recruiter" element={<JobTrackerRecruiter />} />
         <Route path="/recruiter-search" element={<RecruiterSearch />} />
         <Route path="/jobseeker-details" element={<JobSeekerDetails />} />
+
+        <Route path="/view-all-applied-jobs" element={<ViewAllAppliedJobs/>} />
+
         <Route path="/jobseekerchat" element={<JobSeekerChat />} />
         <Route path="/createpost" element={<PostJob />} />
         <Route path="/viewjobpostings" element={<ViewJobPostings jobPostings={jobPostings} setJobPostings={setJobPostings} />} />
