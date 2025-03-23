@@ -1,34 +1,17 @@
 image: cypress/included:14.1.0
 
 stages:
-  - install
   - test
 
-variables:
-  FRONTEND_DIR: src/my-app
-  BACKEND_DIR: src/my-app/src/backend
-
-cache:
-  paths:
-    - node_modules/
-    - $FRONTEND_DIR/node_modules
-
-before_script:
-  - apt-get update && apt-get install -y python3 python3-pip
-  - pip3 install -r $BACKEND_DIR/requirements.txt
-
-install-frontend:
-  stage: install
-  script:
-    - cd $FRONTEND_DIR
-    - npm ci
-
-cypress-tests:
+cypress-run:
   stage: test
+  working_directory: src/my-app
   script:
-    - cd $FRONTEND_DIR
-    - npm run start &                 # React starts on :3000
-    - cd $BACKEND_DIR && python3 app.py &  # Flask backend
-    - npx wait-on http://localhost:3000
-    - cd $FRONTEND_DIR
-    - npm cypress run
+    - npm ci
+    - npm run start &             # Start React app
+    - npx wait-on http://localhost:3000  # Wait until it's live
+    - npx cypress run             # Run your e2e tests
+  only:
+    - main
+    - clean-ci
+    - new-branch
