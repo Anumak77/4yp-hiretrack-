@@ -6,17 +6,29 @@ stages:
 cypress-run:
   stage: test
   script:
-    - echo "Installing deps..."
+    - echo "Debugging environment..."
+    - which bash
+    - echo $SHELL
+    - echo $PATH
+    - node -v
+    - npm -v
+    - npx cypress --version
+
+    # Start Flask backend
+    - echo "Starting Flask backend..."
+    - cd src/my-app/src/backend
+    - python app.py &  # Start Flask backend in the background
+    - cd ../../..  # Go back to the root directory
+
+    # Start React frontend
+    - echo "Starting React frontend..."
     - cd src/my-app
     - npm ci
-    - echo " Starting React app..."
     - npm run start &
-    - echo "Waiting for app..."
-    - npx wait-on http://localhost:3000
-    - echo "Running Cypress..."
-    - npx cypress run
-  variables:
-    SHELL: /bin/bash
+    - npx wait-on http://localhost:3000 http://localhost:5000  # Wait for both frontend and backend
+
+    # Run Cypress tests
+    - npx cypress run --config baseUrl=http://localhost:3000
   only:
     - main
     - clean-ci
