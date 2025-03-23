@@ -11,5 +11,4 @@ cypress-run:
     - npx wait-on http://localhost:3000
     - npx cypress run
   only:
-    - main
-    - new-branch
+    - branches
