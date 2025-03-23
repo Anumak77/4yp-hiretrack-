@@ -7,6 +7,6 @@ cypress-run:
   script:
     - cd src/my-app
     - npm ci
-    - npm run start &
-    - npx wait-on http://localhost:3000
-    - npx cypress run
+    - npm run start &  
+    - npx wait-on http://localhost:3000 
+    - npx cypress run --config-file cypress.config.js 
