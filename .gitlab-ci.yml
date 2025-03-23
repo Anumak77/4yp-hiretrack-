@@ -5,15 +5,18 @@ stages:
 
 cypress-run:
   stage: test
-  working_directory: src/my-app
   script:
-    - echo "Running Cypress tests..."          # Debug line
+    - echo "Installing deps..."
+    - cd src/my-app
     - npm ci
+    - echo " Starting React app..."
     - npm run start &
+    - echo "Waiting for app..."
     - npx wait-on http://localhost:3000
+    - echo "Running Cypress..."
     - npx cypress run
   variables:
-    SHELL: /bin/bash       
+    SHELL: /bin/bash
   only:
     - main
     - clean-ci
