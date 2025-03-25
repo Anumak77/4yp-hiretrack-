@@ -70,6 +70,19 @@ def get_recruiter_chats():
     chats = [{"id": doc.id, **doc.to_dict()} for doc in snapshot]
     return jsonify({"chats": chats})
 
+@chat_bp.route("/get_applicant_chats", methods=["GET"])
+def get_applicant_chats():
+    applicant_id = request.args.get("applicant_id")
+    if not applicant_id:
+        return jsonify({"error": "Recruiter ID is required"}), 400
+
+    chats_ref = firestore.client().collection("chats")
+    q = chats_ref.where("applicantId", "==", applicant_id)
+    snapshot = q.get()
+    
+    chats = [{"id": doc.id, **doc.to_dict()} for doc in snapshot]
+    return jsonify({"chats": chats})
+
 
 @chat_bp.route("/create_chat", methods=["POST"])
 def create_chat():
@@ -80,11 +93,18 @@ def create_chat():
     applicant_ref = firestore_db.collection("jobseekers").document(applicant_id)
     applicant_doc = applicant_ref.get()
 
+    recruiter_ref = firestore_db.collection("recruiters").document(recruiter_id)
+    recruiter_doc = recruiter_ref.get()
+
     if not applicant_doc.exists:
         return jsonify({"error": "Applicant not found"}), 404
 
     applicant_data = applicant_doc.to_dict()
     applicant_name = f"{applicant_data.get('first_name', 'Unknown')} {applicant_data.get('last_name', '')}".strip()
+
+    recruiter_data = recruiter_doc.to_dict()
+    recruiter_name = f"{recruiter_data.get('first_name', 'Unknown')} {recruiter_data.get('last_name', '')}".strip()
+
 
     if not recruiter_id or not applicant_id:
         return jsonify({"error": "Recruiter ID and applicant ID are required"}), 400
@@ -100,7 +120,8 @@ def create_chat():
         "recruiterId": recruiter_id,
         "applicantId": applicant_id,
         "messages": [],
-        "applicantName": applicant_name
+        "applicantName": applicant_name,
+        "recruiterName": recruiter_name
     })
 
     return jsonify({"success": True, "chat_id": chat_id})

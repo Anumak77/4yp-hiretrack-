@@ -13,6 +13,7 @@ const RecruiterChat = () => {
   const [loading, setLoading] = useState(true);
   const { applicantId } = useParams();
 
+  /*
   useEffect(() => {
     console.log("useEffect 1: Setting selectedChat");
     const auth = getAuth();
@@ -26,7 +27,7 @@ const RecruiterChat = () => {
     console.log(selectedChat)
   }, [applicantId]);
 
-
+*/
   useEffect(() => {
     console.log("useEffect 2: Fetching recruiter chats");
     const auth = getAuth();
@@ -47,8 +48,39 @@ const RecruiterChat = () => {
           const data = await response.json();
           setChatList(data.chats);
           setLoading(false);
-        } else {
-          console.error("Failed to fetch recruiter chats");
+          if (applicantId) {
+            const existingChat = data.chats.find(chat => 
+              chat.applicantId === applicantId
+            );
+            
+            if (existingChat) {
+              setSelectedChat(existingChat.id);
+            } else {
+              const createResponse = await fetch("http://localhost:5000/create_chat", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  recruiter_id: recruiterId,
+                  applicant_id: applicantId,
+                }),
+              });
+              
+              if (createResponse.ok) {
+                const newChat = await createResponse.json();
+                setChatList(prev => [...prev, { 
+                  id: newChat.chat_id, 
+                  applicantId,
+                  applicantName: newChat.applicantName || "New Applicant"
+                }]);
+                setSelectedChat(newChat.chat_id);
+              }
+            }
+          } else if (data.chats.length > 0) {
+            // No specific applicant - select the first chat by default
+            setSelectedChat(data.chats[0].id);
+          }
         }
       } catch (error) {
         console.error("Error fetching recruiter chats:", error);
@@ -56,71 +88,11 @@ const RecruiterChat = () => {
     };
 
     fetchRecruiterChats(); 
-  }, [navigate]);
-
-  useEffect(() => {
-    console.log("useEffect 3: Creating new chat");
-    console.log(selectedChat)
-    const auth = getAuth();
-    const user = auth.currentUser;
-    const recruiterId = user.uid;
-
-
-    if (applicantId) {
-      setSelectedChat(recruiterId + "_" + applicantId);
-    }
-
-    const chatExists = chatList.some((chat) => chat.id === `${recruiterId}_${applicantId}`);
-
-    if (!chatExists){
-    const createNewChat = async () => {
-
-      if (!recruiterId || !applicantId) {
-        console.error("Recruiter ID or Applicant ID is missing");
-        return;
-      }
-
-        const payload = {
-          recruiter_id: recruiterId,
-          applicant_id: applicantId,
-        };
-        console.log("Payload:", payload);
-
-      try {
-        const response = await fetch("http://localhost:5000/create_chat", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            recruiter_id: recruiterId,
-            applicant_id: applicantId,
-          }),
-        });
-
-        console.log(response)
-
-        if (response.ok) {
-          const data = await response.json();
-          setChatList((prevChats) => [
-            ...prevChats,
-            { id: data.chat_id, messages: [] },
-          ]);
-        } else {
-          console.error("Failed to create new chat");
-        }
-      } catch (error) {
-        console.error("Error creating new chat:", error);
-      }
-    };
-
-    createNewChat();
-  }
   }, [navigate, applicantId]);
 
 
   useEffect(() => {
-    const auth = getAuth();
+   /* const auth = getAuth();
     const user = auth.currentUser;
     const recruiterId = user.uid;
 
@@ -128,7 +100,8 @@ const RecruiterChat = () => {
     if (applicantId) {
       setSelectedChat(recruiterId + "_" + applicantId);
     }
-    console.log(selectedChat)
+    console.log(selectedChat) */
+
     if (selectedChat) {
         const fetchChatHistory = async () => {
           try {
@@ -158,6 +131,8 @@ const RecruiterChat = () => {
       const user = auth.currentUser;
       const sender_id = user.uid;
 
+      /*
+
       console.log(selectedChat)
 
       if (applicantId) {
@@ -174,7 +149,9 @@ const RecruiterChat = () => {
             message: input,
           };
         
-          console.log("Sending payload:", payload);
+          console.log("Sending payload:", payload); */
+        
+        try{
 
           const response = await fetch("http://localhost:5000/send_message", {
             method: "POST",
@@ -183,7 +160,7 @@ const RecruiterChat = () => {
             },
             body: JSON.stringify({
               sender_id: sender_id, 
-              recipient_id: applicantId,
+              recipient_id: selectedChat.split('_')[1],
               message: input,
             }),
           });
@@ -250,50 +227,63 @@ const RecruiterChat = () => {
           </ul>
         </aside>
 
-        {/* Chat Box */}
-        <section className="chat-box">
-          <h1 className="chat-title">
-          Chat with{" "} {selectedChat? chatList.find((chat) => chat.id === selectedChat)?.applicantName: "Select a chat"}
-          </h1>
+      {/* Chat Box */}
+      <section className="chat-box">
+        {!selectedChat && chatList.length === 0 && !loading ? (
+          <div className="empty-inbox">
+            <h2>Your inbox is empty</h2>
+            <p>Start a new chat by selecting an applicant</p>
+          </div>
+        ) : (
+          <>
+            <h1 className="chat-title">
+              {selectedChat ? 
+                `Chat with ${chatList.find(c => c.id === selectedChat)?.applicantName || 'Applicant'}` : 
+                "Select a chat from the sidebar"}
+            </h1>
 
-          <div className="messages-container">
-            {messages.length === 0 ? (
-              <p className="no-messages">No messages yet.</p>
-            ) : (
-              messages.map((msg) => (
-                <div
-                  key={msg.id}
-                  className={`message ${
-                    msg.sender === "Recruiter"
-                      ? "recruiter-message"
-                      : "seeker-message"
-                  }`}
+            <div className="messages-container">
+              {messages.length === 0 ? (
+                <p className="no-messages">
+                  {selectedChat ? "No messages yet" : "Please select a chat"}
+                </p>
+              ) : (
+                messages.map((msg) => (
+                  <div
+                    key={msg.id}
+                    className={`message ${
+                      msg.sender === "Recruiter"
+                        ? "recruiter-message"
+                        : "seeker-message"
+                    }`}
+                  >
+                    <strong>{msg.sender === "Recruiter" ? "You" : "Applicant"}:</strong> {msg.text}
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Chat Input Area - Only show when a chat is selected */}
+            {selectedChat && (
+              <div className="chat-input-container">
+                <input
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="Type a message..."
+                  className="chat-input"
+                />
+                <button
+                  onClick={handleSendMessage}
+                  className="chat-send-button"
                 >
-                  <strong>"You":</strong> {msg.text}
-                </div>
-              ))
+                  Send
+                </button>
+              </div>
             )}
-          </div>
-
-          {/* Chat Input Area */}
-          <div className="chat-input-container">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Type a message..."
-              className="chat-input"
-              disabled={!selectedChat} // Disable input if no chat is selected
-            />
-            <button
-              onClick={handleSendMessage}
-              className="chat-send-button"
-              disabled={!selectedChat} 
-            >
-              Send
-            </button>
-          </div>
-        </section>
+          </>
+        )}
+      </section>
       </div>
     </main>
   );

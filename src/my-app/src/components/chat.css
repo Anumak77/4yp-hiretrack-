@@ -185,3 +185,24 @@
       height: calc(100vh - 220px);
     }
   }
+
+  .empty-inbox {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+  }
+  
+  .empty-inbox h2 {
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
+  
+  .empty-inbox p {
+    font-size: 16px;
+  }
+  
+  .no-messages {
+    text-align: center;
+    color: #666;
+    padding: 20px;
+  }
