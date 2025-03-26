@@ -370,6 +370,13 @@ useEffect(() => {
           )}
         </div>
 
+        <button
+          onClick={() => (window.location.href = "/CV-Edit-Page")}
+          className="dash-jobseeker__button"
+        >
+          Edit CV
+        </button>
+
                 <button
           onClick={() => navigate("/edit-profile")}
           className="dash-jobseeker__button"
@@ -384,6 +391,7 @@ useEffect(() => {
         >
           Inbox
         </button>
+
 
         <button className="dash-jobseeker__logout" onClick={handleLogout}>
           Logout

@@ -35,6 +35,7 @@ import JobDetails2 from './pages/jobseekers/job-details2';
 import ViewAllAppliedJobs from './pages/recruiters/View-all-applied-jobs';
 import EditProfile from './pages/jobseekers/EditProfile';
 
+import CVEditPage from './pages/jobseekers/CVEditPage';
 
 function App() {
   return (
@@ -134,6 +135,7 @@ function MainApp() {
         <Route path="/edit-job/:id" element={<EditJob />} />
         <Route path="/edit-profile" element={<EditProfile />} />
 
+        <Route path="/CV-Edit-Page" element={<CVEditPage />} />
 
       
 
