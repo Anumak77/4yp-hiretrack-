@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import axios from 'axios';
 import { getAuth } from 'firebase/auth';
 import '../../components/style.css';
 
@@ -42,6 +41,8 @@ const EditJob = () => {
   useEffect(() => {
     const fetchJobData = async () => {
       try {
+        console.log("Editing job ID:", id);
+
         const user = getAuth().currentUser;
         if (!user) throw new Error('User not authenticated');
   

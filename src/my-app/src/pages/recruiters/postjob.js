@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import {getAuth} from 'firebase/auth'
+// Remove this line: import axios from 'axios';
+import { getAuth } from 'firebase/auth';
 import '../../components/style.css';
 import { getFirestore, collection, addDoc } from "firebase/firestore";
-
 
 const countryOptions = [
   'United States',
@@ -21,7 +20,6 @@ const countryOptions = [
 
 const PostJob = () => {
   const navigate = useNavigate();
-
   const [jobData, setJobData] = useState({
     AboutC: '',
     ApplicationP: '',
@@ -59,48 +57,54 @@ const PostJob = () => {
 
   const confirmSubmission = async (e) => {
     e.preventDefault();
-    
-    const missingFields = [];
 
-    Object.entries("").forEach(([key, value]) => {
+    // Example check for missing fields:
+    const missingFields = [];
+    // This snippet is just an example – adapt it to match your own logic
+    for (const [key, value] of Object.entries(jobData)) {
       if (typeof value === "string" && value.trim() === "") {
         missingFields.push(key);
       } else if (value === undefined || value === null) {
         missingFields.push(key);
       }
-    });
-    
+    }
+
     if (missingFields.length > 0) {
       console.log("Missing fields:", missingFields);
-      console.log("Form Data:", "");
+      console.log("Form Data:", jobData);
       showAlert(`Please fill out all fields: ${missingFields.join(", ")}`, 'error');
-
       return;
     }
-    
+
     try {
-      
       const user = getAuth().currentUser;
       if (!user) throw new Error('User not authenticated');
 
       const idToken = await user.getIdToken();
       if (!idToken) throw new Error('Failed to get ID token');
 
-
-      const response = await axios.post('http://localhost:5000/create-job', jobData, {
+      // Replace axios.post with fetch
+      const response = await fetch('http://localhost:5000/create-job', {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': idToken, 
+          'Authorization': idToken,
         },
+        body: JSON.stringify(jobData),
       });
 
-      if (response.data.success) {
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
         showAlert('Job Posted Successfully!', 'success');
-        console.log('Job posted with ID:', response.data.jobId);
-    
+        console.log('Job posted with ID:', data.jobId);
         navigate('/dashboard-recruiter');
       } else {
-        throw new Error(response.data.error || "Failed to post job");
+        throw new Error(data.error || "Failed to post job");
       }
     } catch (error) {
       console.error('Error posting job:', error);
@@ -108,61 +112,72 @@ const PostJob = () => {
     }
   };
 
-
-  
-
-
   return (
     <main>
-      <h1 className='post-job-title'>Post a Job</h1>
+    <h1 className="post-job-title">Post a Job</h1>
 
-      <section className='post-job-container'>
-        <section className='post-job-card'>
+      <section className="post-job-container">
+        <section className="post-job-card">
           {alertMessage && <div className={`alert-box ${alertType}`}>{alertMessage}</div>}
 
           <button
-            type='button'
-            className='back-button'
+            type="button"
+            className="back-button"
             onClick={() => navigate('/dashboard-recruiter')}
           >
             Go Back
           </button>
 
           <form onSubmit={handleSubmit}>
-            <div className='input-group'>
+            {/* Job Title */}
+            <div className="input-group">
               <label>Job Title</label>
               <input
-                type='text'
-                name='Title'
+                type="text"
+                name="Title"
                 value={jobData.Title}
                 onChange={handleChange}
-                placeholder='Enter job title'
+                placeholder="Enter job title"
                 required
               />
             </div>
 
-            <div className='input-group'>
+            {/* Company */}
+            <div className="input-group">
               <label>Company</label>
               <input
-                type='text'
-                name='Company'
+                type="text"
+                name="Company"
                 value={jobData.Company}
                 onChange={handleChange}
-                placeholder='Enter company name'
+                placeholder="Enter company name"
                 required
               />
             </div>
 
-            <div className='input-group'>
-              <label htmlFor='Location'>Location</label>
+            {/* About Company */}
+            <div className="input-group">
+              <label>About Company</label>
+              <textarea
+                name="AboutC"
+                value={jobData.AboutC}
+                onChange={handleChange}
+                placeholder="Enter details about the company"
+                required
+              />
+            </div>
+
+            {/* Location */}
+            <div className="input-group">
+              <label htmlFor="Location">Location</label>
               <select
-                name='Location'
+                name="Location"
                 value={jobData.Location}
                 onChange={handleChange}
                 required
-                className='location-dropdown'
+                className="location-dropdown"
               >
-                <option value=''>Select a country</option>
+                <option value="">Select a country</option>
                 {countryOptions.map((country, index) => (
                   <option key={index} value={country}>
                     {country}
@@ -171,75 +186,111 @@ const PostJob = () => {
               </select>
             </div>
 
-            <div className='input-group'>
+            {/* Job Description */}
+            <div className="input-group">
               <label>Job Description</label>
               <textarea
-                name='JobDescription'
+                name="JobDescription"
                 value={jobData.JobDescription}
                 onChange={handleChange}
-                placeholder='Enter job description'
+                placeholder="Enter job description"
                 required
               />
             </div>
 
-            <div className='input-group'>
+            {/* Job Requirements */}
+            <div className="input-group">
               <label>Job Requirements</label>
               <textarea
-                name='JobRequirment'
+                name="JobRequirment"
                 value={jobData.JobRequirment}
                 onChange={handleChange}
-                placeholder='Enter job requirements'
+                placeholder="Enter job requirements"
                 required
               />
             </div>
 
-            <div className='input-group'>
+            {/* Required Qualifications */}
+            <div className="input-group">
               <label>Required Qualifications</label>
               <textarea
-                name='RequiredQual'
+                name="RequiredQual"
                 value={jobData.RequiredQual}
                 onChange={handleChange}
-                placeholder='Enter required qualifications'
+                placeholder="Enter required qualifications"
                 required
               />
             </div>
 
-            <div className='input-group'>
+            {/* Application Process */}
+            <div className="input-group">
               <label>Application Process</label>
               <textarea
-                name='ApplicationP'
+                name="ApplicationP"
                 value={jobData.ApplicationP}
                 onChange={handleChange}
-                placeholder='Enter application process'
+                placeholder="Enter application process"
                 required
               />
             </div>
 
-            <div className='date-container'>
-              <div className='input-group'>
+            {/* jobpost */}
+            <div className="input-group">
+              <label>Job Post</label>
+              <textarea
+                name="jobpost"
+                value={jobData.jobpost}
+                onChange={handleChange}
+                placeholder="Enter any additional job post details"
+              />
+            </div>
+
+            {/* Date fields (OpeningDate, Deadline, StartDate, date) */}
+            <div className="date-container">
+              <div className="input-group">
                 <label>Opening Date</label>
                 <input
-                  type='date'
-                  name='OpeningDate'
+                  type="date"
+                  name="OpeningDate"
                   value={jobData.OpeningDate}
                   onChange={handleChange}
                   required
                 />
               </div>
-              <div className='input-group'>
+
+              <div className="input-group">
                 <label>Deadline</label>
                 <input
-                  type='date'
-                  name='Deadline'
+                  type="date"
+                  name="Deadline"
                   value={jobData.Deadline}
                   onChange={handleChange}
                   required
                 />
               </div>
+
+              <div className="input-group">
+                <label>Start Date</label>
+                <input
+                  type="date"
+                  name="StartDate"
+                  value={jobData.StartDate}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div className="input-group">
+                <label>Date</label>
+                <input
+                  type="date"
+                  name="date"
+                  value={jobData.date}
+                  onChange={handleChange}
+                />
+              </div>
             </div>
 
-
-            <button type='submit' className='post-job-button'>
+            <button type="submit" className="post-job-button">
               Post Job
             </button>
           </form>

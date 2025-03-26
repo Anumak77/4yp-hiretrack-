@@ -4,7 +4,9 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { firebaseapp } from '../../components/firebaseconfigs';
 import { getFirestore, doc, setDoc } from 'firebase/firestore';
 import '../../components/style.css';
-import axios from 'axios';
+
+// Remove this line:
+// import axios from 'axios';
 
 const countryOptions = [
   "United States", "United Kingdom", "India", "Canada", "Germany",
@@ -23,11 +25,8 @@ const Signup = () => {
   const [userType, setUserType] = useState('Job Seeker');
   const [error, setError] = useState('');
 
- 
-
   const onSubmit = async (e) => {
     e.preventDefault();
-
     setError('');
 
     try {
@@ -42,12 +41,26 @@ const Signup = () => {
         company_name: userType === 'Recruiter' ? companyName : '',
       };
 
-      const response = await axios.post('http://127.0.0.1:5000/signup', userData);
-      console.log('Signup successful:', response.data);
-      
+      // Replaced axios.post with fetch:
+      const response = await fetch('http://127.0.0.1:5000/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData),
+      });
+
+      if (!response.ok) {
+        // The server responded with a 4xx or 5xx code
+        throw new Error(`Signup failed: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log('Signup successful:', data);
+
+      // Redirect on success
       navigate('/login');
     } catch (err) {
-      setError(err.response?.data?.error || 'Signup failed. Please try again.');
+      // Fallback error message if no details come back from server
+      setError(err.message || 'Signup failed. Please try again.');
       console.error('Signup error:', err);
     }
   };

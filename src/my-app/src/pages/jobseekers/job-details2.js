@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { auth, firestore, realtimeDb } from '../../components/firebaseconfigs.js';
-import axios from 'axios';
 import '../../components/style.css';
 
 const JobDetails2 = () => {
@@ -56,61 +55,42 @@ const JobDetails2 = () => {
       throw error;
     }
   };
-
   const compareWithDescription = async () => {
     try {
-      let cvBase64;
-        if (base64Data) {
-        cvBase64 = base64Data;
-      } else {
-        cvBase64 = await fetchPdfFromFlaskBackend();
-      }
-  
-      console.log('CV Base64 Data (before split):', cvBase64);
-
-      const jobDescription = job['JobDescription'];
-      const jobRequirment = job['JobRequirment'];
-      const requiredQual = job['RequiredQual'];
-
-      console.log('Job Description:', jobDescription);
+      let cvBase64 = base64Data || await fetchPdfFromFlaskBackend();
   
       if (!cvBase64) {
         alert('No CV found for the user. Please upload a CV.');
         return;
       }
-        cvBase64 = cvBase64.trim();
   
-      let cv;
-      if (cvBase64.startsWith('data:')) {
-        cv = cvBase64.split(',')[1];
-      } else {
-        cv = cvBase64;
-      }
+      cvBase64 = cvBase64.trim();
   
-      console.log('CV Base64 Data (after handling):', cv);
+      const cv = cvBase64.startsWith('data:') ? cvBase64.split(',')[1] : cvBase64;
   
       const payload = {
-        JobDescription: jobDescription,
-        JobRequirment: jobRequirment,
-        RequiredQual: requiredQual,
-        cv: cv, // Use the processed value
+        JobDescription: job.JobDescription,
+        JobRequirment: job.JobRequirment,
+        RequiredQual: job.RequiredQual,
+        cv: cv
       };
-      //console.log('Request Payload:', payload);
   
-      // Send the CV and job description to the Flask backend for comparison
-      const response = await axios.post('http://127.0.0.1:5000/compare_with_description', payload, {
+      const response = await fetch('http://127.0.0.1:5000/compare_with_description', {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify(payload)
       });
   
-     
-      console.log('Comparison Response:', response.data);
+      if (!response.ok) {
+        throw new Error('Failed to get match score from backend');
+      }
   
-      const similarityScore = response.data['cosine_similarity']; 
-      console.log('Similarity Score:', similarityScore);
-  
+      const data = await response.json();
+      const similarityScore = data.cosine_similarity;
       const matchScorePercentage = (similarityScore * 100).toFixed(2);
+  
       setMatchScore(matchScorePercentage);
       setShowPopup(true);
     } catch (error) {
@@ -118,6 +98,7 @@ const JobDetails2 = () => {
       alert('An error occurred. Please try again.');
     }
   };
+  
 
 
   return (
@@ -176,3 +157,4 @@ const JobDetails2 = () => {
 };
 
 export default JobDetails2;
+
