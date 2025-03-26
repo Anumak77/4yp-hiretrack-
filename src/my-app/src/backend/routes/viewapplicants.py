@@ -160,3 +160,29 @@ def fetch_rejected_applicants(recruiter_id, jobposting_id):
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@viewapplicants_bp.route('/matchscore-applicants/<recruiter_id>/<jobposting_id>', methods=['GET'])
+def matchscore_applicants(recruiter_id, jobposting_id):
+    try:
+
+        applicant_id = request.args.get('applicant_id')
+        if not applicant_id:
+            return jsonify({"error": "applicant_id is required"}), 400
+
+        applicant_ref = firestore_db.collection(f'recruiters/{recruiter_id}/jobposting/{jobposting_id}/applicants').document(applicant_id)
+        applicant_data = applicant_ref.get()
+
+        applicant_data = applicant_data.to_dict()
+
+        if 'matchScore' not in applicant_data:
+            return jsonify({"error": "matchScore field not found in applicant data"}), 404
+
+        return jsonify({
+            "success": True,
+            "matchscore": applicant_data['matchScore'],
+        }), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+        

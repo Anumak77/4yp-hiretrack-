@@ -8,7 +8,7 @@ describe('Signup Page', () => {
       const email = `testuser_${Math.random().toString(36).substring(2, 8)}@example.com`;
       const password = 'Password123!';
   
-      cy.log(`🆕 Signing up: ${firstName} ${lastName} | ${email}`);
+      cy.log(` Signing up: ${firstName} ${lastName} | ${email}`);
   
       cy.get('input#first-name').type(firstName);
       cy.get('input#last-name').type(lastName);

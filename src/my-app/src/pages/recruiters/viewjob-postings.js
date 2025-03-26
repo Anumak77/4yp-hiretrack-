@@ -178,7 +178,7 @@ try {
         <div className="vj-tags">
           {job.tags?.map((tag, index) => (
             <span key={index} className="vj-tag">
-              {tag} <span className="vj-remove-tag" onClick={() => handleRemoveTag(job.id, tag)}>❌</span>
+              {tag} <span className="vj-remove-tag" onClick={() => handleRemoveTag(job.id, tag)}></span>
             </span>
           ))}
           <input

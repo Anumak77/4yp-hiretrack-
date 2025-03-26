@@ -316,6 +316,10 @@ useEffect(() => {
     return () => unsubscribe();
 }, []);
 
+const handleChat = () => {
+  navigate(`/jobseekerchat`);
+};
+
   return (
     <div className="dash-jobseeker__container">
       <NavbarJobseeker />
@@ -370,6 +374,13 @@ useEffect(() => {
           )}
         </div>
 
+        <button
+          onClick={() => (window.location.href = "/CV-Edit-Page")}
+          className="dash-jobseeker__button"
+        >
+          Edit CV
+        </button>
+
                 <button
           onClick={() => navigate("/edit-profile")}
           className="dash-jobseeker__button"
@@ -379,11 +390,12 @@ useEffect(() => {
 
 
         <button
-          onClick={() => (window.location.href = "/jobseekerchat")}
+          onClick={() => handleChat()}
           className="dash-jobseeker__button"
         >
           Inbox
         </button>
+
 
         <button className="dash-jobseeker__logout" onClick={handleLogout}>
           Logout
