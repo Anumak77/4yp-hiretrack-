@@ -29,6 +29,7 @@ from routes.cv_extract import cv_extract_bp
 from routes.train_resume_data import train_resume_bp
 from routes.cv_suggestions import cv_suggestions_bp
 from routes.cv_generate import cv_generate_bp
+from routes.chat import chat_bp
 
 app = Flask(__name__)
 CORS(app)
@@ -48,6 +49,8 @@ app.register_blueprint(notifications_bp)
 app.register_blueprint(cv_extract_bp)
 app.register_blueprint(cv_suggestions_bp)
 app.register_blueprint(cv_generate_bp)
+app.register_blueprint(chat_bp)
+
 
 FIREBASE_DATABASE_URL = "https://hiretrack-7b035-default-rtdb.europe-west1.firebasedatabase.app/"
 

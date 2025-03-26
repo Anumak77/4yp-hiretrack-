@@ -32,6 +32,7 @@ import EditJob from './pages/recruiters/editjobposting';
 import ViewJobPostings from './pages/recruiters/viewjob-postings';
 import ViewApplicants from './pages/recruiters/ViewApplicants';
 import JobDetails2 from './pages/jobseekers/job-details2';
+import RecruiterChat from './pages/chat/recruiterchat';
 import ViewAllAppliedJobs from './pages/recruiters/View-all-applied-jobs';
 import EditProfile from './pages/jobseekers/EditProfile';
 
@@ -130,6 +131,8 @@ function MainApp() {
         <Route path="/view-all-applied-jobs" element={<ViewAllAppliedJobs/>} />
 
         <Route path="/jobseekerchat" element={<JobSeekerChat />} />
+        <Route path="/recruiterchat" element={<RecruiterChat />} />
+        <Route path="/recruiterchat/:applicantId" element={<RecruiterChat />} />
         <Route path="/createpost" element={<PostJob />} />
         <Route path="/viewjobpostings" element={<ViewJobPostings jobPostings={jobPostings} setJobPostings={setJobPostings} />} />
         <Route path="/edit-job/:id" element={<EditJob />} />

@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { getAuth } from 'firebase/auth';
 import "../../components/chat.css";
 
-const JobseekerChat = () => {
+const RecruiterChat = () => {
   console.log("RecruiterChat component rendered"); 
   const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
@@ -11,6 +11,7 @@ const JobseekerChat = () => {
   const [selectedChat, setSelectedChat] = useState(null);
   const [chatList, setChatList] = useState([]); 
   const [loading, setLoading] = useState(true);
+  const { applicantId } = useParams();
 
   /*
   useEffect(() => {
@@ -37,24 +38,57 @@ const JobseekerChat = () => {
       return;
     }
 
-    const applicantId = user.uid; 
-    const fetchJobseekerChats = async () => {
+    const recruiterId = user.uid; 
+    const fetchRecruiterChats = async () => {
       try {
         const response = await fetch(
-          `http://localhost:5000/get_applicant_chats?applicant_id=${applicantId}`
+          `http://localhost:5000/get_recruiter_chats?recruiter_id=${recruiterId}`
         );
         if (response.ok) {
           const data = await response.json();
           setChatList(data.chats);
           setLoading(false);
+          if (applicantId) {
+            const existingChat = data.chats.find(chat => 
+              chat.applicantId === applicantId
+            );
+            
+            if (existingChat) {
+              setSelectedChat(existingChat.id);
+            } else {
+              const createResponse = await fetch("http://localhost:5000/create_chat", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  recruiter_id: recruiterId,
+                  applicant_id: applicantId,
+                }),
+              });
+              
+              if (createResponse.ok) {
+                const newChat = await createResponse.json();
+                setChatList(prev => [...prev, { 
+                  id: newChat.chat_id, 
+                  applicantId,
+                  applicantName: newChat.applicantName || "New Applicant"
+                }]);
+                setSelectedChat(newChat.chat_id);
+              }
+            }
+          } else if (data.chats.length > 0) {
+            // No specific applicant - select the first chat by default
+            setSelectedChat(data.chats[0].id);
+          }
         }
-      }
-      catch (error) {
+      } catch (error) {
         console.error("Error fetching recruiter chats:", error);
-    }
-    }
-    fetchJobseekerChats(); 
-  }, [navigate]);
+      }
+    };
+
+    fetchRecruiterChats(); 
+  }, [navigate, applicantId]);
 
 
   useEffect(() => {
@@ -186,7 +220,7 @@ const JobseekerChat = () => {
                   className={selectedChat === chat.id ? "selected-chat" : ""}
                   onClick={() => setSelectedChat(chat.id)}
                 >
-                  {chat.recruiterName} {/* Display applicant's name */}
+                  {chat.applicantName} {/* Display applicant's name */}
                 </li>
               ))
             )}
@@ -204,7 +238,7 @@ const JobseekerChat = () => {
           <>
             <h1 className="chat-title">
               {selectedChat ? 
-                `Chat with ${chatList.find(c => c.id === selectedChat)?.recruiterName || 'Recruiter'}` : 
+                `Chat with ${chatList.find(c => c.id === selectedChat)?.applicantName || 'Applicant'}` : 
                 "Select a chat from the sidebar"}
             </h1>
 
@@ -218,12 +252,12 @@ const JobseekerChat = () => {
                   <div
                     key={msg.id}
                     className={`message ${
-                      msg.sender === "Applcant"
+                      msg.sender === "Recruiter"
                         ? "recruiter-message"
                         : "seeker-message"
                     }`}
                   >
-                    <strong>{msg.sender === "Applicant" ? "You" : "Recruiter"}:</strong> {msg.text}
+                    <strong>{msg.sender === "Recruiter" ? "You" : "Applicant"}:</strong> {msg.text}
                   </div>
                 ))
               )}
@@ -255,4 +289,4 @@ const JobseekerChat = () => {
   );
 };
 
-export default JobseekerChat;
+export default RecruiterChat;
