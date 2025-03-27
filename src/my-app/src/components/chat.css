@@ -63,7 +63,7 @@
   }
   
   .chat-sidebar li:hover {
-    background-color: #34495e;
+    background-color: #0b3d2e;
   }
   
   .chat-sidebar .selected-chat {
@@ -226,8 +226,8 @@
   margin: 5px 0;
   cursor: pointer;
   border-radius: 4px;
-  color: #a84646; /* Dark text color */
-  background-color: #ba5858;
+  color: #ffffff; /* Dark text color */
+  background-color: #2b3453;
   transition: all 0.2s ease;
   border: 1px solid #4c4c4c;
 }
@@ -237,7 +237,7 @@
 }
 
 .chat-list-item.selected-chat {
-  background-color: #007bff;
+  background-color: #0b3d2e;
   color: white;
   font-weight: bold;
 }

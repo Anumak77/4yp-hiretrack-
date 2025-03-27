@@ -3,8 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import Fuse from 'fuse.js';
 import { fetchPdfFromFirestore } from '../../components/utils';
 import { getFirestore, collection, getDocs } from 'firebase/firestore';
-// Remove this line:
-// import axios from 'axios';
 
 const getMatchScore = async (jobDescription, setMatchScores, seeker) => {
   try {
@@ -19,7 +17,6 @@ const getMatchScore = async (jobDescription, setMatchScores, seeker) => {
       ? cvBase64.split(',')[1] 
       : cvBase64;
 
-    // Replace axios with fetch
     const response = await fetch('http://127.0.0.1:5000/compare_with_description', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
