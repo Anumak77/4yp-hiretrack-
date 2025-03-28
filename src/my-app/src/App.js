@@ -10,6 +10,7 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 
 import NavbarJobseeker from './pages/jobseekers/NavbarJobseeker';
@@ -40,6 +41,7 @@ import CVEditPage from './pages/jobseekers/CVEditPage';
 
 function App() {
   return (
+    <GoogleOAuthProvider clientId="714625690444-bjnr3aumebso58niqna7613rtvmc5e6f.apps.googleusercontent.com">
     <div>
     <Router>
       <MainApp />
@@ -56,6 +58,7 @@ function App() {
                 draggable
                 pauseOnHover />
     </div>
+    </GoogleOAuthProvider>
   );
 }
 

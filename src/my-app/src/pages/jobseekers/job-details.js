@@ -12,26 +12,17 @@ const JobDetails = () => {
   const [popupType, setPopupType] = useState(""); 
   const [matchScore, setMatchScore] = useState(null);
   const [base64Data, setBase64Data] = useState(null); 
-
-
   
-  // ===============================
-  // Close the "Match Score" popup
-  // ===============================
+
   const closePopup = () => {
     setShowPopup(false);
   };
 
-  // ===============================
-  // If no job was passed in props
-  // ===============================
   if (!job) {
     return <p className="job-details__no-job">No job details available.</p>;
   }
 
-  // =======================================
-  // 1) Fetch the PDF from Flask backend
-  // =======================================
+
   const fetchPdfFromFlaskBackend = async () => {
     try {
       // If you’re using Firebase Auth:
@@ -69,9 +60,6 @@ const JobDetails = () => {
     }
   };
 
-  // ================================================
-  // 2) Compare CV with Job Description (Match Score)
-  // ================================================
   const compareWithDescription = async () => {
     try {
       let cvBase64 = base64Data;
@@ -123,9 +111,6 @@ const JobDetails = () => {
   };
   
 
-  // ===============================
-  // 3) Save the job
-  // ===============================
   const handleSaveJob = async (e) => {
     e.preventDefault();
     if (!job) {
@@ -162,11 +147,7 @@ const JobDetails = () => {
     }
   };
   
-  
 
-  // ===============================
-  // 4) Apply for the job
-  // ===============================
   const handleApplyJob = async (e) => {
     e.preventDefault();
     if (!job) {
@@ -210,21 +191,24 @@ const JobDetails = () => {
 
       const result = await response.json();
       if (response.ok) {
-        console.log('Job applied successfully:', result.message);
-        alert('Job applied successfully!');
+        console.log("Job applied successfully:", result.message);
+        setPopupMessage("Job applied successfully!"); 
+        setPopupType("save"); 
+        setShowPopup(true);
       } else {
-        console.error('Error applying to job:', result.error);
-        alert('Error applying to job. Please try again.');
+        console.log("Error applying for job:", result.error);
+        setPopupMessage("Error applying job. Please try again.");
+        setPopupType("save");
+        setShowPopup(true);
       }
     } catch (error) {
-      console.error('Error applying to job:', error);
-      alert('An error occurred. Please try again.');
+      console.log("Error applying job:", error);
+      setPopupMessage("Error applying job. Please try again.");
+      setPopupType("save"); 
+      setShowPopup(true);
     }
   };
 
-  // ===============================
-  // Render the job details
-  // ===============================
   return (
     <main className="job-details__container">
       <section className="job-details__card">

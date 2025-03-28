@@ -12,7 +12,9 @@ import {
 import { getAuth } from "firebase/auth";
 import React, { useState, useEffect } from "react";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
-import "../../components/style.css"; 
+import "../../components/style.css";
+import { auth } from '../../components/firebaseconfigs'; 
+import { useGoogleLogin } from '@react-oauth/google';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
@@ -157,7 +159,60 @@ const JobTrackerJobseeker = () => {
       },
     ],
   };
+
+  const connectCalendar = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      try {
+        const user = auth.currentUser;
+        if (!user) throw new Error('Not authenticated');
   
+        console.log("Google OAuth Response:", tokenResponse);
+  
+        const payload = {
+          uid: user.uid,
+          token: tokenResponse.access_token
+        };
+        console.log("Sending payload to backend:", JSON.stringify(payload, null, 2));
+        
+        const response = await fetch('http://localhost:5000/store-google-token', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': await user.getIdToken()
+          },
+          body: JSON.stringify(payload) 
+        });
+  
+        const responseClone = response.clone();
+        const data = await response.json();
+        
+        if (!response.ok) {
+          throw { 
+            message: data.error || 'Failed to store token',
+            response: responseClone
+          };
+        }
+  
+        alert('Google Calendar connected successfully!');
+      } catch (error) {
+        console.error('Full error:', error);
+        
+        let errorDetails = '';
+        try {
+          const errorResponse = error.response || await fetch(error.url);
+          errorDetails = await errorResponse.text();
+        } catch (e) {
+          errorDetails = error.message;
+        }
+        
+        console.error('Error details:', errorDetails);
+        alert(`Connection failed: ${error.message}\nDetails: ${errorDetails.substring(0, 100)}`);
+      }
+    },
+    scope: 'https://www.googleapis.com/auth/calendar.events',
+    flow: 'implicit',
+    prompt: 'consent'
+  });
 
   return (
     <main>
@@ -226,6 +281,9 @@ const JobTrackerJobseeker = () => {
   <section className="google-calendar-integration">
   <h2>Google Calendar Integration (Coming Soon)</h2>
   <p>Sync your job application deadlines with Google Calendar to stay on top of your applications.</p>
+  <button onClick={connectCalendar} className="google-connect-button">
+      Connect Google Calendar
+    </button>
   </section>
 
     </main>

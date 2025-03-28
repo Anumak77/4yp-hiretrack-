@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@react-oauth/google": "^0.12.1",
     "@testing-library/user-event": "^13.5.0",
-    "axios": "^1.8.3",
+    "axios": "^1.8.4",
     "chart.js": "^4.4.7",
     "core-js": "^3.41.0",
     "cors": "^2.8.5",
@@ -14,6 +15,7 @@
     "file-saver": "^2.0.5",
     "firebase": "^11.0.1",
     "fuse.js": "^7.0.0",
+    "googleapis": "^148.0.0",
     "jspdf": "^3.0.1",
     "ng2-charts": "^8.0.0",
     "papaparse": "^5.4.1",

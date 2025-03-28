@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-// Remove this line: import axios from 'axios';
 import { getAuth } from 'firebase/auth';
 import '../../components/style.css';
 import { getFirestore, collection, addDoc } from "firebase/firestore";
@@ -58,9 +57,7 @@ const PostJob = () => {
   const confirmSubmission = async (e) => {
     e.preventDefault();
 
-    // Example check for missing fields:
     const missingFields = [];
-    // This snippet is just an example – adapt it to match your own logic
     for (const [key, value] of Object.entries(jobData)) {
       if (typeof value === "string" && value.trim() === "") {
         missingFields.push(key);
@@ -82,8 +79,6 @@ const PostJob = () => {
 
       const idToken = await user.getIdToken();
       if (!idToken) throw new Error('Failed to get ID token');
-
-      // Replace axios.post with fetch
       const response = await fetch('http://localhost:5000/create-job', {
         method: 'POST',
         headers: {
