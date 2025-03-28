@@ -12,7 +12,6 @@ const JobDetails = () => {
   const [popupType, setPopupType] = useState(""); 
   const [matchScore, setMatchScore] = useState(null);
   const [base64Data, setBase64Data] = useState(null); 
-  
 
   const closePopup = () => {
     setShowPopup(false);
@@ -21,7 +20,6 @@ const JobDetails = () => {
   if (!job) {
     return <p className="job-details__no-job">No job details available.</p>;
   }
-
 
   const fetchPdfFromFlaskBackend = async () => {
     try {
@@ -110,7 +108,6 @@ const JobDetails = () => {
     }
   };
   
-
   const handleSaveJob = async (e) => {
     e.preventDefault();
     if (!job) {
@@ -147,7 +144,6 @@ const JobDetails = () => {
     }
   };
   
-
   const handleApplyJob = async (e) => {
     e.preventDefault();
     if (!job) {
