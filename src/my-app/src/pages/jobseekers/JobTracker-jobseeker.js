@@ -11,10 +11,25 @@ import {
 } from "chart.js";
 import { getAuth } from "firebase/auth";
 import React, { useState, useEffect } from "react";
-import { getFirestore, collection, getDocs } from "firebase/firestore";
 import "../../components/style.css";
-import { auth } from '../../components/firebaseconfigs'; 
 import { useGoogleLogin } from '@react-oauth/google';
+import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
+import { format, parse, startOfWeek, getDay } from 'date-fns';
+import "../../components/style.css";
+import "../../components/JobTracker-jobseeker.css";
+import { getFirestore, doc, getDoc } from "firebase/firestore";
+
+const locales = {
+  'en-US': require('date-fns/locale/en-US')
+};
+
+const localizer = dateFnsLocalizer({
+  format,
+  parse,
+  startOfWeek,
+  getDay,
+  locales,
+});
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
@@ -25,7 +40,13 @@ const JobTrackerJobseeker = () => {
   const [jobApplications, setJobApplications] = useState([]);
   const [dueDate, setDueDate] = useState("");
   const [jobStatus, setJobStatus] = useState("Applied");
-
+  const [events, setEvents] = useState([]);
+  const auth = getAuth();
+  const user = auth.currentUser;
+  const [loading, setLoading] = useState("")
+  const [view, setView] = useState('week'); 
+  const [height, setHeight] = useState(400);
+  const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
   const fetchAppliedJobs = async () => {
@@ -209,85 +230,191 @@ const JobTrackerJobseeker = () => {
         alert(`Connection failed: ${error.message}\nDetails: ${errorDetails.substring(0, 100)}`);
       }
     },
-    scope: 'https://www.googleapis.com/auth/calendar.events',
+    scope: 'https://www.googleapis.com/auth/calendar.readonly',
     flow: 'implicit',
     prompt: 'consent'
   });
 
-  return (
-    <main>
-
-<h2 className="jobtracker-chart-title">Job Tracker Dashboard</h2>
-
-      <section className="jobtracker-container">
-
-      <section className="jobtracker-form">
-        <select className="jobtracker-select" value={selectedJob} onChange={(e) => setSelectedJob(e.target.value)}>
-          <option value="">Select a Job</option>
-          {jobOptions.map((job, index) => (
-            <option key={index} value={job}>
-              {job}
-            </option>
-          ))}
-        </select>
-
-        <input type="date" className="input-date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
-        <div className="jobtracker-status-buttons">
-  <button
-    onClick={() => handleStatusChange("Applied")}
-    className={`jobtracker-status-button applied ${jobStatus === "Applied" ? "active" : ""}`}
-  >
-    Applied
-  </button>
-  <button
-    onClick={() => handleStatusChange("Interviewed")}
-    className={`jobtracker-status-button interviewed ${jobStatus === "Interviewed" ? "active" : ""}`}
-  >
-    Interviewed
-  </button>
-  <button
-    onClick={() => handleStatusChange("Rejected")}
-    className={`jobtracker-status-button rejected ${jobStatus === "Rejected" ? "active" : ""}`}
-  >
-    Rejected
-  </button>
-</div>
-        <button onClick={handleAddApplication} className="jobtracker-add-button">
-          Add Application
-        </button>
+  const fetchCalendarEvents = async () => {
+    setLoading(true);
+    try {
+      const idToken = await user.getIdToken();
+      const response = await fetch('http://localhost:5000/get-calendar-events', {
+        headers: {
+          'Authorization': `Bearer ${idToken}`
+        }
+      });
       
-      </section>
-
-      <div className="jobtracker-charts-container">
-      <div className="jobtracker-chart-container">
-        <h2 className="jobtracker-chart-heading">Bar Chart - Applications Per Status</h2>
-        <div className="jobtracker-bar-chart">
-        <div className="jobtracker-bar-chart" style={{ width: "400px", height: "400px" }}>
-          <Bar data={barChartData} options={chartOptions} />
-        </div>
-        </div>
-      </div>
-
-      <div className="jobtracker-chart-container">
-        <h2 className="jobtracker-chart-heading">Pie Chart - Job Status</h2>
-        <div className="jobtracker-pie-chart">
-          <Pie data={pieChartData} />
-        </div>
-      </div>
-      </div>
-      </section>
-
+      if (!response.ok) throw new Error('Failed to fetch events');
       
-  <section className="google-calendar-integration">
-  <h2>Google Calendar Integration (Coming Soon)</h2>
-  <p>Sync your job application deadlines with Google Calendar to stay on top of your applications.</p>
-  <button onClick={connectCalendar} className="google-connect-button">
-      Connect Google Calendar
-    </button>
-  </section>
+      const data = await response.json();
+      const events = data.items.map(event => ({
+        id: event.id,
+        title: event.summary || 'No Title',
+        start: new Date(event.start.dateTime || event.start.date),
+        end: new Date(event.end.dateTime || event.end.date),
+        allDay: !event.start.dateTime,
+        color: event.colorId ? `#${getColorHex(event.colorId)}` : '#4285F4'
+      }));
+      
+      setCalendarEvents(events);
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
+      setLoading(false);
+    }
+  
+  useEffect(() => {
+    const checkConnection = async () => {
+      const userDoc = await getDoc(doc(getFirestore(), 'users', user.uid));
+      setIsConnected(!!userDoc.data()?.googleTokens?.accessToken);
+    };
+    if (user) checkConnection();
+  }, [user]);
+  
+  useEffect(() => {
+    if (isConnected) fetchEvents();
+  }, [isConnected]);
 
-    </main>
+  useEffect(() => {
+    setHeight(view === 'month' ? 600 : view === 'week' ? 500 : 400);
+  }, [view]);
+  
+
+  const CustomEvent = ({ event }) => (
+    <div>
+      <strong>{event.title}</strong>
+      {event.resource.description && <div>{event.resource.description}</div>}
+    </div>
   );
-};
+  
+  const CustomToolbar = (toolbar) => {
+    const goToToday = () => {
+      toolbar.onNavigate('TODAY');
+    };}
+  
+
+    return (
+      <main>
+        <h2 className="jobtracker-chart-title">Job Tracker Dashboard</h2>
+    
+        <div className="jobtracker-container">
+          {/* Application Form Section */}
+          <section className="jobtracker-form">
+            <select className="jobtracker-select" value={selectedJob} onChange={(e) => setSelectedJob(e.target.value)}>
+              <option value="">Select a Job</option>
+              {jobOptions.map((job, index) => (
+                <option key={index} value={job}>{job}</option>
+              ))}
+            </select>
+    
+            <input 
+              type="date" 
+              className="input-date" 
+              value={dueDate} 
+              onChange={(e) => setDueDate(e.target.value)} 
+            />
+    
+            <div className="jobtracker-status-buttons">
+              <button
+                onClick={() => handleStatusChange("Applied")}
+                className={`jobtracker-status-button applied ${jobStatus === "Applied" ? "active" : ""}`}
+              >
+                Applied
+              </button>
+              <button
+                onClick={() => handleStatusChange("Interviewed")}
+                className={`jobtracker-status-button interviewed ${jobStatus === "Interviewed" ? "active" : ""}`}
+              >
+                Interviewed
+              </button>
+              <button
+                onClick={() => handleStatusChange("Rejected")}
+                className={`jobtracker-status-button rejected ${jobStatus === "Rejected" ? "active" : ""}`}
+              >
+                Rejected
+              </button>
+            </div>
+    
+            <button onClick={handleAddApplication} className="jobtracker-add-button">
+              Add Application
+            </button>
+          </section>
+    
+          {/* Charts Section - Side by Side */}
+          <div className="charts-row">
+            <div className="chart-container">
+              <h3 className="chart-title">Applications Status (Bar)</h3>
+              <div className="chart-wrapper">
+                <Bar 
+                  data={barChartData} 
+                  options={chartOptions} 
+                  style={{ width: '100%', height: '400px' }} 
+                />
+              </div>
+            </div>
+    
+            <div className="chart-container">
+              <h3 className="chart-title">Applications Breakdown (Pie)</h3>
+              <div className="chart-wrapper">
+                <Pie 
+                  data={pieChartData} 
+                  style={{ width: '100%', height: '400px' }} 
+                />
+              </div>
+            </div>
+          </div>
+    
+          {/* Calendar Section - Below Charts */}
+          <section className="calendar-section">
+            <div className="calendar-header">
+              <h2>Application Schedule</h2>
+              {!isConnected ? (
+                <button onClick={connectCalendar} className="connect-button">
+                  <img src="/google-calendar-icon.png" alt="Google Calendar" />
+                  Connect Calendar
+                </button>
+              ) : (
+                <div className="view-controls">
+                  <button onClick={() => setView('day')} className={view === 'day' ? 'active' : ''}>
+                    Day
+                  </button>
+                  <button onClick={() => setView('week')} className={view === 'week' ? 'active' : ''}>
+                    Week
+                  </button>
+                  <button onClick={() => setView('month')} className={view === 'month' ? 'active' : ''}>
+                    Month
+                  </button>
+                </div>
+              )}
+            </div>
+    
+            {isConnected && (
+              <div className="calendar-wrapper" style={{ height: `${height}px` }}>
+                {loading ? (
+                  <div className="loading-spinner"></div>
+                ) : (
+                  <Calendar
+                    localizer={localizer}
+                    events={events}
+                    startAccessor="start"
+                    endAccessor="end"
+                    views={['month', 'week', 'day']}
+                    view={view}
+                    onView={setView}
+                    defaultDate={new Date()}
+                    components={{
+                      event: CustomEvent,
+                      toolbar: CustomToolbar
+                    }}
+                  />
+                )}
+              </div>
+            )}
+          </section>
+        </div>
+      </main>
+    );
+  }
 
 export default JobTrackerJobseeker;
