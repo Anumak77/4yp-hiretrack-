@@ -165,7 +165,7 @@ const DashRecruiter = () => {
     fetchJobPostings();
   }, []);
 
-  /*
+  
 const logIdToken = async () => {
   try {
     const user = getAuth().currentUser; 
@@ -183,7 +183,7 @@ const logIdToken = async () => {
 };
 
 
-logIdToken(); */
+logIdToken();
 
 const handleChat = () => {
   navigate(`/recruiterchat`);

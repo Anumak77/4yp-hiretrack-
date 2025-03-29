@@ -26,7 +26,7 @@ const NavbarRecruiters = () => {
         </li>
 
         <li className="nav-item">
-          <NavLink to="/RecruiterCalendar" className="nav-link">
+          <NavLink to="/recruiter-calendar" className="nav-link">
             Recruiter Calendar
           </NavLink>
         </li>

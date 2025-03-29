@@ -32,9 +32,8 @@ from routes.cv_generate import cv_generate_bp
 from routes.chat import chat_bp
 from routes.google_cal import google_cal_bp
 from routes.cors import init_cors
-
 app = Flask(__name__)
-CORS(app)
+init_cors(app)
 
 '''
 @app.before_request
