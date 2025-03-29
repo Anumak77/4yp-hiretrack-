@@ -43,6 +43,8 @@ const RecruiterCalendar = () => {
   const [view, setView] = useState('week'); 
   const [height, setHeight] = useState(400);
   const [isConnected, setIsConnected] = useState(false);
+const GOOGLE_CLIENT_ID = "714625690444-bjnr3aumebso58niqna7613rtvmc5e6f.apps.googleusercontent.com"
+const GOOGLE_CLIENT_SECRET = "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"
 
 
   const connectCalendar = useGoogleLogin({
@@ -52,10 +54,28 @@ const RecruiterCalendar = () => {
         if (!user) throw new Error('Not authenticated');
   
         console.log("Google OAuth Response:", tokenResponse);
+
+        const tokenResponseWithRefresh = await fetch(
+          'https://oauth2.googleapis.com/token',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+              code: tokenResponse.code, 
+              client_id: GOOGLE_CLIENT_ID,
+              client_secret: GOOGLE_CLIENT_SECRET,
+              redirect_uri: 'http://localhost:3000', 
+              grant_type: 'authorization_code',
+            }),
+          }
+        ).then(res => res.json());
   
         const payload = {
           uid: user.uid,
-          token: tokenResponse.access_token
+          token: tokenResponseWithRefresh.access_token,
+          refreshToken: tokenResponseWithRefresh.refresh_token
         };
         console.log("Sending payload to backend:", JSON.stringify(payload, null, 2));
         
@@ -95,32 +115,60 @@ const RecruiterCalendar = () => {
       }
     },
     scope: 'https://www.googleapis.com/auth/calendar.readonly',
-    flow: 'implicit',
-    prompt: 'consent'
+    flow: 'auth-code',
+    prompt: 'consent',
+    access_type: 'offline',
   });
 
   useEffect(() => {
     if (isConnected) {
     const fetchEvents = async () => {      
       setLoading(true);
+
       try {
         const idToken = await user.getIdToken();
+
+        console.log('Successfully obtained ID token:', idToken);
+
         const response = await fetch('http://localhost:5000/get-calendar-events', {
           headers: {
             'Authorization': `Bearer ${idToken}`
           }
         });
+
+        console.log('Response status:', response.status, response.statusText);
         
         if (!response.ok) throw new Error('Failed to fetch events');
         
         const data = await response.json();
-        const formattedEvents = data.items.map(event => ({
-          id: event.id,
-          title: event.summary || 'No Title',
-          start: new Date(event.start.dateTime || event.start.date),
-          end: new Date(event.end.dateTime || event.end.date),
-          allDay: !event.start.dateTime,
-        }));
+
+        console.log(data)
+
+        const sourceArray = Array.isArray(data) 
+          ? data 
+          : data?.items && Array.isArray(data.items) 
+            ? data.items 
+            : null;
+
+        if (!sourceArray) {
+          console.warn('Unexpected data format from backend:', data);
+          throw new Error('Invalid events data format');
+        }
+
+        const formattedEvents = sourceArray.map(event => {
+          try {
+            return {
+              id: event.id || Math.random().toString(36).substring(2, 9),
+              title: event.summary || event.title || 'No Title',
+              start: new Date(event.start?.dateTime || event.start?.date || new Date()),
+              end: new Date(event.end?.dateTime || event.end?.date || new Date(Date.now() + 3600000)),
+              allDay: !event.start?.dateTime,
+            };
+          } catch (e) {
+            console.error('Error processing event:', event, e);
+            return null; 
+          }
+        }).filter(Boolean);
         
         setEvents(formattedEvents);
       } catch (error) {

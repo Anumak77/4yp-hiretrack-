@@ -1,4 +1,4 @@
-/*// Import the functions you need from the SDKs you need
+// Import the functions you need from the SDKs you need
 import { initializeApp} from "firebase/app";
 import { getDatabase, ref, get } from 'firebase/database';
 import { getAuth } from 'firebase/auth';
@@ -29,4 +29,4 @@ const auth = getAuth(app);
 const db = getFirestore(app)
 
 export { database, ref, get, auth, collection, query, where, onSnapshot, orderBy };
-export{db}*/
+export{db}
