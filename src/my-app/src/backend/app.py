@@ -34,8 +34,9 @@ from routes.google_cal import google_cal_bp
 from routes.cors import init_cors
 
 app = Flask(__name__)
-init_cors(app)
+CORS(app)
 
+'''
 @app.before_request
 def handle_cookies():
     if request.method == "OPTIONS":
@@ -49,6 +50,8 @@ def handle_cookies():
 def add_security_headers(response):
     response.headers['Cross-Origin-Opener-Policy'] = 'same-origin-allow-popups'
     return response
+
+'''
 
 app.register_blueprint(train_resume_bp)
 app.register_blueprint(auth_bp)

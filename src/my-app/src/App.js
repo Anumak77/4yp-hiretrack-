@@ -36,7 +36,7 @@ import JobDetails2 from './pages/jobseekers/job-details2';
 import RecruiterChat from './pages/chat/recruiterchat';
 import ViewAllAppliedJobs from './pages/recruiters/View-all-applied-jobs';
 import EditProfile from './pages/jobseekers/EditProfile';
-
+import RecruiterCalendar from './pages/recruiters/RecruiterCalendar';
 import CVEditPage from './pages/jobseekers/CVEditPage';
 
 function App() {
@@ -140,11 +140,8 @@ function MainApp() {
         <Route path="/viewjobpostings" element={<ViewJobPostings jobPostings={jobPostings} setJobPostings={setJobPostings} />} />
         <Route path="/edit-job/:id" element={<EditJob />} />
         <Route path="/edit-profile" element={<EditProfile />} />
-
         <Route path="/CV-Edit-Page" element={<CVEditPage />} />
-
-      
-
+        <Route path="/RecruiterCalendar" element={<RecruiterCalendar />} />
         <Route path="/viewapplicants/:id" element={<ViewApplicants />} />
         <Route path="*" element={<h1>404 - Page Not Found</h1>} />
       </Routes>

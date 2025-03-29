@@ -2,6 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { getAuth } from "firebase/auth";
 import "../../components/style.css";
+import InterviewPopup from "./InterviewPopup";
 
 const ViewApplicants = () => {
     const { id: jobId } = useParams(); 
