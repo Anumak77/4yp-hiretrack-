@@ -1,58 +1,76 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate,  useParams } from 'react-router-dom';
 import '../../components/style.css';
-
-const mockApplications = [
-  {
-    title: 'Frontend Developer',
-    company: 'Acme Corp',
-    date: 'March 10, 2025',
-    matchScore: 92,
-  },
-  {
-    title: 'Backend Engineer',
-    company: 'BetaTech Solutions',
-    date: 'March 15, 2025',
-    matchScore: 78,
-  },
-  {
-    title: 'Full Stack Developer',
-    company: 'Innovatech',
-    date: 'March 18, 2025',
-    matchScore: 54,
-  },
-];
-
-const otherJobs = [
-  { title: 'React Native Developer', company: 'Greenbyte', matchScore: 88 },
-  { title: 'DevOps Engineer', company: 'CloudCraft', matchScore: 63 },
-  { title: 'Data Analyst', company: 'InsightWorks', matchScore: 59 },
-  { title: 'UI/UX Designer', company: 'PixelPlay', matchScore: 72 },
-  { title: 'QA Tester', company: 'BugSquashers Inc.', matchScore: 66 },
-  { title: 'Technical Writer', company: 'DocuPro', matchScore: 81 },
-];
-
+import { getAuth } from "firebase/auth";
 
 const ViewAppliedJobs = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const seeker = location.state;
-
+  const auth = getAuth();
+  const { jobId } = useParams();
   const [applications, setApplications] = useState([]);
+  const otherJobs = []
+  const [matchScores, setMatchScores] = useState({});
+  const [loadingScores, setLoadingScores] = useState({});
 
-  useEffect(() => {
-    if (seeker) {
-      setApplications(mockApplications);
-    } else {
-      navigate('/');
-    }
-  }, [seeker, navigate]);
 
   const getScoreClass = (score) => {
     if (score > 85) return 'score-high';
     if (score >= 60) return 'score-medium';
     return 'score-low';
   };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        if (!seeker) {
+          navigate('/');
+          return;
+        }
+
+        console.log(seeker.uid)
+  
+        const auth = getAuth();
+        const user = auth.currentUser;
+        if (!user) {
+          throw new Error("Not authenticated");
+        }
+  
+        const idToken = await user.getIdToken();
+        
+        const response = await fetch(
+          `http://localhost:5000/fetch-jobseeker-applied-jobs/${seeker.uid}/appliedjobs`, 
+          {
+            method: "GET",
+            headers: {
+              "Authorization": idToken,
+              "Content-Type": "application/json"
+            }
+          }
+        );
+  
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Failed to fetch jobseeker jobs");
+        }
+  
+        const jobs = await response.json();
+        console.log(jobs)
+        setApplications(jobs);
+  
+      } catch (error) {
+        console.error("Error fetching jobseeker jobs:", error);
+      }
+    };
+  
+    fetchData();
+  }, [seeker, navigate]);
+
+  
+const handleChat = (applicantId) => {
+    navigate(`/recruiterchat/${applicantId}`);};
+
 
   return (
     <div className="view-applied-container">
@@ -74,8 +92,8 @@ const ViewAppliedJobs = () => {
   {applications.map((job, index) => (
     <div className="other-job-card">
     <div>
-      <h3 className="other-job-title">{job.title}</h3>
-      <p className="other-job-company">{job.company}</p>
+      <h3 className="other-job-title">{job.Title}</h3>
+      <p className="other-job-company">{job.Company}</p>
       <p className="other-job-score">
         <strong>Applied on:</strong> {job.date}<br />
         <strong>Match Score:</strong>{' '}
@@ -94,7 +112,7 @@ const ViewAppliedJobs = () => {
       </button>
       <button
         className="other-job-offer-button"
-        onClick={() => alert('Reaching out to User')}
+        onClick={() => handleChat(seeker.uid)}
       >
         Reach Out
       </button>
@@ -111,8 +129,8 @@ const ViewAppliedJobs = () => {
   {otherJobs.map((job, index) => (
     <div key={index} className="other-job-card">
       <div>
-        <h3 className="other-job-title">{job.title}</h3>
-        <p className="other-job-company">{job.company}</p>
+        <h3 className="other-job-title">{job.Title}</h3>
+        <p className="other-job-company">{job.Company}</p>
         <p className="other-job-score">
           <strong>Match Score:</strong>{' '}
           <span className={`match-score ${getScoreClass(job.matchScore)}`}>

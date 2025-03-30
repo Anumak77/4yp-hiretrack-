@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, Blueprint
 from fuzzywuzzy import process
 from firebase_admin import credentials, initialize_app, auth, firestore
+from flask_cors import cross_origin
 
 
 recruitersearch_bp = Blueprint('recruitersearch', __name__)
@@ -46,3 +47,40 @@ def search_job_seekers():
         filtered_seekers = [seekers_list[i] for (_, i) in results]
 
     return jsonify(filtered_seekers)
+
+@recruitersearch_bp.route('/fetch-jobseeker-applied-jobs/<jobseeker_id>/<job_list>', methods=['GET'])
+@cross_origin()
+def fetch_jobseeker_applied_jobs(jobseeker_id, job_list):
+    try:
+    
+        id_token = request.headers.get('Authorization')
+        if not id_token:
+            return jsonify({"error": "Authorization token is required"}), 401
+
+        decoded_token = auth.verify_id_token(id_token)
+        requester_uid = decoded_token.get('uid')
+
+        firestore_db = firestore.client()
+        recruiter_ref = firestore_db.collection('recruiters').document(requester_uid)
+        recruiter_data = recruiter_ref.get()
+
+        if not recruiter_data.exists:
+            return jsonify({"error": "Only recruiters can access this endpoint"}), 403
+
+        jobs_ref = firestore_db.collection(f'jobseekers/{jobseeker_id}/{job_list}')
+        jobs_snapshot = jobs_ref.get()
+
+        jobs = []
+        for doc in jobs_snapshot:
+            job_data = doc.to_dict()
+            jobs.append({ 
+                "id": doc.id,
+                **job_data,
+            })
+
+        return jsonify(jobs), 200
+
+    except FirebaseError as e:
+        return jsonify({"error": str(e)}), 500
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
