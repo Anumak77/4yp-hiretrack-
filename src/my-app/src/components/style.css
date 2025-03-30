@@ -2171,7 +2171,25 @@ body {
   cursor: pointer;
 }
 
+.offer-button {
+  background-color: #95933a;
+  color: white;
+  padding: 8px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
 .reject-button {
+  background-color: #b22222;
+  color: white;
+  padding: 8px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.viewCV-button {
   background-color: #b22222;
   color: white;
   padding: 8px;

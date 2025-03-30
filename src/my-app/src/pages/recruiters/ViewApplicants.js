@@ -123,8 +123,40 @@ const ViewApplicants = () => {
             fetchInterviewApplicants();
         } else if (filter === "Rejected") {
             fetchRejectedApplicants();
-        }
+        } else if (filter === "Offered") {
+            fetchOfferedApplicants();}
     }, [filter, jobId]);
+
+    const fetchOfferedApplicants = async () => {
+        try {
+            const auth = getAuth();
+            const user = auth.currentUser;
+
+            if (!user) {
+                throw new Error("User not authenticated");
+            }
+
+            const idToken = await user.getIdToken();
+
+            const response = await fetch(`http://localhost:5000/fetch-offered-applicants/${user.uid}/${jobId}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": idToken,
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to fetch interview applicants");
+            }
+
+            const data = await response.json();
+            setApplicants(data.applicants);
+        } catch (error) {
+            console.error("Error fetching interview applicants:", error);
+            setError(error.message);
+        }
+    };
 
     const handleInterview = async (applicantId) => {
         try {
@@ -159,12 +191,12 @@ const ViewApplicants = () => {
                 await fetchInterviewApplicants();
             } else if (filter === "Rejected") {
                 await fetchRejectedApplicants();
-            }
+            } else if (filter === "Offered") {
+                await fetchOfferedApplicants();}
 
             alert("Applicant added to interview list");
         } catch (error) {
             console.error("Error adding applicant to interview list:", error);
-            alert("Error adding applicant to interview list");
         }
     };
 
@@ -201,24 +233,48 @@ const ViewApplicants = () => {
                 await fetchInterviewApplicants();
             } else if (filter === "Rejected") {
                 await fetchRejectedApplicants();
-            }
+            }else if (filter === "Offered") {
+                await fetchOfferedApplicants();}
 
             alert("Applicant added to rejected list");
         } catch (error) {
             console.error("Error adding applicant to rejected list:", error);
-            alert("Error adding applicant to rejected list");
         }
     };
 
 
-
-    const handleStatusChange = (applicantId, newStatus) => {
-        setApplicants(prevApplicants =>
-            prevApplicants.map(applicant =>
-                applicant.id === applicantId ? { ...applicant, status: newStatus } : applicant
-            )
-        );
+    const handleOffer = async (applicantId) => {
+        try {
+            const auth = getAuth();
+            const user = auth.currentUser;
+            if (!user) throw new Error("User not authenticated");
+    
+            const idToken = await user.getIdToken();
+            const response = await fetch(
+                `http://localhost:5000/send_job_offer/${user.uid}/${jobId}/${applicantId}`, {
+                method: "POST",
+                headers: {
+                    "Authorization": idToken,
+                    "Content-Type": "application/json",
+                },
+            });
+    
+            if (!response.ok) throw new Error("Failed to send offer");
+            
+            const data = await response.json();
+            alert(`Offer for ${data.job_title} sent successfully!`);
+            
+            if (filter === "All") await fetchApplicants();
+            else if (filter === "Interview") await fetchInterviewApplicants();
+            else if (filter === "Rejected") await fetchRejectedApplicants();
+            else if (filter === "Offered") await fetchOfferedApplicants();
+    
+        } catch (error) {
+            console.error("Error offering job:", error);
+            alert("Error offering job: " + error.message);
+        }
     };
+
 
     const handleMatchScore = async (applicantId, jobId) => {
         try {
@@ -259,6 +315,47 @@ const ViewApplicants = () => {
         navigate(`/recruiterchat/${applicantId}`);
     };
 
+    const viewCV = async (applicantId) => {
+        try {
+            const auth = getAuth();
+            const user = auth.currentUser;
+            if (!user) return alert("Please sign in to view CVs.");
+    
+            const idToken = await user.getIdToken();
+    
+            const response = await fetch(`http://127.0.0.1:5000/fetch-applicant-pdf/${applicantId}`, {
+                method: "GET",
+                headers: { Authorization: idToken },
+            });
+    
+            if (!response.ok) {
+                throw new Error(response.status === 404 ? "Applicant hasn't uploaded a CV" : "Could not fetch PDF");
+            }
+    
+            const data = await response.json();
+    
+            if (data.fileData) {
+                const byteCharacters = atob(data.fileData);
+                const byteNumbers = new Array(byteCharacters.length);
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                const byteArray = new Uint8Array(byteNumbers);
+                const blob = new Blob([byteArray], { type: "application/pdf" });
+    
+                const blobUrl = URL.createObjectURL(blob);
+                window.open(blobUrl, "_blank");
+                URL.revokeObjectURL(blobUrl);
+            } else {
+                alert("No CV data found for this applicant");
+            }
+        } catch (error) {
+            console.error("Error fetching CV:", error);
+            alert(error.message);
+        }
+    };
+    
+
     return (
         <main className="view-applicants-container">
             <button className="back-button-view" onClick={() => navigate(-1)}>Go Back</button>
@@ -266,7 +363,7 @@ const ViewApplicants = () => {
 
             <label>Filter by Status</label>
             <div className="status-filter">
-                {["All", "Interview", "Rejected"].map(status => (
+                {["All", "Interview", "Offered", "Rejected"].map(status => (
                     <button 
                         key={status} 
                         className={`filter-button ${filter === status ? "selected" : ""}`} 
@@ -287,17 +384,29 @@ const ViewApplicants = () => {
                             <p className="applicant-phone"><strong>Phone:</strong> {applicant.phone_number || "Not provided"}</p>
 
                             <div className="applicant-actions">
+                            {filter === "Interview" && (
+                                    <button className="offer-button" onClick={() => handleOffer(applicant.uid, jobId)}>
+                                        Offer
+                                    </button>)}
+                                
+                            {filter !== "Rejected" && filter !== "Offered" && filter !== "Interview" && (
                                 <button className="interview-button" onClick={() => handleInterview(applicant.uid, jobId) }>
                                     Interview
-                                </button>
+                                </button>)}
+            
                                 <button className="match-score-button" onClick={() => handleMatchScore(applicant.uid, jobId)}>
                                     Match Score
                                 </button>
                                 <button className="chat-button" onClick={() => handleChat(applicant.uid)}>
                                     Chat
                                 </button>
+                            {filter !== "Rejected" && filter !== "Offered" && (
                                 <button className="reject-button" onClick={() => handleReject(applicant.uid, jobId)}>
                                     Reject
+                                </button> )}
+
+                                <button className="view-cv-button" onClick={() => viewCV(applicant.uid)}>
+                                    View CV
                                 </button>
                             </div>
                         
