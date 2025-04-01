@@ -3,9 +3,10 @@ const { defineConfig } = require("cypress");
 module.exports = defineConfig({
   e2e: {
     setupNodeEvents(on, config) {
-      // add custom event listeners here
+      // Implement or require custom event listeners and tasks
     },
-    specPattern: "./e2e/**/*.cy.{js,jsx,ts,tsx}",
-    baseUrl: "http://localhost:3000", // ensure this is your app's base URL
+    specPattern: 'e2e/**/*.cy.{js,jsx,ts,tsx}',  // Updated spec pattern
+    supportFile: './support/index.js',  // Adjusted path
+    baseUrl: "http://localhost:3000", // Adjust based on your application's URL
   },
 });
