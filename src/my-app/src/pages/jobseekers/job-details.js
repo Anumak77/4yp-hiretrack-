@@ -176,7 +176,13 @@ const JobDetails = () => {
         userId: user.uid,
         job,
         cv: cvBase64,
+        matchScore: matchScore
       };
+
+      if (matchScore === null) {
+        await compareWithDescription(); 
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
 
       // Send request to apply
       const response = await fetch('http://127.0.0.1:5000/apply-job', {

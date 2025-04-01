@@ -2,7 +2,8 @@ from flask import Flask, request, jsonify, Blueprint
 from fuzzywuzzy import process
 from firebase_admin import credentials, initialize_app, auth, firestore
 from flask_cors import cross_origin
-
+from config import firestore_db, realtime_db 
+from firebase_admin.exceptions import FirebaseError
 
 recruitersearch_bp = Blueprint('recruitersearch', __name__)
 cred = credentials.Certificate('firebase_service_account_key.json')
@@ -48,37 +49,30 @@ def search_job_seekers():
 
     return jsonify(filtered_seekers)
 
-@recruitersearch_bp.route('/fetch-jobseeker-applied-jobs/<jobseeker_id>/<job_list>', methods=['GET'])
+@recruitersearch_bp.route('/fetch-jobseeker-applied-jobs/<jobseeker_id>/<recruiter_id>/<job_list>', methods=['GET'])
 @cross_origin()
-def fetch_jobseeker_applied_jobs(jobseeker_id, job_list):
+def fetch_jobseeker_applied_jobs(jobseeker_id, recruiter_id, job_list):
     try:
-    
-        id_token = request.headers.get('Authorization')
-        if not id_token:
-            return jsonify({"error": "Authorization token is required"}), 401
-
-        decoded_token = auth.verify_id_token(id_token)
-        requester_uid = decoded_token.get('uid')
-
-        firestore_db = firestore.client()
-        recruiter_ref = firestore_db.collection('recruiters').document(requester_uid)
-        recruiter_data = recruiter_ref.get()
-
-        if not recruiter_data.exists:
-            return jsonify({"error": "Only recruiters can access this endpoint"}), 403
+        recruiter_jobs_ref = firestore_db.collection('recruiters').document(recruiter_id).collection('jobposting')
+        recruiter_job_ids = [doc.id for doc in recruiter_jobs_ref.get()]
 
         jobs_ref = firestore_db.collection(f'jobseekers/{jobseeker_id}/{job_list}')
         jobs_snapshot = jobs_ref.get()
 
-        jobs = []
+        matching_jobs = []
         for doc in jobs_snapshot:
-            job_data = doc.to_dict()
-            jobs.append({ 
-                "id": doc.id,
-                **job_data,
-            })
+            applied_job_id = doc.id
+            
+            if applied_job_id in recruiter_job_ids:
+                job_data = doc.to_dict()
+                job_posting = recruiter_jobs_ref.document(applied_job_id).get().to_dict()
+                
+                matching_jobs.append({ 
+                    "id": applied_job_id,
+                    **job_data 
+                })
 
-        return jsonify(jobs), 200
+        return jsonify(matching_jobs), 200
 
     except FirebaseError as e:
         return jsonify({"error": str(e)}), 500
