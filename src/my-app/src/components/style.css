@@ -3382,3 +3382,75 @@ main::after {
   min-width: 120px;
   outline: none;
 }
+
+
+
+.cv-suggestion-slider-container {
+  position: fixed;
+  top: 6rem;
+  right: 2rem;
+  width: 320px;
+  z-index: 50;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 1rem;
+  padding: 1rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.cv-suggestion-slider__title {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #333;
+  font-size: 1rem;
+}
+
+.cv-suggestion-slider {
+  display: flex;
+  overflow-x: auto;
+  gap: 1rem;
+  padding-bottom: 0.5rem;
+  scrollbar-width: none;
+}
+
+.cv-suggestion-slider::-webkit-scrollbar {
+  display: none;
+}
+
+.cv-suggestion-card {
+  min-width: 260px;
+  max-width: 280px; 
+  flex-shrink: 0;
+  background: #f6fdf9;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid #b1e3cd;
+  font-size: 0.875rem;
+  color: #155e46;
+  box-shadow: 0 4px 10px rgba(21, 94, 70, 0.1);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal; 
+  display: flex;
+  align-items: center;
+}
+
+.cv-suggestion-slider-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cv-suggestion-close {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  color: #999;
+  cursor: pointer;
+  margin-left: 0.5rem;
+}
+
+.cv-suggestion-close:hover {
+  color: #333;
+}
+

@@ -90,6 +90,11 @@ function CVEditMock() {
   const fileInputRef = useRef();
   const navigate = useNavigate();
 
+  const handleCloseSuggestions = () => {
+    setShowNote(false);
+  };
+  
+
   // Fetch applied jobs on mount
   useEffect(() => {
     const auth = getAuth(firebaseapp);
@@ -140,13 +145,21 @@ function CVEditMock() {
         method: "POST",
         body: formData,
       });
-      const data = await res.json();
-      setCvData(data);
-      setStatus(" Uploaded and parsed your CV!");
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      } else if (res.headers.get("content-type")?.includes("application/json")) {
+        const data = await res.json();
+        setCvData(data);
+        setStatus("Uploaded and parsed your CV!");
+      } else {
+        const errorMsg = await res.text(); 
+        throw new Error(`Server didn't return JSON. Returned: ${errorMsg}`);
+      }
     } catch (error) {
       console.error("Upload error:", error);
-      setStatus(" Error parsing the file.");
+      setStatus(`Error parsing the file: ${error.message}`);
     }
+    
   };
 
   const handleGetSuggestions = async () => {
@@ -154,34 +167,45 @@ function CVEditMock() {
       alert("Please upload a CV and select a job first.");
       return;
     }
-
+  
     const payload = {
       cv: cvBase64,
       jobTitle: selectedJob.Title,
       jobDescription: selectedJob.JobDescription,
       jobRequirment: selectedJob.JobRequirment
     };
-
+  
     try {
       const res = await fetch("http://localhost:5000/cv-suggestions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
+  
       const data = await res.json();
-      setGptSuggestions(data.suggestions);
+      let suggestions = data.suggestions || "";
+  
+      suggestions = suggestions.replace(/^.*?[.!?](\s|$)/, ""); // removes first sentence
+  
+      suggestions = suggestions.replace(/\*\*(.*?)\*\*/g, "$1");
+  
+      suggestions = suggestions.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1");
+  
+      setGptSuggestions(suggestions);
       setShowNote(true);
+  
     } catch (error) {
       console.error("Error fetching suggestions:", error);
     }
   };
+  
 
   const handleChange = (field, value) => {
     setCvData(prev => ({ ...prev, [field]: value }));
   };
 
   const handleDownload = async () => {
-    const res = await fetch("http://localhost:5000/generate-cv", {
+    const res = await fetch("http://localhost:3000/generate-cv", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(cvData)
@@ -212,17 +236,28 @@ function CVEditMock() {
 
       <h1 className="mb-4">Upload & Edit Your CV</h1>
 
-      {showNote && (
-        <div className="floating-note">
-          <p>Hello! I'm here to help. </p>
-          {gptSuggestions && (
-            <div className="cv-suggestions-box">
-              <h3>Suggestions to Improve:</h3>
-              <pre>{gptSuggestions}</pre>
-            </div>
-          )}
-        </div>
-      )}
+
+
+      {showNote && gptSuggestions && (
+  <div className="cv-suggestion-slider-container">
+    <div className="cv-suggestion-slider-header">
+      <h3 className="cv-suggestion-slider__title">Suggestions to Improve</h3>
+      <button className="cv-suggestion-close" onClick={handleCloseSuggestions}>×</button>
+    </div>
+    <div className="cv-suggestion-slider">
+      {gptSuggestions
+        .split(/\n(?=\d+\.)/)
+        .map((tip, i) => (
+          <div key={i} className="cv-suggestion-card">
+            <p>{tip.replace(/^\d+\.\s*/, "").trim()}</p>
+          </div>
+        ))}
+    </div>
+  </div>
+)}
+
+
+
 
       <Button onClick={handleGetSuggestions}>Get Suggestions to Improve!</Button>
 
