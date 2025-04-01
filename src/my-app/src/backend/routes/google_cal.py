@@ -138,3 +138,82 @@ def get_calendar_events():
     except Exception as e:
         print(f'Error fetching events: {str(e)}')
         return jsonify({'error': str(e)}), 500
+
+@google_cal_bp.route('/schedule-interview/<recruiter_id>/<job_id>/<applicant_id>', methods=['POST'])
+def schedule_interview(recruiter_id, job_id, applicant_id):
+    try:
+        data = request.json
+        interview_time = datetime.fromisoformat(data['date'])
+        applicant_email = data['applicantEmail']
+        job_title = data['jobTitle']
+        interview_type = data['type']
+        notes = data.get('notes', '')
+
+        recruiter_ref = firestore_db.collection('users').document(recruiter_id)
+        recruiter_data = recruiter_ref.get().to_dict()
+        
+        if not recruiter_data or 'googleTokens' not in recruiter_data:
+            return jsonify({"error": "Google account not connected"}), 400
+        
+        tokens = recruiter_data['googleTokens']
+
+        # Create credentials from stored tokens
+        creds = Credentials(
+            token=tokens['accessToken'],
+            refresh_token=tokens['refreshToken'],
+            token_uri=tokens['tokenUri'],
+            client_id=tokens['clientId'],
+            client_secret=tokens['clientSecret'],
+            scopes=tokens['scopes']
+        )
+
+        service = build('calendar', 'v3', credentials=creds)
+
+        event = {
+            'summary': f'Interview for {job_title}',
+            'description': f'Interview with {applicant_email}\nNotes: {notes}',
+            'start': {
+                'dateTime': interview_time.isoformat(),
+                'timeZone': 'GMT',
+            },
+            'end': {
+                'dateTime': (interview_time + timedelta(hours=1)).isoformat(),
+                'timeZone': 'GMT',
+            },
+            'attendees': [{'email': applicant_email}],
+            'conferenceData': {
+                'createRequest': {
+                    'requestId': f"{job_id}-{applicant_id}",
+                    'conferenceSolutionKey': {'type': 'hangoutsMeet'}
+                }
+            } if interview_type == 'video' else None,
+            'reminders': {
+                'useDefault': True,
+            },
+        }
+
+        created_event = service.events().insert(
+            calendarId='primary',
+            body=event,
+            conferenceDataVersion=1 if interview_type == 'video' else 0
+        ).execute()
+
+        interview_ref = firestore_db.collection(f'recruiters/{recruiter_id}/jobposting/{job_id}/applicants/{applicant_id}/interviews').document()
+        interview_ref.set({
+            'interview': {
+                'scheduled_at': interview_time,
+                'type': interview_type,
+                'notes': notes,
+                'calendar_event_id': created_event.get('id'),
+                'meet_link': created_event.get('hangoutLink', '') if interview_type == 'video' else None
+            }
+        })
+
+        return jsonify({
+            "success": True,
+            "event_link": created_event.get('htmlLink'),
+            "meet_link": created_event.get('hangoutLink', '')
+        })
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

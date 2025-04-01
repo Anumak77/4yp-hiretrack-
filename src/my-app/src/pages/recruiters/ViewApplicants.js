@@ -1,7 +1,8 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { getAuth } from "firebase/auth";
 import "../../components/style.css";
+import "../../components/interviewschedueler.css";
 import InterviewPopup from "./InterviewPopup";
 
 const ViewApplicants = () => {
@@ -12,6 +13,11 @@ const ViewApplicants = () => {
     const [filter, setFilter] = useState("All");
     const [loading, setLoading] = useState(true); 
     const [error, setError] = useState(null); 
+    const [showInterviewPopup, setShowInterviewPopup] = useState(false);
+    const [selectedApplicant, setSelectedApplicant] = useState(null);
+    const location = useLocation();
+    const job = location.state  || {};
+
 
         const fetchApplicants = async () => {
             try {
@@ -158,7 +164,13 @@ const ViewApplicants = () => {
         }
     };
 
-    const handleInterview = async (applicantId) => {
+
+    const handleInterview = (applicant) => {
+        setSelectedApplicant(applicant);
+        setShowInterviewPopup(true);
+      };
+
+    const MarkAsInterview = async (applicantId) => {
         try {
             const auth = getAuth();
             const user = auth.currentUser;
@@ -199,6 +211,49 @@ const ViewApplicants = () => {
             console.error("Error adding applicant to interview list:", error);
         }
     };
+
+
+    const handleScheduleInterview = async (interviewDetails) => {
+        try {
+
+            console.log(selectedApplicant.uid)
+
+          await MarkAsInterview(selectedApplicant.uid);
+          const auth = getAuth();
+          const user = auth.currentUser;
+          if (!user) throw new Error("User not authenticated");
+      
+          const idToken = await user.getIdToken();
+    
+          const response = await fetch(
+            `http://localhost:5000/schedule-interview/${user.uid}/${jobId}/${selectedApplicant.uid}`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: idToken,
+              },
+              body: JSON.stringify({
+                date: interviewDetails.date.toISOString(),
+                type: interviewDetails.type,
+                notes: interviewDetails.notes,
+                applicantEmail: selectedApplicant.email,
+                jobTitle: job.Title, 
+              }),
+            }
+          );
+      
+          if (!response.ok) throw new Error("Failed to schedule interview");
+      
+          await handleInterview(selectedApplicant.uid);
+      
+          alert("Interview scheduled successfully!");
+          setShowInterviewPopup(false);
+        } catch (error) {
+          console.error("Error scheduling interview:", error);
+          alert("Error scheduling interview: " + error.message);
+        }
+      };
 
     const handleReject = async (applicantId) => {
         try {
@@ -431,6 +486,14 @@ const ViewApplicants = () => {
                     <p className="no-applicants">No applicants found.</p>
                 )}
             </section>
+            {showInterviewPopup && selectedApplicant && (
+      <InterviewPopup
+        applicantName={`${selectedApplicant.first_name} ${selectedApplicant.last_name}`}
+        jobTitle={job?.Title || "the position"}
+        onClose={() => setShowInterviewPopup(false)}
+        onSchedule={handleScheduleInterview}
+      />
+    )}
         </main>
     );
 };
