@@ -161,10 +161,11 @@ const DashJobseeker = () => {
     saved: [],
     applied: [],
     unapply: [],
+    interviewed: [],
   });
 
   const [offeredJobs, setOfferedJobs] = useState([]);
-  const [interviewJobs, setInterviewJobs] = useState([]);
+  // const [interviewJobs, setInterviewJobs] = useState([]);
 
   const fetchJobs = async (jobList) => {
     try {
@@ -202,8 +203,8 @@ const DashJobseeker = () => {
           const unapplyJobs = await fetchJobs("unapplyjobs");
           const offeredJobs = await fetchJobs("offeredjobs");
   
-          setJobColumns({ saved: savedJobs, applied: appliedJobs, unapply: unapplyJobs });
-          setInterviewJobs(interviewedJobs);
+          setJobColumns({ saved: savedJobs, applied: appliedJobs, unapply: unapplyJobs, interviewed: interviewedJobs });
+          // setInterviewJobs(interviewedJobs);
           setOfferedJobs(offeredJobs);
         };
         loadJobs();
@@ -446,7 +447,7 @@ const handleChat = () => {
           >
             <h2 className="dash-jobseeker__column-title">Interviewed</h2>
             <div className="dash-jobseeker__job-list">
-              {interviewJobs.map((job) => (
+              {jobColumns.interviewed.map((job) => (
                 <div
                   key={job.id}
                   className="dash-jobseeker__job-card"
