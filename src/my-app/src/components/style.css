@@ -3267,10 +3267,6 @@ main::after {
   margin-top: 16px; 
 }
 
-.flex-end {
-  display: flex;
-  justify-content: flex-end;
-}
 
 .cv-edit__label {
   display: block;
@@ -3454,3 +3450,24 @@ main::after {
   color: #333;
 }
 
+.downloadcv {
+  display: inline-block; 
+  margin-right: 16px;
+}
+
+.suggestions {
+  display: inline-block; 
+}
+
+.downloadcv .button, 
+.suggestions .button {
+  vertical-align: middle;
+}
+
+.downloadcv, .suggestions {
+  font-size: 0; 
+}
+.downloadcv .button, 
+.suggestions .button {
+  font-size: 16px; 
+}

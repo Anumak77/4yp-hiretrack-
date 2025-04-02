@@ -224,18 +224,7 @@ function CVEditMock() {
       <br /><br /><br /><br />
       <button className="edit-jobseeker-profile__back-button" onClick={() => navigate(-1)}>Go Back</button>
 
-      <div className="mb-4">
-        <label className="cv-edit__label">Pick a Job for Suggestions</label>
-        <select value={selectedJobId} onChange={(e) => setSelectedJobId(e.target.value)} className="cv-edit__input-base">
-          <option value="">Select a job...</option>
-          {appliedJobs.map((job) => (
-            <option key={job.id} value={job.id}>{job.Title || job.id}</option>
-          ))}
-        </select>
-      </div>
-
-      <h1 className="mb-4">Upload & Edit Your CV</h1>
-
+      <h2 className="mb-4">Upload & Edit Your CV</h2>
 
 
       {showNote && gptSuggestions && (
@@ -255,11 +244,8 @@ function CVEditMock() {
     </div>
   </div>
 )}
-
-
-
-
-      <Button onClick={handleGetSuggestions}>Get Suggestions to Improve!</Button>
+<br>
+</br>
 
       <input type="file" ref={fileInputRef} onChange={handleUpload} className="hidden" />
       <label className="cv-edit__file-info">{fileName && `Uploaded: ${fileName}`}</label>
@@ -274,11 +260,31 @@ function CVEditMock() {
           <Textarea label="Experience" value={cvData.experience || ""} onChange={(e) => handleChange("experience", e.target.value)} />
           <Textarea label="Projects" value={cvData.projects || ""} onChange={(e) => handleChange("projects", e.target.value)} />
           <TagInput label="Skills" value={cvData.skills || ""} onChange={(val) => handleChange("skills", val)} />
-          <div className="flex-end">
+          <div className="downloadcv">
             <Button variant="secondary" onClick={handleDownload}>Download CV</Button>
           </div>
         </div>
       )}
+
+
+<div className="suggestions">
+<Button onClick={handleGetSuggestions}>Get Suggestions to Improve!</Button>
+</div>
+
+<br>
+</br>
+<br>
+</br>
+
+<div className="mb-4">
+        <label className="cv-edit__label">Pick a Job for Suggestions</label>
+        <select value={selectedJobId} onChange={(e) => setSelectedJobId(e.target.value)} className="cv-edit__input-base">
+          <option value="">Select a job...</option>
+          {appliedJobs.map((job) => (
+            <option key={job.id} value={job.id}>{job.Title || job.id}</option>
+          ))}
+        </select>
+      </div>
     </div>
   );
 }
