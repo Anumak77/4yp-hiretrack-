@@ -165,12 +165,13 @@ const ViewApplicants = () => {
     };
 
 
-    const handleInterview = (applicant) => {
+    const handleInterviewClick = (applicant) => {
+        console.log("Setting applicant:", applicant);
         setSelectedApplicant(applicant);
         setShowInterviewPopup(true);
       };
 
-    const MarkAsInterview = async (applicantId) => {
+      const handleInterview = async (applicantId) => {
         try {
             const auth = getAuth();
             const user = auth.currentUser;
@@ -212,18 +213,33 @@ const ViewApplicants = () => {
         }
     };
 
-
     const handleScheduleInterview = async (interviewDetails) => {
         try {
 
-            console.log(selectedApplicant.uid)
+            if (!selectedApplicant || !selectedApplicant.uid) {
+                throw new Error("No applicant selected");
+              }
 
-          await MarkAsInterview(selectedApplicant.uid);
+              await handleInterview(selectedApplicant.uid, jobId);
+          
+              console.log("Scheduling interview for:", selectedApplicant.uid);
+              console.log(jobId)
+
           const auth = getAuth();
           const user = auth.currentUser;
           if (!user) throw new Error("User not authenticated");
       
           const idToken = await user.getIdToken();
+
+          const payload = {
+            date: interviewDetails.date.toISOString(),
+            type: interviewDetails.type,
+            notes: interviewDetails.notes,
+            applicantEmail: selectedApplicant.email,
+            jobTitle: job?.Title || "the position",
+          };
+
+          console.log(payload)
     
           const response = await fetch(
             `http://localhost:5000/schedule-interview/${user.uid}/${jobId}/${selectedApplicant.uid}`,
@@ -244,8 +260,7 @@ const ViewApplicants = () => {
           );
       
           if (!response.ok) throw new Error("Failed to schedule interview");
-      
-          await handleInterview(selectedApplicant.uid);
+    
       
           alert("Interview scheduled successfully!");
           setShowInterviewPopup(false);
@@ -253,6 +268,9 @@ const ViewApplicants = () => {
           console.error("Error scheduling interview:", error);
           alert("Error scheduling interview: " + error.message);
         }
+
+        if (filter === "All") await fetchApplicants();
+        else if (filter === "Interview") await fetchInterviewApplicants();
       };
 
     const handleReject = async (applicantId) => {
@@ -445,7 +463,7 @@ const ViewApplicants = () => {
                                     </button>)}
                                 
                             {filter !== "Rejected" && filter !== "Offered" && filter !== "Interview" && (
-                                <button className="interview-button" onClick={() => handleInterview(applicant.uid, jobId) }>
+                                <button className="interview-button" onClick={() => handleInterviewClick(applicant) }>
                                     Interview
                                 </button>)}
             

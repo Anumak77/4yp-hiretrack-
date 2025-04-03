@@ -15,6 +15,8 @@ const InterviewPopup = ({ applicantName, jobTitle, onClose, onSchedule }) => {
       type: interviewType,
       notes
     });
+
+    console.log(selectedDate, interviewType)
   };
 
   return (

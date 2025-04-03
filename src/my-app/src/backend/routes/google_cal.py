@@ -20,6 +20,9 @@ from googleapiclient.discovery import build
 from datetime import datetime, timedelta 
 import requests
 import time
+import uuid 
+import logging
+logging.basicConfig(level=logging.INFO)
 
 cred = credentials.Certificate('firebase_service_account_key.json')
 google_cal_bp = Blueprint('google_cal', __name__)
@@ -149,48 +152,100 @@ def schedule_interview(recruiter_id, job_id, applicant_id):
         interview_type = data['type']
         notes = data.get('notes', '')
 
-        recruiter_ref = firestore_db.collection('users').document(recruiter_id)
-        recruiter_data = recruiter_ref.get().to_dict()
-        
-        if not recruiter_data or 'googleTokens' not in recruiter_data:
-            return jsonify({"error": "Google account not connected"}), 400
-        
-        tokens = recruiter_data['googleTokens']
+        required_fields = ['date', 'type', 'applicantEmail', 'jobTitle']
+        for field in required_fields:
+            if field not in data:
+                return jsonify({"error": f"Missing required field: {field}"}), 400
 
-        # Create credentials from stored tokens
-        creds = Credentials(
-            token=tokens['accessToken'],
-            refresh_token=tokens['refreshToken'],
-            token_uri=tokens['tokenUri'],
-            client_id=tokens['clientId'],
-            client_secret=tokens['clientSecret'],
-            scopes=tokens['scopes']
+        recruiter_ref = firestore_db.collection('users').document(recruiter_id)
+        recruiter_data = recruiter_ref.get().to_dict() or {}
+        applicant_ref = firestore_db.collection('users').document(applicant_id)
+        applicant_data = applicant_ref.get().to_dict() or {}
+
+        if not recruiter_data:
+            return jsonify({"error": "recruiter data not foudn"}), 400
+        
+        if not applicant_data:
+            return jsonify({"error": "recruiter data not foudn"}), 400
+
+        if 'email' not in applicant_data:
+            return jsonify({"error": "email not found"}), 400
+
+        if 'email' not in recruiter_data:
+            return jsonify({"error": "email not found"}), 400
+        
+        recruiter_event = create_calendar_event(
+            user_data=recruiter_data,
+            title=f"Interview for {data['jobTitle']}",
+            description=f"Interview with {applicant_data.get('first_name', '')} {applicant_data.get('last_name', '')}\nNotes: {notes}",
+            start_time=interview_time,
+            end_time=interview_time + timedelta(hours=1),
+            attendee_emails=[applicant_data['email']],
+            interview_type=interview_type
         )
 
+        applicant_event = create_calendar_event(
+            user_data=applicant_data,
+            title=f"Interview for {data['jobTitle']} at {recruiter_data['company_name']}",
+            description=f"Interview with {recruiter_data.get('first_name', '')} {recruiter_data.get('last_name', '')}\nNotes: {notes}",
+            start_time=interview_time,
+            end_time=interview_time + timedelta(hours=1),
+            attendee_emails=[recruiter_data['email']],
+            interview_type=interview_type
+        )
+
+        interview_ref = firestore_db.collection('interviews').document()
+        interview_ref.set({
+            'interview': {
+                'scheduled_at': interview_time,
+                'job_id': job_id,
+                'type': interview_type,
+                'notes': notes,
+                'recruiter_event_id': recruiter_event.get('id', '') if recruiter_event else '',
+                'applicant_event_id': applicant_event.get('id', '') if applicant_event else '',
+                'meet_link': recruiter_event.get('hangoutLink', '') if interview_type == 'video' else None,
+            }
+        })
+ 
+        return jsonify({
+            "success": True,
+            "event_link": recruiter_event.get('htmlLink'),
+            "meet_link": recruiter_event.get('hangoutLink', '')
+        })
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+def create_calendar_event(user_data, title, description, start_time, end_time, attendee_emails, interview_type):
+    try:
+        if 'googleTokens' not in user_data:
+            raise ValueError("Google account not connected")
+        
+        creds = Credentials(
+            token=user_data['googleTokens']['accessToken'],
+            refresh_token=user_data['googleTokens']['refreshToken'],
+            token_uri=user_data['googleTokens']['tokenUri'],
+            client_id=user_data['googleTokens']['clientId'],
+            client_secret=user_data['googleTokens']['clientSecret'],
+            scopes=user_data['googleTokens']['scopes']
+        )
         service = build('calendar', 'v3', credentials=creds)
 
         event = {
-            'summary': f'Interview for {job_title}',
-            'description': f'Interview with {applicant_email}\nNotes: {notes}',
-            'start': {
-                'dateTime': interview_time.isoformat(),
-                'timeZone': 'GMT',
-            },
-            'end': {
-                'dateTime': (interview_time + timedelta(hours=1)).isoformat(),
-                'timeZone': 'GMT',
-            },
-            'attendees': [{'email': applicant_email}],
-            'conferenceData': {
+            'summary': title,
+            'description': description,
+            'start': {'dateTime': start_time.isoformat(), 'timeZone': 'UTC'},
+            'end': {'dateTime': end_time.isoformat(), 'timeZone': 'UTC'},
+            'attendees': [{'email': email} for email in attendee_emails]
+        }
+
+        if interview_type == 'video':
+            event['conferenceData'] = {
                 'createRequest': {
-                    'requestId': f"{job_id}-{applicant_id}",
+                    'requestId': str(uuid.uuid4()),
                     'conferenceSolutionKey': {'type': 'hangoutsMeet'}
                 }
-            } if interview_type == 'video' else None,
-            'reminders': {
-                'useDefault': True,
-            },
-        }
+            }
 
         created_event = service.events().insert(
             calendarId='primary',
@@ -198,22 +253,7 @@ def schedule_interview(recruiter_id, job_id, applicant_id):
             conferenceDataVersion=1 if interview_type == 'video' else 0
         ).execute()
 
-        interview_ref = firestore_db.collection(f'recruiters/{recruiter_id}/jobposting/{job_id}/applicants/{applicant_id}/interviews').document()
-        interview_ref.set({
-            'interview': {
-                'scheduled_at': interview_time,
-                'type': interview_type,
-                'notes': notes,
-                'calendar_event_id': created_event.get('id'),
-                'meet_link': created_event.get('hangoutLink', '') if interview_type == 'video' else None
-            }
-        })
-
-        return jsonify({
-            "success": True,
-            "event_link": created_event.get('htmlLink'),
-            "meet_link": created_event.get('hangoutLink', '')
-        })
-
+        return created_event
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        logging.error(f"Error creating calendar event: {str(e)}")
+        raise 
