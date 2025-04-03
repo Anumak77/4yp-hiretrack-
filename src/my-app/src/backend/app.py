@@ -32,6 +32,7 @@ from routes.cv_generate import cv_generate_bp
 from routes.chat import chat_bp
 from routes.google_cal import google_cal_bp
 from routes.cors import init_cors
+from routes.editprofile import edit_profile_bp
 app = Flask(__name__)
 init_cors(app)
 
@@ -69,6 +70,7 @@ app.register_blueprint(cv_suggestions_bp)
 app.register_blueprint(cv_generate_bp)
 app.register_blueprint(chat_bp)
 app.register_blueprint(google_cal_bp)
+app.register_blueprint(edit_profile_bp)
 
 
 FIREBASE_DATABASE_URL = "https://hiretrack-7b035-default-rtdb.europe-west1.firebasedatabase.app/"
