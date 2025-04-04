@@ -25,10 +25,6 @@ def fetch_jobseeker_jobs(job_list):
         jobs_ref = firestore_db.collection(f'jobseekers/{uid}/{job_list}')
         jobs_snapshot = jobs_ref.get()
 
-        if not jobs_snapshot:
-            jobs_ref.document().set({})
-            jobs_snapshot = jobs_ref.get()
-
         jobs = []
         for doc in jobs_snapshot:
             jobs.append({ "id": doc.id, **doc.to_dict() })
