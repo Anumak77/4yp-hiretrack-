@@ -236,10 +236,11 @@ const ViewApplicants = () => {
             type: interviewDetails.type,
             notes: interviewDetails.notes,
             applicantEmail: selectedApplicant.email,
-            jobTitle: job?.Title || "the position",
+            jobTitle: jobId || "the position",
           };
 
           console.log(payload)
+          console.log(selectedApplicant.uid)
     
           const response = await fetch(
             `http://localhost:5000/schedule-interview/${user.uid}/${jobId}/${selectedApplicant.uid}`,
@@ -254,12 +255,16 @@ const ViewApplicants = () => {
                 type: interviewDetails.type,
                 notes: interviewDetails.notes,
                 applicantEmail: selectedApplicant.email,
-                jobTitle: job.Title, 
+                jobTitle: jobId || 'this position', 
               }),
             }
           );
       
-          if (!response.ok) throw new Error("Failed to schedule interview");
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            console.error("Backend error details:", errorData);
+            throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+        }
     
       
           alert("Interview scheduled successfully!");
@@ -507,7 +512,7 @@ const ViewApplicants = () => {
             {showInterviewPopup && selectedApplicant && (
       <InterviewPopup
         applicantName={`${selectedApplicant.first_name} ${selectedApplicant.last_name}`}
-        jobTitle={job?.Title || "the position"}
+        jobTitle={jobId || "the position"}
         onClose={() => setShowInterviewPopup(false)}
         onSchedule={handleScheduleInterview}
       />
