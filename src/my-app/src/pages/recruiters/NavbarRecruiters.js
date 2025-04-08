@@ -24,6 +24,13 @@ const NavbarRecruiters = () => {
             Recruiter Search
           </NavLink>
         </li>
+
+        <li className="nav-item">
+          <NavLink to="/recruiter-calendar" className="nav-link">
+            Recruiter Calendar
+          </NavLink>
+        </li>
+
       </ul>
 
     </nav>

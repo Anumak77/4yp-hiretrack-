@@ -12,8 +12,8 @@ cred = credentials.Certificate('firebase_service_account_key.json')
 chat_bp = Blueprint('chat', __name__)
 
 
-@chat_bp.route("/send_message", methods=["POST"])
-def send_message():
+@chat_bp.route("/send_message_recruiter", methods=["POST"])
+def send_message_recruiter():
     data = request.json
     sender_id = data.get("sender_id")
     recipient_id = data.get("recipient_id")
@@ -29,6 +29,36 @@ def send_message():
 
     new_message = {
         "sender": sender_id,
+        "recipient": recipient_id,
+        "text": message_text,
+        "timestamp": datetime.now().isoformat(),
+    }
+
+    if chat_doc.exists:
+        chat_ref.update({"messages": firestore.ArrayUnion([new_message])})
+    else:
+        chat_ref.set({"messages": [new_message]})
+
+    return jsonify({"success": True, "message": "Message sent"})
+
+@chat_bp.route("/send_message_jobseeker", methods=["POST"])
+def send_message_jobseeker():
+    data = request.json
+    sender_id = data.get("sender_id")
+    recipient_id = data.get("recipient_id")
+    message_text = data.get("message")
+
+
+    if not message_text or len(message_text.strip()) == 0:
+        return jsonify({"error": "Message cannot be empty"}), 400
+
+    chat_id = f"{recipient_id}_{sender_id}"
+    chat_ref = firestore_db.collection("chats").document(chat_id)
+    chat_doc = chat_ref.get()
+
+    new_message = {
+        "sender": sender_id,
+        "recipient": recipient_id,
         "text": message_text,
         "timestamp": datetime.now().isoformat(),
     }
@@ -119,9 +149,9 @@ def create_chat():
     chat_ref.set({
         "recruiterId": recruiter_id,
         "applicantId": applicant_id,
-        "messages": [],
         "applicantName": applicant_name,
-        "recruiterName": recruiter_name
+        "recruiterName": recruiter_name,
+        "messages": [],
     })
 
     return jsonify({"success": True, "chat_id": chat_id})

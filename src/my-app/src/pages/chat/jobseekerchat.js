@@ -11,6 +11,8 @@ const JobseekerChat = () => {
   const [selectedChat, setSelectedChat] = useState(null);
   const [chatList, setChatList] = useState([]); 
   const [loading, setLoading] = useState(true);
+  const auth = getAuth();
+  const user = auth.currentUser;
 
   /*
   useEffect(() => {
@@ -119,17 +121,23 @@ const JobseekerChat = () => {
         
         try{
 
-          const response = await fetch("http://localhost:5000/send_message", {
+          const [recruiterId, applicantId] = selectedChat.split('_');
+
+          const response = await fetch("http://localhost:5000/send_message_jobseeker", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              sender_id: sender_id, 
-              recipient_id: selectedChat.split('_')[1],
+              sender_id: applicantId, 
+              recipient_id: recruiterId,
               message: input,
             }),
           });
+
+          console.log(recruiterId + "recruiter id")
+          console.log(applicantId + "applicant id")
+          console.log(selectedChat.split("_")[0])
     
           if (response.ok) {
             setInput("");
@@ -218,12 +226,10 @@ const JobseekerChat = () => {
                   <div
                     key={msg.id}
                     className={`message ${
-                      msg.sender === "Applcant"
-                        ? "recruiter-message"
-                        : "seeker-message"
+                      msg.sender === user.uid ? "recruiter-message" : "seeker-message"
                     }`}
                   >
-                    <strong>{msg.sender === "Applicant" ? "You" : "Recruiter"}:</strong> {msg.text}
+                    <strong>{msg.sender === user.uid ? "You" : "Recruiter"}:</strong> {msg.text}
                   </div>
                 ))
               )}

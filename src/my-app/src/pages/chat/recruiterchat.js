@@ -12,6 +12,8 @@ const RecruiterChat = () => {
   const [chatList, setChatList] = useState([]); 
   const [loading, setLoading] = useState(true);
   const { applicantId } = useParams();
+  const auth = getAuth();
+  const user = auth.currentUser;
 
   /*
   useEffect(() => {
@@ -153,7 +155,7 @@ const RecruiterChat = () => {
         
         try{
 
-          const response = await fetch("http://localhost:5000/send_message", {
+          const response = await fetch("http://localhost:5000/send_message_recruiter", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -208,7 +210,7 @@ const RecruiterChat = () => {
         {/* Chat Sidebar */}
         <aside className="chat-sidebar">
           <h2>Chats</h2>
-          <ul>
+          <ul className = "chat-list">
             {loading ? (
               <p>Loading chats...</p>
             ) : chatList.length === 0 ? (
@@ -217,7 +219,9 @@ const RecruiterChat = () => {
               chatList.map((chat) => (
                 <li
                   key={chat.id}
-                  className={selectedChat === chat.id ? "selected-chat" : ""}
+                  className={`chat-list-item ${
+                    selectedChat === chat.id ? "selected-chat" : ""
+                  }`}
                   onClick={() => setSelectedChat(chat.id)}
                 >
                   {chat.applicantName} {/* Display applicant's name */}
@@ -252,12 +256,10 @@ const RecruiterChat = () => {
                   <div
                     key={msg.id}
                     className={`message ${
-                      msg.sender === "Recruiter"
-                        ? "recruiter-message"
-                        : "seeker-message"
+                     msg.sender === user.uid ? "recruiter-message" : "seeker-message"
                     }`}
                   >
-                    <strong>{msg.sender === "Recruiter" ? "You" : "Applicant"}:</strong> {msg.text}
+                    <strong>{msg.sender === user.uid ? "You" : "Applicant"}:</strong> {msg.text}
                   </div>
                 ))
               )}

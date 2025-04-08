@@ -30,9 +30,28 @@ from routes.train_resume_data import train_resume_bp
 from routes.cv_suggestions import cv_suggestions_bp
 from routes.cv_generate import cv_generate_bp
 from routes.chat import chat_bp
-
+from routes.google_cal import google_cal_bp
+from routes.cors import init_cors
+from routes.editprofile import edit_profile_bp
 app = Flask(__name__)
-CORS(app)
+init_cors(app)
+
+'''
+@app.before_request
+def handle_cookies():
+    if request.method == "OPTIONS":
+        response = jsonify({'status': 'preflight'})
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add("Access-Control-Allow-Headers", "*")
+        response.headers.add("Access-Control-Allow-Methods", "*")
+        return response
+
+@app.after_request
+def add_security_headers(response):
+    response.headers['Cross-Origin-Opener-Policy'] = 'same-origin-allow-popups'
+    return response
+
+'''
 
 app.register_blueprint(train_resume_bp)
 app.register_blueprint(auth_bp)
@@ -50,6 +69,8 @@ app.register_blueprint(cv_extract_bp)
 app.register_blueprint(cv_suggestions_bp)
 app.register_blueprint(cv_generate_bp)
 app.register_blueprint(chat_bp)
+app.register_blueprint(google_cal_bp)
+app.register_blueprint(edit_profile_bp)
 
 
 FIREBASE_DATABASE_URL = "https://hiretrack-7b035-default-rtdb.europe-west1.firebasedatabase.app/"

@@ -10,6 +10,7 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 
 import NavbarJobseeker from './pages/jobseekers/NavbarJobseeker';
@@ -35,11 +36,13 @@ import JobDetails2 from './pages/jobseekers/job-details2';
 import RecruiterChat from './pages/chat/recruiterchat';
 import ViewAllAppliedJobs from './pages/recruiters/View-all-applied-jobs';
 import EditProfile from './pages/jobseekers/EditProfile';
-
+import RecruiterCalendar from './pages/recruiters/RecruiterCalendar';
 import CVEditPage from './pages/jobseekers/CVEditPage';
+import JobDetails3 from './pages/jobseekers/job-details3';
 
 function App() {
   return (
+    <GoogleOAuthProvider clientId="714625690444-bjnr3aumebso58niqna7613rtvmc5e6f.apps.googleusercontent.com">
     <div>
     <Router>
       <MainApp />
@@ -56,6 +59,7 @@ function App() {
                 draggable
                 pauseOnHover />
     </div>
+    </GoogleOAuthProvider>
   );
 }
 
@@ -137,13 +141,12 @@ function MainApp() {
         <Route path="/viewjobpostings" element={<ViewJobPostings jobPostings={jobPostings} setJobPostings={setJobPostings} />} />
         <Route path="/edit-job/:id" element={<EditJob />} />
         <Route path="/edit-profile" element={<EditProfile />} />
-
         <Route path="/CV-Edit-Page" element={<CVEditPage />} />
-
-      
-
+        <Route path="/recruiter-calendar" element={<RecruiterCalendar />} />
         <Route path="/viewapplicants/:id" element={<ViewApplicants />} />
+        <Route path="/job-details3" element={<JobDetails3 />} />
         <Route path="*" element={<h1>404 - Page Not Found</h1>} />
+        
       </Routes>
     </>
   );

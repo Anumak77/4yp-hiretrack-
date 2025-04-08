@@ -2,5 +2,12 @@
   "devDependencies": {
     "@playwright/test": "^1.51.0",
     "cypress": "^14.1.0"
+  },
+  "dependencies": {
+    "@fullcalendar/daygrid": "^6.1.15",
+    "@fullcalendar/google-calendar": "^6.1.15",
+    "@fullcalendar/interaction": "^6.1.15",
+    "@fullcalendar/react": "^6.1.15",
+    "@fullcalendar/timegrid": "^6.1.15"
   }
 }
