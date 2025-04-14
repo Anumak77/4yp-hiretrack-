@@ -3,14 +3,16 @@ stages:
 
 e2e-tests:
   stage: test
-  image: cypress/included:14.3.0
+  image:
+    name: cypress/included:14.3.0
+    entrypoint: ["/bin/sh", "-c"] 
   script:
     - echo "Installing frontend dependencies"
     - cd src/my-app
     - npm ci
 
     - echo "Starting frontend"
-    - npm start & 
+    - npm start &
     - FRONT_PID=$!
     - cd ../..
 
@@ -25,7 +27,7 @@ e2e-tests:
     - npx wait-on http://localhost:3000/login http://localhost:5000/ping
 
     - echo "Running Cypress tests"
-    - cypress run
+    - npx cypress run
 
     - echo "Cleaning up"
     - kill $BACK_PID || echo "Backend already stopped"
