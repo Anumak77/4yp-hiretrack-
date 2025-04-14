@@ -3143,11 +3143,15 @@ main::after {
   grid-column: span 2;
 }
 
+
 .edit-jobseeker-profile__button-group {
-  margin-top: 32px;
+  grid-column: 1 / -1;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 2rem;
 }
+
 
 .edit-jobseeker-profile__cancel-button,
 .edit-jobseeker-profile__save-button {
@@ -3158,6 +3162,7 @@ main::after {
   cursor: pointer;
   font-size: 14px;
 }
+
 
 .edit-jobseeker-profile__cancel-button {
   background-color: #e74c3c;
@@ -3695,4 +3700,268 @@ main::after {
 .downloadcv .button, 
 .suggestions .button {
   font-size: 16px; 
+}
+
+
+.postjob-afterposted {
+  background: #1e461f; 
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 20px; 
+  width: 100px; 
+  display: block; 
+  margin-left: auto;
+  margin-right: auto; 
+}
+
+.postjob-afterposted:hover {
+  background: #255628; 
+}
+
+.postjob-afterposted:active {
+  transform: scale(0.98); 
+}
+
+.confirmation-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+.confirm-button.delete-btn {
+  background: #f44336;
+  color: white;
+}
+
+.confirm-button.delete-btn:hover {
+  background: #d32f2f;
+}
+
+.cancel-button {
+  background: #e0e0e0;
+  color: #333;
+}
+
+.cancel-button:hover {
+  background: #eeabab;
+  color: #333;
+}
+
+
+.applicant-actions button {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.applicant-actions button:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.applicant-actions button.hidden {
+  display: none;
+}
+
+.view-cv-button{
+  width: 100%;
+}
+
+.offer-button{
+  width: 48%;
+}
+
+/* Reject Button Style */
+.confirm-button.reject-btn {
+  background: #dc3545;
+}
+
+.confirm-button.reject-btn:hover {
+  background: #c82333;
+}
+
+/* Match Score Styles */
+.match-score-display {
+  margin: 1.5rem 0;
+  text-align: center;
+}
+
+.score-circle {
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 1rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4CAF50, #8BC34A);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: bold;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.score-explanation {
+  font-size: 0.9rem;
+  color: #555;
+  line-height: 1.5;
+  margin-top: 1rem;
+}
+
+
+
+
+/* Interview Modal Styles */
+.interview-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.interview-modal {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.interview-modal-header {
+  padding: 20px;
+  background: #23633e;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.interview-modal-header h2 {
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0 10px;
+}
+
+.interview-modal-body {
+  padding: 20px;
+}
+
+.interview-info {
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #eee;
+}
+
+.interview-info p {
+  margin: 5px 0;
+  color: #555;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
+  color: #333;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+.form-group textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.interview-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #eee;
+}
+
+.cancel-button {
+  padding: 10px 20px;
+  background: #f0f0f0;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.schedule-button {
+  padding: 10px 20px;
+  background: #23633e;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.cancel-button:hover {
+  background: #e0e0e0;
+}
+
+.schedule-button:hover {
+  background: #215e3b;
+}
+
+.cv-suggestion-slider {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+  scroll-snap-type: x mandatory;
+  scrollbar-color: #888 #f0f0f0; /* for Firefox */
+  scrollbar-width: thin; /* for Firefox */
+}
+
+/* Chrome, Safari, Edge */
+.cv-suggestion-slider::-webkit-scrollbar {
+  height: 8px;
+}
+
+.cv-suggestion-slider::-webkit-scrollbar-track {
+  background: #f0f0f0;
+}
+
+.cv-suggestion-slider::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 4px;
 }

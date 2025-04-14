@@ -37,6 +37,7 @@ const EditJob = () => {
 
   const [alertMessage, setAlertMessage] = useState(null);
   const [alertType, setAlertType] = useState('error');
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   useEffect(() => {
     const fetchJobData = async () => {
@@ -91,9 +92,7 @@ const EditJob = () => {
       if (!user) throw new Error('User not authenticated');
   
       const idToken = await user.getIdToken();
-      if (!idToken) throw new Error('Failed to get ID token');
-  
-      const user_id = user.uid; // Get the current user's ID
+      const user_id = user.uid;
       const response = await fetch(`http://localhost:5000/update_job/${user_id}/${id}`, {
         method: 'PUT',
         headers: {
@@ -103,12 +102,9 @@ const EditJob = () => {
         body: JSON.stringify(jobData),
       });
   
-      if (!response.ok) {
-        throw new Error('Failed to update job');
-      }
+      if (!response.ok) throw new Error('Failed to update job');
   
-      showAlert('Job updated successfully!', 'success');
-      navigate('/dashboard-recruiter');
+      setShowSuccessModal(true); 
     } catch (error) {
       console.error('Error updating job:', error);
       showAlert(error.message || 'An error occurred while updating the job.', 'error');
@@ -184,7 +180,24 @@ const EditJob = () => {
           </form>
         </section>
       </section>
-    </main>
+      {showSuccessModal && (
+      <div className="confirmation-modal">
+        <div className="confirmation-content">
+          <h2>Job Updated Successfully!</h2>
+          <p>Your changes have been saved.</p>
+          <div className="confirmation-buttons">
+            <button 
+              className="confirm-button" 
+              onClick={() => navigate('/dashboard-recruiter')}
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+  </main>
+
   );
 };
 

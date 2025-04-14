@@ -38,6 +38,7 @@ const PostJob = () => {
   const [alertMessage, setAlertMessage] = useState(null);
   const [alertType, setAlertType] = useState('error');
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const showAlert = (message, type = 'error') => {
     setAlertMessage(message);
@@ -46,7 +47,25 @@ const PostJob = () => {
   };
 
   const handleChange = (e) => {
-    setJobData({ ...jobData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    
+    setJobData(prevData => {
+      const newData = { ...prevData, [name]: value };
+      
+      if (name === "JobDescription") {
+        newData.jobpost = value;
+      }
+      
+      if (name === "Deadline") {
+        newData.OpeningDate = value;
+      }
+      
+      if (name === "StartDate") {
+        newData.date = value;
+      }
+      
+      return newData; 
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -56,7 +75,7 @@ const PostJob = () => {
 
   const confirmSubmission = async (e) => {
     e.preventDefault();
-
+  
     const missingFields = [];
     for (const [key, value] of Object.entries(jobData)) {
       if (typeof value === "string" && value.trim() === "") {
@@ -65,20 +84,17 @@ const PostJob = () => {
         missingFields.push(key);
       }
     }
-
+  
     if (missingFields.length > 0) {
-      console.log("Missing fields:", missingFields);
-      console.log("Form Data:", jobData);
       showAlert(`Please fill out all fields: ${missingFields.join(", ")}`, 'error');
       return;
     }
-
+  
     try {
       const user = getAuth().currentUser;
       if (!user) throw new Error('User not authenticated');
-
+  
       const idToken = await user.getIdToken();
-      if (!idToken) throw new Error('Failed to get ID token');
       const response = await fetch('http://localhost:5000/create-job', {
         method: 'POST',
         headers: {
@@ -87,21 +103,18 @@ const PostJob = () => {
         },
         body: JSON.stringify(jobData),
       });
-
-      if (!response.ok) {
-        throw new Error(`Server error: ${response.statusText}`);
-      }
-
+  
+      if (!response.ok) throw new Error(`Server error: ${response.statusText}`);
+  
       const data = await response.json();
-
+  
       if (data.success) {
-        showAlert('Job Posted Successfully!', 'success');
-        console.log('Job posted with ID:', data.jobId);
-        navigate('/dashboard-recruiter');
+        setShowConfirmation(false); 
+        setShowSuccessModal(true); 
       } else {
         throw new Error(data.error || "Failed to post job");
       }
-    } catch (error) {
+    } catch (error) { 
       console.error('Error posting job:', error);
       showAlert(error.message || 'An error occurred while posting the job.', 'error');
     }
@@ -229,29 +242,8 @@ const PostJob = () => {
               />
             </div>
 
-            {/* jobpost */}
-            <div className="input-group">
-              <label>Job Post</label>
-              <textarea
-                name="jobpost"
-                value={jobData.jobpost}
-                onChange={handleChange}
-                placeholder="Enter any additional job post details"
-              />
-            </div>
-
             {/* Date fields (OpeningDate, Deadline, StartDate, date) */}
             <div className="date-container">
-              <div className="input-group">
-                <label>Opening Date</label>
-                <input
-                  type="date"
-                  name="OpeningDate"
-                  value={jobData.OpeningDate}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
 
               <div className="input-group">
                 <label>Deadline</label>
@@ -274,15 +266,6 @@ const PostJob = () => {
                 />
               </div>
 
-              <div className="input-group">
-                <label>Date</label>
-                <input
-                  type="date"
-                  name="date"
-                  value={jobData.date}
-                  onChange={handleChange}
-                />
-              </div>
             </div>
 
             <button type="submit" className="post-job-button">
@@ -303,7 +286,23 @@ const PostJob = () => {
             </div>
           </div>
         </div>
-      )}
+        )}
+            {showSuccessModal && (
+      <div className="confirmation-modal">
+        <div className="confirmation-content">
+          <h2>Job Posted Successfully!</h2>
+          <p>Your job has been submitted.</p>
+          <div className="confirmation-buttons">
+            <button 
+              className="postjob-afterposted" 
+              onClick={() => navigate('/dashboard-recruiter')}
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      </div>
+            )}
     </main>
   );
 };
