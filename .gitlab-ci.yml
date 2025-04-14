@@ -9,31 +9,40 @@ e2e-tests:
     - echo "Installing frontend dependencies"
     - cd src/my-app
     - npm ci
-    - echo "Starting frontend"
-    - npm start & 
-    - FRONT_PID=$!
+
+    - |
+      echo "Starting frontend"
+      npm start &
+      FRONT_PID=$!
     - cd ../..
+
     - echo "Starting mock backend"
     - cd src/my-app/src/backend
     - python3 -m pip install --no-cache-dir -r requirements.txt
-    - python3 app.py & 
-    - BACK_PID=$!
+    - |
+      python3 app.py &
+      BACK_PID=$!
     - cd ../../..
+
     - echo "Waiting for servers to be ready"
     - npx wait-on http://localhost:3000/login http://localhost:5000/ping
-    - whoami
-    - echo "Git config email:"
-    - git config user.email || echo "No email set"
+
+    - |
+      echo "Running as: $(whoami)"
+      echo "Git config email:"
+      git config user.email || echo "No email set"
+
     - echo "Running Cypress tests"
-    - echo "About to run Cypress with config"
+    - cd src/my-app 
     - npx cypress run --config baseUrl=http://localhost:3000
 
     - echo "Cleaning up"
-    - kill $BACK_PID || echo "Backend already stopped"
-    - kill $FRONT_PID || echo "Frontend already stopped"
+    - |
+      kill $BACK_PID || echo "Backend already stopped"
+      kill $FRONT_PID || echo "Frontend already stopped"
   artifacts:
     when: always
     paths:
-      - cypress/videos/
-      - cypress/screenshots/
+      - src/my-app/cypress/videos/
+      - src/my-app/cypress/screenshots/
     expire_in: 1 week
