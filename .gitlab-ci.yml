@@ -10,16 +10,18 @@ e2e-tests:
     - cd src/my-app
     - npm ci
 
-    - echo "Starting frontend"
-    - npm start &
-    - FRONT_PID=$!
+    - |
+      echo "Starting frontend"
+      npm start &
+      FRONT_PID=$!
     - cd ../..
 
     - echo "Starting mock backend"
     - cd src/my-app/src/backend
     - pip3 install --user -r requirements.txt
-    - python3 app.py &
-    - BACK_PID=$!
+    - |
+      python3 app.py &
+      BACK_PID=$!
     - cd ../../..
 
     - echo "Waiting for servers to be ready"
@@ -31,11 +33,12 @@ e2e-tests:
       git config user.email || echo "No email set"
 
     - echo "Running Cypress tests"
-    - npx cypress run
+    - npx cypress run --config baseUrl=http://localhost:3000
 
     - echo "Cleaning up"
-    - kill $BACK_PID || echo "Backend already stopped"
-    - kill $FRONT_PID || echo "Frontend already stopped"
+    - |
+      kill $BACK_PID || echo "Backend already stopped"
+      kill $FRONT_PID || echo "Frontend already stopped"
   artifacts:
     when: always
     paths:
