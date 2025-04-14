@@ -4,12 +4,33 @@ stages:
 e2e-tests:
   stage: test
   image: cypress/included:14.3.0
+  services:
+    - name: node:18
   script:
-    - chmod +x scripts/dev-ci.sh
-    - ./scripts/dev-ci.sh
+    - echo "Installing backend deps"
+    - cd src/my-app/src/backend
+    - python3 -m venv venv
+    - source venv/bin/activate
+    - pip install -r requirements.txt &
+    - BACK_PID=$!
+    - cd ../../../..
+    - echo "Installing frontend deps"
+    - cd src/my-app
+    - npm ci
+    - npm start & 
+    - FRONT_PID=$!
+    - cd ../..
+    - echo "Waiting for servers"
+    - npx wait-on http://localhost:3000/login http://localhost:5000/ping
+    - echo "Running Cypress"
+    - npx cypress run --config baseUrl=http://localhost:3000
+    - echo "Killing servers"
+    - kill $BACK_PID
+    - kill $FRONT_PID
   artifacts:
     when: always
     paths:
       - cypress/videos/
       - cypress/screenshots/
     expire_in: 1 week
+

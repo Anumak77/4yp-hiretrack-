@@ -7,27 +7,25 @@ python3 app.py &
 BACK_PID=$!
 cd ../../..
 
+echo "Starting frontend"
+
 if [ -n "$CI" ]; then
-  echo "Starting frontend in background for CI"
+  echo "Detected CI environment: starting frontend in background"
   cd src/my-app || exit
   npm ci
-  npm start & # background
+  npm start & # run in background for CI
   FRONT_PID=$!
   cd ../..
 else
-  echo "Starting frontend in a new Terminal tab"
-  osascript <<EOF
-tell application "Terminal"
-  do script "cd \"$(pwd)/src/my-app\" && npm ci && npm start"
-end tell
-EOF
-  FRONT_PID=$! # just a dummy value so kill doesn't break later
+  echo "Local run: opening frontend in new Terminal tab"
+  osascript -e 'tell application "Terminal" to do script "cd ~/Desktop/4yp/2025-csc1097-Hiretrack/src/my-app && npm start"'
 fi
+
 
 echo "Waiting for frontend and backend to be ready"
 npx wait-on http://localhost:3000/login http://localhost:5000/ping
 
-echo "🚀 Running Cypress tests..."
+echo "Running Cypress tests"
 npx cypress run --config baseUrl=http://localhost:3000
 
 echo "Killing backend server"
