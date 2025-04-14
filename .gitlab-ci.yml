@@ -5,34 +5,18 @@ e2e-tests:
   stage: test
   image: cypress/included:14.3.0
   script:
-    - set -e
-    - echo "Installing dependencies and starting servers..."
-    
-    # Frontend setup
     - cd src/my-app
-    - npm ci
     - npm start &
     - FRONT_PID=$!
-    - cd ../..
-    
-    # Backend setup
-    - cd src/my-app/src/backend
-    - python3 -m pip install --no-cache-dir -r requirements.txt
+    - cd src/backend
     - python3 app.py &
     - BACK_PID=$!
     - cd ../../..
-    
-    # Wait for servers
     - npx wait-on http://localhost:3000 http://localhost:5000/ping
-    
-    # Run Cypress - 
     - cd src/my-app
-    - CYPRESS_BASE_URL=http://localhost:3000 npx cypress run
-    - cd ../..
-    
-    # Cleanup
-    - kill $BACK_PID || echo "Backend already stopped"
-    - kill $FRONT_PID || echo "Frontend already stopped"
+    - npx cypress run --browser chrome --config baseUrl=http://localhost:3000
+    - kill $BACK_PID
+    - kill $FRONT_PID
     
   artifacts:
     when: always
