@@ -5,36 +5,34 @@ e2e-tests:
   stage: test
   image: cypress/included:14.3.0
   script:
-    - echo "Setting up backend"
-    - cd src/my-app/src/backend || exit
-    - python3 -m venv venv
-    - source venv/bin/activate
-    - pip install -r requirements.txt
-    - python3 app.py & 
-    - BACK_PID=$!
-    - cd ../../../.. || exit
-
-    - echo "Setting up frontend"
-    - cd src/my-app || exit
+    - echo "Installing frontend dependencies"
+    - cd src/my-app
     - npm ci
+
+    - echo "Starting frontend"
     - npm start & 
     - FRONT_PID=$!
-    - cd ../.. || exit
+    - cd ../..
 
-    - echo "Waiting for servers"
+    - echo "Starting mock backend"
+    - cd src/my-app/src/backend
+    - pip3 install --user -r requirements.txt
+    - python3 app.py &
+    - BACK_PID=$!
+    - cd ../../..
+
+    - echo "Waiting for servers to be ready"
     - npx wait-on http://localhost:3000/login http://localhost:5000/ping
 
-    - echo "Running Cypress"
-    - cypress run --config baseUrl=http://localhost:3000
+    - echo "Running Cypress tests"
+    - cypress run
 
-    - echo "Killing backend"
-    - kill $BACK_PID || echo "Backend not running"
-    - kill $FRONT_PID || echo "Frontend not running"
-
+    - echo "Cleaning up"
+    - kill $BACK_PID || echo "Backend already stopped"
+    - kill $FRONT_PID || echo "Frontend already stopped"
   artifacts:
     when: always
     paths:
       - cypress/videos/
       - cypress/screenshots/
     expire_in: 1 week
-
