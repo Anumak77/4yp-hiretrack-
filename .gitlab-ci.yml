@@ -1,36 +1,15 @@
-image: cypress/included:14.1.0
-
 stages:
   - test
 
-cypress-run:
+e2e-tests:
   stage: test
+  image: cypress/included:14.3.0
   script:
-    - echo "Debugging environment..."
-    - which bash
-    - echo $SHELL
-    - echo $PATH
-    - node -v
-    - npm -v
-    - npx cypress --version
-
-    # Start Flask backend
-    - echo "Starting Flask backend..."
-    - cd src/my-app/src/backend
-    - python app.py &
-    - cd ../../..
-
-    # Start React frontend
-    - echo "Starting React frontend..."
-    - cd src/my-app
-    - npm ci
-    - npm run start &
-    - npx wait-on http://localhost:3000 http://localhost:5000
-
-    # Run Cypress tests
-    - echo "Running Cypress tests..."
-    - npx cypress run --config baseUrl=http://localhost:3000
-  only:
-    - main
-    - clean-ci
-    - new-branch
+    - chmod +x scripts/dev-ci.sh
+    - ./scripts/dev-ci.sh
+  artifacts:
+    when: always
+    paths:
+      - cypress/videos/
+      - cypress/screenshots/
+    expire_in: 1 week

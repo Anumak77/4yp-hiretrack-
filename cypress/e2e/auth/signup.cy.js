@@ -1,7 +1,7 @@
 describe('Signup Page', () => {
   
     it('should allow users to sign up with a unique user', () => {
-      cy.visit('http://localhost:3000/signup'); 
+      cy.visit('/signup'); 
   
       const firstName = `User${Math.random().toString(36).substring(2, 6)}`;
       const lastName = `Test${Math.random().toString(36).substring(2, 6)}`;
@@ -29,4 +29,3 @@ describe('Signup Page', () => {
     });
   
   });
-  

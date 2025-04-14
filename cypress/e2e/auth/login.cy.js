@@ -1,7 +1,7 @@
 describe('Login Page', () => {
   
     it('should allow users to log in and redirect them correctly', () => {
-      cy.visit('http://localhost:3000/login');
+      cy.visit('/login');
   
       const email = 'jobseeker@gmail.com';
       const password = 'jobseeker';
