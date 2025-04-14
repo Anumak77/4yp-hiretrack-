@@ -3,10 +3,9 @@ stages:
 
 e2e-tests:
   stage: test
-  image:
-    name: cypress/included:14.3.0
-    entrypoint: ["/bin/sh", "-c"] 
+  image: cypress/included:14.3.0
   script:
+    - set -e
     - echo "Installing frontend dependencies"
     - cd src/my-app
     - npm ci
@@ -25,6 +24,11 @@ e2e-tests:
 
     - echo "Waiting for servers to be ready"
     - npx wait-on http://localhost:3000/login http://localhost:5000/ping
+
+    - |
+      echo "Running as: $(whoami)"
+      echo "Git config email:"
+      git config user.email || echo "No email set"
 
     - echo "Running Cypress tests"
     - npx cypress run
