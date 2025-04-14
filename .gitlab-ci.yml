@@ -18,7 +18,7 @@ e2e-tests:
 
     - echo "Starting mock backend"
     - cd src/my-app/src/backend
-    - pip3 install --user -r requirements.txt
+    - python3 -m pip install --no-cache-dir -r requirements.txt
     - |
       python3 app.py &
       BACK_PID=$!
@@ -33,7 +33,12 @@ e2e-tests:
       git config user.email || echo "No email set"
 
     - echo "Running Cypress tests"
-    - npx cypress run --config baseUrl=http://localhost:3000
+    - echo "Cypress would run here"
+    - echo "About to run Cypress with config"
+    - echo "Command: npx cypress run --config '{\"baseUrl\":\"http://localhost:3000\"}'"
+    - npx cypress run --config '{"baseUrl":"http://localhost:3000"}'
+
+
 
     - echo "Cleaning up"
     - |
