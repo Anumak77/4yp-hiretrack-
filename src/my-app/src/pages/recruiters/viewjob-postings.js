@@ -10,6 +10,8 @@ const ViewJobPostings = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [jobToDelete, setJobToDelete] = useState(null);
 
   const db = getFirestore();
   const auth = getAuth();
@@ -48,6 +50,7 @@ const ViewJobPostings = () => {
       setLoading(false);
     }
   };
+
   useEffect(() => {
     fetchJobPostings();
   }, []);
@@ -156,6 +159,37 @@ try {
 }
 };
 
+const handleDeleteClick = (id) => {
+  setJobToDelete(id);
+  setShowDeleteModal(true);
+};
+
+const handleDeleteConfirm = async () => {
+  if (!jobToDelete) return;
+
+  try {
+    const user = getAuth().currentUser;
+    if (!user) throw new Error('User not authenticated');
+
+    const idToken = await user.getIdToken();
+    const response = await fetch(`http://localhost:5000/delete-job/${jobToDelete}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': idToken,
+      },
+    });
+
+    if (!response.ok) throw new Error('Failed to delete job');
+
+    setJobPostings(jobPostings.filter(job => job.id !== jobToDelete));
+    setShowDeleteModal(false);
+  } catch (error) {
+    console.error('Error deleting job:', error);
+  }
+};
+
+
 
   return (
 <main className="vj-container">
@@ -193,7 +227,12 @@ try {
       <div className="vj-right">
         <button className="vj-btn view" onClick={() => navigate(`/viewapplicants/${job.id}`)}>View Applicants</button>
         <button className="vj-btn edit" onClick={() => handleEdit(job.id)}>Edit</button>
-        <button className="vj-btn delete" onClick={() => handleDelete(job.id)}>Delete</button>
+        <button 
+          className="vj-btn delete" 
+          onClick={() => handleDeleteClick(job.id)}
+        >
+          Delete
+        </button>
       </div>
     </div>
     
@@ -202,6 +241,28 @@ try {
   ) : (
     <p className="vj-empty">No job postings found.</p>
   )}
+  {showDeleteModal && (
+  <div className="confirmation-modal">
+    <div className="confirmation-content">
+      <h2>Delete Job Posting</h2>
+      <p>Are you sure you want to delete this job? This action cannot be undone.</p>
+      <div className="confirmation-buttons">
+        <button 
+          className="confirm-button delete-btn" 
+          onClick={handleDeleteConfirm}
+        >
+          Delete
+        </button>
+        <button 
+          className="cancel-button" 
+          onClick={() => setShowDeleteModal(false)}
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 </main>
 
 );

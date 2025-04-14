@@ -1,7 +1,7 @@
 {
   "devDependencies": {
     "@playwright/test": "^1.51.0",
-    "cypress": "^14.1.0"
+    "cypress": "^14.3.0"
   },
   "dependencies": {
     "@fullcalendar/daygrid": "^6.1.15",

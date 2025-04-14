@@ -102,8 +102,7 @@ const RecruiterSearch = () => {
             <table className="job-table">
               <thead>
                 <tr>
-                  <th>First Name</th>
-                  <th>Last Name</th>
+                  <th>Name</th>
                   <th>Industry</th>
                   <th>Location</th>
                   <th>Experience</th>
@@ -115,8 +114,7 @@ const RecruiterSearch = () => {
                 {filteredJobSeekers.length > 0 ? (
                   filteredJobSeekers.map((seeker, index) => (
                     <tr key={index}>
-                      <td>{seeker.first_name}</td>
-                      <td>{seeker.last_name}</td>
+                      <td>{seeker.first_name} {seeker.last_name}</td>
                       <td>{seeker.industry}</td>
                       <td>{seeker.location}</td>
                       <td>{seeker.experience}</td>

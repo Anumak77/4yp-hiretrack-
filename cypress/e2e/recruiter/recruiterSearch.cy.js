@@ -1,12 +1,12 @@
 describe('Recruiter Search Flow', () => {
     beforeEach(() => {
-      cy.visit('http://localhost:3000/login');
+      cy.visit('/login');
       const email = 'rec@gmail.com';
       const password = 'recrec';
       cy.get('input#email-address').type(email);
       cy.get('input#password').type(password);
       cy.get('button.login-button').click();
-      cy.url().should('include', '/dashboard-recruiter');
+      cy.url({ timeout: 10000 }).should('include', '/dashboard-recruiter');
       cy.get('.dashboard-recruiter-container > .navbar > .nav-menu > :nth-child(3) > .nav-link').click();
 
     });
@@ -24,7 +24,7 @@ describe('Recruiter Search Flow', () => {
       cy.contains('Industry:').should('exist');
       cy.contains('Experience:').should('exist');
       cy.get('.job-details__button').contains('Reach Out').click();
-      cy.url().should('include', '/jobseekerchat');
+      cy.url().should('include', '/recruiterchat');
       cy.go('back'); 
     });
   
@@ -37,7 +37,6 @@ describe('Recruiter Search Flow', () => {
         expect(name).not.to.be.empty;
       });
       cy.contains('Other Possible Jobs').should('exist');
-      cy.get('.job-cards-container .other-job-card').should('have.length.gt', 0);
       cy.get('.other-jobs-container .other-job-card').should('have.length.gt', 0);
     });
   });

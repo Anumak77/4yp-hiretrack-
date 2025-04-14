@@ -17,6 +17,18 @@ const ViewApplicants = () => {
     const [selectedApplicant, setSelectedApplicant] = useState(null);
     const location = useLocation();
     const job = location.state  || {};
+    const [showOfferSuccess, setShowOfferSuccess] = useState(false);
+    const [offerDetails, setOfferDetails] = useState({ jobTitle: '', applicantName: '' });
+    const [showRejectSuccess, setShowRejectSuccess] = useState(false);
+    const [showMatchScore, setShowMatchScore] = useState(false);
+    const [matchScoreDetails, setMatchScoreDetails] = useState({
+    applicantName: '',
+    score: 0,
+    explanation: ''
+    });
+    const [rejectDetails, setRejectDetails] = useState({
+    applicantName: ''
+    });
 
 
         const fetchApplicants = async () => {
@@ -278,115 +290,120 @@ const ViewApplicants = () => {
         else if (filter === "Interview") await fetchInterviewApplicants();
       };
 
-    const handleReject = async (applicantId) => {
+      const handleReject = async (applicantId) => {
         try {
-            const auth = getAuth();
-            const user = auth.currentUser;
-
-            if (!user) {
-                throw new Error("User not authenticated");
+          const auth = getAuth();
+          const user = auth.currentUser;
+          if (!user) throw new Error("User not authenticated");
+      
+          const idToken = await user.getIdToken();
+          const response = await fetch(
+            `http://localhost:5000/rejected-applicants/${user.uid}/${jobId}?applicant_id=${applicantId}`,
+            {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": idToken,
+              },
             }
-
-            const idToken = await user.getIdToken();
-
-            const response = await fetch(`http://localhost:5000/rejected-applicants/${user.uid}/${jobId}?applicant_id=${applicantId}`, {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": idToken,
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error("Failed to add applicant to rejected list");
-            }
-
-            const data = await response.json();
-            console.log("Reject Response:", data);
-
-            
-            if (filter === "All") {
-                await fetchApplicants();
-            } else if (filter === "Interview") {
-                await fetchInterviewApplicants();
-            } else if (filter === "Rejected") {
-                await fetchRejectedApplicants();
-            }else if (filter === "Offered") {
-                await fetchOfferedApplicants();}
-
-            alert("Applicant added to rejected list");
+          );
+      
+          if (!response.ok) throw new Error("Failed to reject applicant");
+      
+          const applicant = applicants.find(app => app.uid === applicantId);
+          setRejectDetails({
+            applicantName: applicant ? `${applicant.first_name} ${applicant.last_name}` : "the applicant"
+          });
+          
+          setShowRejectSuccess(true);
+      
+          if (filter === "All") await fetchApplicants();
+          else if (filter === "Interview") await fetchInterviewApplicants();
+          else if (filter === "Rejected") await fetchRejectedApplicants();
+          else if (filter === "Offered") await fetchOfferedApplicants();
+      
         } catch (error) {
-            console.error("Error adding applicant to rejected list:", error);
+          console.error("Error rejecting applicant:", error);
+          alert("Error rejecting applicant: " + error.message);
         }
-    };
-
+      };
 
     const handleOffer = async (applicantId) => {
         try {
-            const auth = getAuth();
-            const user = auth.currentUser;
-            if (!user) throw new Error("User not authenticated");
-    
-            const idToken = await user.getIdToken();
-            const response = await fetch(
-                `http://localhost:5000/send_job_offer/${user.uid}/${jobId}/${applicantId}`, {
-                method: "POST",
-                headers: {
-                    "Authorization": idToken,
-                    "Content-Type": "application/json",
-                },
-            });
-    
-            if (!response.ok) throw new Error("Failed to send offer");
-            
-            const data = await response.json();
-            alert(`Offer for ${data.job_title} sent successfully!`);
-            
-            if (filter === "All") await fetchApplicants();
-            else if (filter === "Interview") await fetchInterviewApplicants();
-            else if (filter === "Rejected") await fetchRejectedApplicants();
-            else if (filter === "Offered") await fetchOfferedApplicants();
-    
+          const auth = getAuth();
+          const user = auth.currentUser;
+          if (!user) throw new Error("User not authenticated");
+      
+          const idToken = await user.getIdToken();
+          const response = await fetch(
+            `http://localhost:5000/send_job_offer/${user.uid}/${jobId}/${applicantId}`, {
+            method: "POST",
+            headers: {
+              "Authorization": idToken,
+              "Content-Type": "application/json",
+            },
+          });
+      
+          if (!response.ok) throw new Error("Failed to send offer");
+          
+          const data = await response.json();
+          
+          const applicant = applicants.find(app => app.uid === applicantId);
+          setOfferDetails({
+            jobTitle: data.job_title || job.Title || "the position",
+            applicantName: applicant ? `${applicant.first_name} ${applicant.last_name}` : "the applicant"
+          });
+          
+          setShowOfferSuccess(true);
+          
+          if (filter === "All") await fetchApplicants();
+          else if (filter === "Interview") await fetchInterviewApplicants();
+          else if (filter === "Rejected") await fetchRejectedApplicants();
+          else if (filter === "Offered") await fetchOfferedApplicants();
+      
         } catch (error) {
-            console.error("Error offering job:", error);
-            alert("Error offering job: " + error.message);
+          console.error("Error offering job:", error);
+          alert("Error offering job: " + error.message);
         }
-    };
+      };
 
-
-    const handleMatchScore = async (applicantId, jobId) => {
+      const handleMatchScore = async (applicantId, jobId) => {
         try {
-            const auth = getAuth();
-            const user = auth.currentUser;
-            if (!user) {
-                throw new Error("User not authenticated");
+          const auth = getAuth();
+          const user = auth.currentUser;
+          if (!user) throw new Error("User not authenticated");
+      
+          const idToken = await user.getIdToken();
+          const response = await fetch(
+            `http://localhost:5000/matchscore-applicants/${user.uid}/${jobId}?applicant_id=${applicantId}`,
+            {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": idToken,
+              },
             }
-    
-            const idToken = await user.getIdToken();
-            const response = await fetch(
-                `http://localhost:5000/matchscore-applicants/${user.uid}/${jobId}?applicant_id=${applicantId}`,
-                {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": idToken,
-                    },
-                }
-            );
-            if (!response.ok) {
-                throw new Error("Failed to fetch match score");}
-    
-            const data = await response.json();
-            if (data.success) {
-                alert(`Match Score for Applicant ${applicantId}: ${data.matchscore}%`);
-            } else {
-                alert(`Error: ${data.error}`);
-            }
+          );
+      
+          if (!response.ok) throw new Error("Failed to fetch match score");
+      
+          const data = await response.json();
+          if (data.success) {
+            const applicant = applicants.find(app => app.uid === applicantId);
+            setMatchScoreDetails({
+              applicantName: applicant ? `${applicant.first_name} ${applicant.last_name}` : "the applicant",
+              score: data.matchscore,
+              explanation: data.explanation || "This score is based on skills, experience, and job requirements matching."
+            });
+            setShowMatchScore(true);
+          } else {
+            throw new Error(data.error || "Unknown error");
+          }
         } catch (error) {
-            console.error("Error fetching match score:", error);
-            alert("Error fetching match score");
+          console.error("Error fetching match score:", error);
+          alert("Error fetching match score: " + error.message);
         }
-    };
+      };
     
 
     const handleChat = (applicantId) => {
@@ -432,94 +449,236 @@ const ViewApplicants = () => {
             alert(error.message);
         }
     };
+
+    const InterviewPopup = ({ applicantName, jobTitle, onClose, onSchedule }) => {
+        const [interviewDetails, setInterviewDetails] = useState({
+          date: '',
+          time: '',
+          type: 'Video Call',
+          notes: ''
+        });
+      
+        const handleSubmit = (e) => {
+          e.preventDefault();
+          const dateTime = new Date(`${interviewDetails.date}T${interviewDetails.time}`);
+          onSchedule({
+            date: dateTime,
+            type: interviewDetails.type,
+            notes: interviewDetails.notes
+          });
+        };
+      
+        return (
+          <div className="interview-modal-overlay">
+            <div className="interview-modal">
+              <div className="interview-modal-header">
+                <h2>Schedule Interview with {applicantName}</h2>
+                <button className="close-button" onClick={onClose}>×</button>
+              </div>
+              
+              <div className="interview-modal-body">
+                <div className="interview-info">
+                  <p><strong>For:</strong> {jobTitle}</p>
+                </div>
+      
+                <form onSubmit={handleSubmit}>
+                  <div className="form-group">
+                    <label>Date</label>
+                    <input 
+                      type="date" 
+                      value={interviewDetails.date}
+                      onChange={(e) => setInterviewDetails({...interviewDetails, date: e.target.value})}
+                      required
+                    />
+                  </div>
+      
+                  <div className="form-group">
+                    <label>Time</label>
+                    <input 
+                      type="time" 
+                      value={interviewDetails.time}
+                      onChange={(e) => setInterviewDetails({...interviewDetails, time: e.target.value})}
+                      required
+                    />
+                  </div>
+      
+                  <div className="form-group">
+                    <label>Interview Type</label>
+                    <select
+                      value={interviewDetails.type}
+                      onChange={(e) => setInterviewDetails({...interviewDetails, type: e.target.value})}
+                    >
+                      <option value="Video Call">Video Call</option>
+                      <option value="Phone Call">Phone Call</option>
+                      <option value="In-Person">In-Person</option>
+                    </select>
+                  </div>
+      
+                  <div className="form-group">
+                    <label>Notes/Special Instructions</label>
+                    <textarea
+                      value={interviewDetails.notes}
+                      onChange={(e) => setInterviewDetails({...interviewDetails, notes: e.target.value})}
+                      placeholder="Any special instructions for the candidate..."
+                    />
+                  </div>
+      
+                  <div className="interview-modal-footer">
+                    <button type="button" className="cancel-button" onClick={onClose}>
+                      Cancel
+                    </button>
+                    <button type="submit" className="schedule-button">
+                      Schedule Interview
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        );
+      };
     
 
     return (
         <main className="view-applicants-container">
-            <button className="back-button-view" onClick={() => navigate(-1)}>Go Back</button>
-            <h1 className="view-applicants-title">Applicants for Job ID: {jobId}</h1>
-
-            <label>Filter by Status</label>
-            <div className="status-filter">
-                {["All", "Interview", "Offered", "Rejected"].map(status => (
-                    <button 
-                        key={status} 
-                        className={`filter-button ${filter === status ? "selected" : ""}`} 
-                        onClick={() => setFilter(status)}
-                    >
-                        {status}
+          <button className="back-button-view" onClick={() => navigate(-1)}>Go Back</button>
+          <h1 className="view-applicants-title">Applicants for Job ID: {jobId}</h1>
+      
+          <label>Filter by Status</label>
+          <div className="status-filter">
+            {["All", "Interview", "Offered", "Rejected"].map(status => (
+              <button 
+                key={status} 
+                className={`filter-button ${filter === status ? "selected" : ""}`} 
+                onClick={() => setFilter(status)}
+              >
+                {status}
+              </button>
+            ))}
+          </div>
+      
+          <section className="applicant-list">
+            {applicants.length > 0 ? (
+              applicants.map(applicant => (
+                <div key={applicant.id} className="applicant-card">
+                  <h2 className="applicant-name">{applicant.first_name} {applicant.last_name}</h2>
+                  <p className="applicant-email"><strong>Email:</strong> {applicant.email}</p>
+                  <p className="applicant-location"><strong>Location:</strong> {applicant.location || "Not provided"}</p>
+                  <p className="applicant-phone"><strong>Phone:</strong> {applicant.phone_number || "Not provided"}</p>
+      
+                  <div className="applicant-actions">
+                    {filter === "Interview" && (
+                      <button className="offer-button" onClick={() => handleOffer(applicant.uid)}>
+                        Offer
+                      </button>
+                    )}
+                    
+                    {filter !== "Rejected" && filter !== "Offered" && filter !== "Interview" && (
+                      <button className="interview-button" onClick={() => handleInterviewClick(applicant)}>
+                        Interview
+                      </button>
+                    )}
+        
+                    <button className="match-score-button" onClick={() => handleMatchScore(applicant.uid, jobId)}>
+                      Match Score
                     </button>
-                ))}
+                    <button className="chat-button" onClick={() => handleChat(applicant.uid)}>
+                      Chat
+                    </button>
+                    {filter !== "Rejected" && filter !== "Offered" && (
+                      <button className="reject-button" onClick={() => handleReject(applicant.uid)}>
+                        Reject
+                      </button>
+                    )}
+      
+                    <button className="view-cv-button" onClick={() => viewCV(applicant.uid)}>
+                      View CV
+                    </button>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="no-applicants">No applicants found.</p>
+            )}
+          </section>
+      
+          {showInterviewPopup && selectedApplicant && (
+            <InterviewPopup
+              applicantName={`${selectedApplicant.first_name} ${selectedApplicant.last_name}`}
+              jobTitle={jobId || "the position"}
+              onClose={() => setShowInterviewPopup(false)}
+              onSchedule={handleScheduleInterview}
+            />
+          )}
+
+          {/* Reject Confirmation Modal */}
+          {showRejectSuccess && (
+            <div className="confirmation-modal">
+              <div className="confirmation-content">
+                <h2>Applicant Rejected</h2>
+                <p className="confirmation-message">
+                  You've rejected <strong>{rejectDetails.applicantName}</strong> for this position.
+                </p>
+                <div className="confirmation-buttons">
+                  <button 
+                    className="confirm-button reject-btn" 
+                    onClick={() => setShowRejectSuccess(false)}
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
             </div>
+          )}
 
-            <section className="applicant-list">
-                {applicants.length > 0 ? (
-                    applicants.map(applicant => (
-                        <div key={applicant.id} className="applicant-card">
-                            <h2 className="applicant-name">{applicant.first_name} {applicant.last_name}</h2>
-                            <p className="applicant-email"><strong>Email:</strong> {applicant.email}</p>
-                            <p className="applicant-location"><strong>Location:</strong> {applicant.location || "Not provided"}</p>
-                            <p className="applicant-phone"><strong>Phone:</strong> {applicant.phone_number || "Not provided"}</p>
-
-                            <div className="applicant-actions">
-                            {filter === "Interview" && (
-                                    <button className="offer-button" onClick={() => handleOffer(applicant.uid, jobId)}>
-                                        Offer
-                                    </button>)}
-                                
-                            {filter !== "Rejected" && filter !== "Offered" && filter !== "Interview" && (
-                                <button className="interview-button" onClick={() => handleInterviewClick(applicant) }>
-                                    Interview
-                                </button>)}
-            
-                                <button className="match-score-button" onClick={() => handleMatchScore(applicant.uid, jobId)}>
-                                    Match Score
-                                </button>
-                                <button className="chat-button" onClick={() => handleChat(applicant.uid)}>
-                                    Chat
-                                </button>
-                            {filter !== "Rejected" && filter !== "Offered" && (
-                                <button className="reject-button" onClick={() => handleReject(applicant.uid, jobId)}>
-                                    Reject
-                                </button> )}
-
-                                <button className="view-cv-button" onClick={() => viewCV(applicant.uid)}>
-                                    View CV
-                                </button>
-                            </div>
-                        
-                           {/*
-                                <div className="applicant-tags">
-                                    {applicant.tags.map(tag => (
-                                        <span key={tag} className="applicant-tag">
-                                            {tag} <span className="remove-tag"></span>
-                                        </span>
-                                    ))}
-                                    <input 
-                                        type="text"
-                                        placeholder="Add a tag..."
-                                        className="tag-input"
-                                    />
-                                </div>
-                                */}
-
-                        </div>
-                    ))
-                ) : (
-                    <p className="no-applicants">No applicants found.</p>
-                )}
-            </section>
-            {showInterviewPopup && selectedApplicant && (
-      <InterviewPopup
-        applicantName={`${selectedApplicant.first_name} ${selectedApplicant.last_name}`}
-        jobTitle={jobId || "the position"}
-        onClose={() => setShowInterviewPopup(false)}
-        onSchedule={handleScheduleInterview}
-      />
-    )}
+          {/* Match Score Modal */}
+          {showMatchScore && (
+            <div className="confirmation-modal">
+              <div className="confirmation-content">
+                <h2>Match Score Details</h2>
+                <div className="match-score-display">
+                  <div className="score-circle">
+                    {matchScoreDetails.score}%
+                  </div>
+                  <h3>{matchScoreDetails.applicantName}</h3>
+                  <p className="score-explanation">
+                    {matchScoreDetails.explanation}
+                  </p>
+                </div>
+                <div className="confirmation-buttons">
+                  <button 
+                    className="confirm-button" 
+                    onClick={() => setShowMatchScore(false)}
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+      
+          {showOfferSuccess && (
+            <div className="confirmation-modal">
+              <div className="confirmation-content">
+                <h2>Offer Sent Successfully!</h2>
+                <p className="confirmation-message">
+                  You've offered <strong>{offerDetails.applicantName}</strong> the position of:
+                  <br />
+                  <strong className="job-title-highlight">{offerDetails.jobTitle}</strong>
+                </p>
+                <div className="confirmation-buttons">
+                  <button 
+                    className="confirm-button" 
+                    onClick={() => setShowOfferSuccess(false)}
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </main>
-    );
-};
+      );
+    }
 
 export default ViewApplicants;
-

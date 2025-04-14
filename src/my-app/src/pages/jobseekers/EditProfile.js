@@ -94,7 +94,7 @@ const EditProfile = () => {
       <form onSubmit={handleSubmit}>
         <div className="edit-jobseeker-profile__form-grid">
           <div className="edit-jobseeker-profile__field-group">
-            <label>Name*</label>
+            <label>First Name*</label>
             <input
               type="text"
               name="name"
@@ -107,7 +107,7 @@ const EditProfile = () => {
           </div>
 
           <div className="edit-jobseeker-profile__field-group">
-            <label>Name*</label>
+            <label>Last Name*</label>
             <input
               type="text"
               name="name"

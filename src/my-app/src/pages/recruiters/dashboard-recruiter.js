@@ -9,7 +9,7 @@ import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, scales } from 'chart.js';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
-
+ 
 const DashRecruiter = () => {
   const [userRole, setUserRole] = useState(localStorage.getItem('userRole') || null);
   const [numJobPostings, setNumJobPostings] = useState(0)
@@ -201,8 +201,8 @@ const handleChat = () => {
     <button onClick={() => navigate('/createpost')} className="recruiter-action-button post-job-button">
         Post a Job
     </button>
-    <button onClick={() => navigate('/viewjobpostings')} className="recruiter-action-button view-job-button">
-        View Job Postings
+    <button onClick={() => navigate('/jobtracker-recruiter')} className="recruiter-action-button view-job-button">
+        Job Tracker
     </button>
     <button onClick={() => navigate('/recruiterchat')} className="recruiter-action-button inbox-button">
         Inbox
