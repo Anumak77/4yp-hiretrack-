@@ -5,15 +5,16 @@ e2e-tests:
   stage: test
   image: cypress/included:14.3.0
   script:
-    - echo "Installing backend deps"
+    - echo "Setting up backend"
     - cd src/my-app/src/backend || exit
     - python3 -m venv venv
     - source venv/bin/activate
     - pip install -r requirements.txt
+    - python3 app.py & 
     - BACK_PID=$!
     - cd ../../../.. || exit
 
-    - echo "Installing frontend deps"
+    - echo "Setting up frontend"
     - cd src/my-app || exit
     - npm ci
     - npm start & 
@@ -24,14 +25,16 @@ e2e-tests:
     - npx wait-on http://localhost:3000/login http://localhost:5000/ping
 
     - echo "Running Cypress"
-    - npx cypress run --config baseUrl=http://localhost:3000
+    - cypress run --config baseUrl=http://localhost:3000
 
-    - echo "Killing backend and frontend"
+    - echo "Killing backend"
     - kill $BACK_PID || echo "Backend not running"
     - kill $FRONT_PID || echo "Frontend not running"
+
   artifacts:
     when: always
     paths:
       - cypress/videos/
       - cypress/screenshots/
     expire_in: 1 week
+
