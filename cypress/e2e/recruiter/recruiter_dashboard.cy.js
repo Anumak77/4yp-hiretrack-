@@ -15,7 +15,6 @@ describe('Recruiter Dashboard', () => {
       });
   
       cy.get('.recruiter-chart-container h3').should('contain', 'Job Postings Stats');
-  
       cy.intercept('GET', 'http://localhost:5000/fetch-jobs*').as('getJobs');
 
     });
@@ -24,5 +23,12 @@ describe('Recruiter Dashboard', () => {
       cy.get('.dashboard-recruiter-sidebar > :nth-child(5)').click()
       cy.url().should('include', '/login');  
     });
+
+    it('All Buttons are Visible', () => {
+      cy.contains('Post a Job').should('exist');
+      cy.contains('Job Tracker').should('exist');
+      cy.contains('Inbox').should('exist');
+      cy.contains('Logout').should('exist');
+    });
+
   });
-  

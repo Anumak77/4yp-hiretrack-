@@ -45,6 +45,9 @@
     "sqlite3": "^5.1.7",
     "web-vitals": "^2.1.4"
   },
+  "jest": {
+  "setupFilesAfterEnv": ["<rootDir>/src/setupTests.js"]
+  },
   "browser": {
     "axios": "^1.6.0"
   },
@@ -52,7 +55,7 @@
     "eject": "react-scripts eject",
     "start": "react-scripts start",
     "build": "craco build",
-    "test": "craco test"
+    "test": "react-scripts test"
   },
   "eslintConfig": {
     "extends": [
