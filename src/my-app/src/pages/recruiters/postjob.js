@@ -139,8 +139,9 @@ const PostJob = () => {
           <form onSubmit={handleSubmit}>
             {/* Job Title */}
             <div className="input-group">
-              <label>Job Title</label>
+            <label htmlFor="title">Job Title</label>
               <input
+                id="title"
                 type="text"
                 name="Title"
                 value={jobData.Title}
@@ -152,8 +153,9 @@ const PostJob = () => {
 
             {/* Company */}
             <div className="input-group">
-              <label>Company</label>
+              <label htmlFor="company">Company</label>
               <input
+                id="company"
                 type="text"
                 name="Company"
                 value={jobData.Company}
@@ -165,8 +167,9 @@ const PostJob = () => {
 
             {/* About Company */}
             <div className="input-group">
-              <label>About Company</label>
+              <label htmlFor="aboutc">About Company</label>
               <textarea
+                id="aboutc"
                 name="AboutC"
                 value={jobData.AboutC}
                 onChange={handleChange}
@@ -177,8 +180,9 @@ const PostJob = () => {
 
             {/* Location */}
             <div className="input-group">
-              <label htmlFor="Location">Location</label>
+              <label htmlFor="location">Location</label>
               <select
+                id="location"
                 name="Location"
                 value={jobData.Location}
                 onChange={handleChange}
@@ -196,8 +200,9 @@ const PostJob = () => {
 
             {/* Job Description */}
             <div className="input-group">
-              <label>Job Description</label>
+              <label htmlFor="jobdesc">Job Description</label>
               <textarea
+                id="jobdesc"
                 name="JobDescription"
                 value={jobData.JobDescription}
                 onChange={handleChange}
@@ -208,8 +213,9 @@ const PostJob = () => {
 
             {/* Job Requirements */}
             <div className="input-group">
-              <label>Job Requirements</label>
+              <label htmlFor="jobrequir">Job Requirements</label>
               <textarea
+                id="jobrequir"
                 name="JobRequirment"
                 value={jobData.JobRequirment}
                 onChange={handleChange}
@@ -220,8 +226,9 @@ const PostJob = () => {
 
             {/* Required Qualifications */}
             <div className="input-group">
-              <label>Required Qualifications</label>
+            <label htmlFor="qual">Required Qualifications</label>
               <textarea
+                id="qual"
                 name="RequiredQual"
                 value={jobData.RequiredQual}
                 onChange={handleChange}
@@ -232,8 +239,9 @@ const PostJob = () => {
 
             {/* Application Process */}
             <div className="input-group">
-              <label>Application Process</label>
+              <label htmlFor="appProcess">Application Process</label>
               <textarea
+                id="appProcess"
                 name="ApplicationP"
                 value={jobData.ApplicationP}
                 onChange={handleChange}
@@ -246,8 +254,9 @@ const PostJob = () => {
             <div className="date-container">
 
               <div className="input-group">
-                <label>Deadline</label>
+                <label htmlFor="deadline">Deadline</label>
                 <input
+                  id="deadline"
                   type="date"
                   name="Deadline"
                   value={jobData.Deadline}
@@ -257,8 +266,9 @@ const PostJob = () => {
               </div>
 
               <div className="input-group">
-                <label>Start Date</label>
+                <label htmlFor="startDate">Start Date</label>
                 <input
+                  id="startDate"
                   type="date"
                   name="StartDate"
                   value={jobData.StartDate}
