@@ -12,10 +12,10 @@
     "jest-environment-jsdom": "^29.7.0"
   },
   "dependencies": {
-    "@fullcalendar/daygrid": "^6.1.15",
+    "@fullcalendar/daygrid": "^6.1.17",
     "@fullcalendar/google-calendar": "^6.1.15",
-    "@fullcalendar/interaction": "^6.1.15",
-    "@fullcalendar/react": "^6.1.15",
-    "@fullcalendar/timegrid": "^6.1.15"
+    "@fullcalendar/interaction": "^6.1.17",
+    "@fullcalendar/react": "^6.1.17",
+    "@fullcalendar/timegrid": "^6.1.17"
   }
 }
