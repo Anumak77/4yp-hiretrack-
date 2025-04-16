@@ -13,7 +13,7 @@
 # sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 # from routes.edit_job import edit_job_bp
 
-# # 🔧 Setup Flask app for test
+# 
 # @pytest.fixture
 # def app():
 #     app = Flask(__name__)
@@ -24,7 +24,6 @@
 # def client(app):
 #     return app.test_client()
 
-# # 🔹 Test: Fetch existing job
 # @patch('routes.edit_job.firestore_db')
 # def test_fetch_job_success(mock_db, client):
 #     mock_job_doc = MagicMock()
@@ -37,7 +36,6 @@
 #     assert response.status_code == 200
 #     assert response.get_json()['title'] == "AI Engineer"
 
-# # 🔹 Test: Fetch non-existent job
 # @patch('routes.edit_job.firestore_db')
 # def test_fetch_job_not_found(mock_db, client):
 #     mock_job_doc = MagicMock()
@@ -48,7 +46,6 @@
 #     assert response.status_code == 404
 #     assert "error" in response.get_json()
 
-# # 🔹 Test: Update job successfully
 # @patch('routes.edit_job.firestore_db')
 # def test_update_job_success(mock_db, client):
 #     mock_job_ref = MagicMock()
@@ -58,7 +55,6 @@
 #     assert response.status_code == 200
 #     assert response.get_json()['success'] is True
 
-# # 🔹 Test: Update job with invalid JSON
 # @patch('routes.edit_job.firestore_db')
 # def test_update_job_failure(mock_db, client):
 #     mock_db.collection.return_value.document.return_value.collection.return_value.document.return_value.update.side_effect = Exception("Update failed")

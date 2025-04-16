@@ -4,7 +4,6 @@
 # from unittest.mock import patch
 # from flask import Flask
 
-# # Add backend path
 # sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # from routes.train_resume_data import train_resume_bp
@@ -19,7 +18,6 @@
 # def client(app):
 #     return app.test_client()
 
-# # 🔹 Test: Success case for /resume-dataset
 # @patch('routes.train_resume_data.process_resumes')
 # def test_get_dataset_success(mock_process_resumes, client):
 #     mock_process_resumes.return_value = [
@@ -34,7 +32,6 @@
 #     assert data[0]["name"] == "Alice"
 #     assert "skills" in data[1]
 
-# # 🔹 Test: Internal server error
 # @patch('routes.train_resume_data.process_resumes')
 # def test_get_dataset_exception(mock_process_resumes, client):
 #     mock_process_resumes.side_effect = Exception("Dataset read error")

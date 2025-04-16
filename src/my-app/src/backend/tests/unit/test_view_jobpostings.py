@@ -4,7 +4,6 @@ import pytest
 from unittest.mock import patch, MagicMock
 from flask import Flask
 
-# Add backend path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from routes.view_jobpostings import view_jobpostings_bp
@@ -19,7 +18,7 @@ def app():
 def client(app):
     return app.test_client()
 
-# 🔹 Fetch specific job (success)
+
 @patch('routes.view_jobpostings.firestore_db')
 def test_fetch_job_success(mock_firestore_db, client):
     mock_doc = MagicMock()
@@ -31,7 +30,6 @@ def test_fetch_job_success(mock_firestore_db, client):
     assert response.status_code == 200
     assert response.get_json()["title"] == "Test Job"
 
-# 🔹 Fetch specific job (not found)
 @patch('routes.view_jobpostings.firestore_db')
 def test_fetch_job_not_found(mock_firestore_db, client):
     mock_doc = MagicMock()
@@ -41,14 +39,12 @@ def test_fetch_job_not_found(mock_firestore_db, client):
     response = client.get('/fetch_job/user123/job456')
     assert response.status_code == 404
 
-# 🔹 Update job
 @patch('routes.view_jobpostings.firestore_db')
 def test_update_job_success(mock_firestore_db, client):
     response = client.put('/update_job/user123/job456', json={"title": "Updated"})
     assert response.status_code == 200
     assert "success" in response.get_json()
 
-# 🔹 Fetch all jobs with token
 @patch('routes.view_jobpostings.auth')
 @patch('routes.view_jobpostings.firestore_db')
 def test_fetch_jobs_success(mock_firestore_db, mock_auth, client):
@@ -62,7 +58,6 @@ def test_fetch_jobs_success(mock_firestore_db, mock_auth, client):
     assert response.status_code == 200
     assert response.get_json()[0]["id"] == "job1"
 
-# 🔹 Delete job with token
 @patch('routes.view_jobpostings.auth')
 @patch('routes.view_jobpostings.firestore_db')
 def test_delete_job_success(mock_firestore_db, mock_auth, client):
@@ -71,7 +66,6 @@ def test_delete_job_success(mock_firestore_db, mock_auth, client):
     assert response.status_code == 200
     assert response.get_json()["success"] is True
 
-# 🔹 Add tag to job
 @patch('routes.view_jobpostings.firestore_db')
 def test_add_tag_success(mock_firestore_db, client):
     mock_doc = MagicMock()
@@ -83,7 +77,6 @@ def test_add_tag_success(mock_firestore_db, client):
     assert response.status_code == 200
     assert "tag2" in response.get_json()["tags"]
 
-# 🔹 Remove tag from job
 @patch('routes.view_jobpostings.firestore_db')
 def test_remove_tag_success(mock_firestore_db, client):
     mock_doc = MagicMock()

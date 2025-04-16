@@ -4,12 +4,10 @@
 # from unittest.mock import patch, MagicMock
 # from datetime import datetime
 
-# # ✅ Fix import path
 # sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # from routes.notifications import create_notification
 
-# # 🔹 Test: successful notification creation
 # @patch('routes.notifications.db')
 # def test_create_notification_success(mock_db):
 #     mock_collection = MagicMock()
@@ -24,7 +22,6 @@
 #     assert args[0]['status'] == 'unread'
 #     assert isinstance(args[0]['timestamp'], datetime)
 
-# # 🔹 Test: failure in Firestore write
 # @patch('routes.notifications.db')
 # def test_create_notification_firestore_error(mock_db, capsys):
 #     mock_collection = MagicMock()
