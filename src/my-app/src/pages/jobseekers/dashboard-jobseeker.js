@@ -199,11 +199,11 @@ const DashJobseeker = () => {
         const loadJobs = async () => {
           const savedJobs = await fetchJobs("savedjobs");
           const appliedJobs = await fetchJobs("appliedjobs");
-          const interviewedJobs = await fetchJobs("interviewedjobs");
+          const interviewJobs = await fetchJobs("interviewjobs");
           const unapplyJobs = await fetchJobs("unapplyjobs");
           const offeredJobs = await fetchJobs("offeredjobs");
   
-          setJobColumns({ saved: savedJobs, applied: appliedJobs, unapply: unapplyJobs, interviewed: interviewedJobs });
+          setJobColumns({ saved: savedJobs, applied: appliedJobs, unapply: unapplyJobs, interviewed: interviewJobs });
           // setInterviewJobs(interviewedJobs);
           setOfferedJobs(offeredJobs);
         };
@@ -228,7 +228,7 @@ const DashJobseeker = () => {
   const columnToCollectionMap = {
     saved: "savedjobs",       
     applied: "appliedjobs",   
-    interviewed: "interviewedjobs", 
+    interviewed: "interviewjobs", 
     withdraw: "unapplyjobs",  
     offered: "offeredjobs",
   };

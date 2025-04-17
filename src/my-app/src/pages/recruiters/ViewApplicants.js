@@ -4,11 +4,15 @@ import { getAuth } from "firebase/auth";
 import "../../components/style.css";
 import "../../components/interviewschedueler.css";
 import InterviewPopup from "./InterviewPopup";
+import { useGoogleLogin } from '@react-oauth/google';
+
 
 const ViewApplicants = () => {
     const { id: jobId } = useParams(); 
     console.log("Job ID from URL:", jobId);
     const navigate = useNavigate();
+    const auth = getAuth();
+    const user = auth.currentUser;
     const [applicants, setApplicants] = useState([]);
     const [filter, setFilter] = useState("All");
     const [loading, setLoading] = useState(true); 
@@ -21,6 +25,10 @@ const ViewApplicants = () => {
     const [offerDetails, setOfferDetails] = useState({ jobTitle: '', applicantName: '' });
     const [showRejectSuccess, setShowRejectSuccess] = useState(false);
     const [showMatchScore, setShowMatchScore] = useState(false);
+    const [showReconnectPopup, setShowReconnectPopup] = useState(false);
+    const [isConnected, setIsConnected] = useState(false);
+    const GOOGLE_CLIENT_ID = "714625690444-bjnr3aumebso58niqna7613rtvmc5e6f.apps.googleusercontent.com"
+    const GOOGLE_CLIENT_SECRET = "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"
     const [matchScoreDetails, setMatchScoreDetails] = useState({
     applicantName: '',
     score: 0,
@@ -29,6 +37,81 @@ const ViewApplicants = () => {
     const [rejectDetails, setRejectDetails] = useState({
     applicantName: ''
     });
+
+
+    const connectCalendar = useGoogleLogin({
+      onSuccess: async (tokenResponse) => {
+        try {
+          const user = auth.currentUser;
+          if (!user) throw new Error('Not authenticated');
+    
+          console.log("Google OAuth Response:", tokenResponse);
+  
+          const tokenResponseWithRefresh = await fetch(
+            'https://oauth2.googleapis.com/token',
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+              },
+              body: new URLSearchParams({
+                code: tokenResponse.code, 
+                client_id: GOOGLE_CLIENT_ID,
+                client_secret: GOOGLE_CLIENT_SECRET,
+                redirect_uri: 'http://localhost:3000', 
+                grant_type: 'authorization_code',
+              }),
+            }
+          ).then(res => res.json());
+    
+          const payload = {
+            uid: user.uid,
+            token: tokenResponseWithRefresh.access_token,
+            refreshToken: tokenResponseWithRefresh.refresh_token
+          };
+          console.log("Sending payload to backend:", JSON.stringify(payload, null, 2));
+          
+          const response = await fetch('http://localhost:5000/store-google-token', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': await user.getIdToken()
+            },
+            body: JSON.stringify(payload) 
+          });
+    
+          const responseClone = response.clone();
+          const data = await response.json();
+          
+          if (!response.ok) {
+            throw { 
+              message: data.error || 'Failed to store token',
+              response: responseClone
+            };
+          }
+    
+          alert('Google Calendar connected successfully!');
+        } catch (error) {
+          console.error('Full error:', error);
+          
+          let errorDetails = '';
+          try {
+            const errorResponse = error.response || await fetch(error.url);
+            errorDetails = await errorResponse.text();
+          } catch (e) {
+            errorDetails = error.message;
+          }
+          
+          console.error('Error details:', errorDetails);
+          alert(`Connection failed: ${error.message}\nDetails: ${errorDetails.substring(0, 100)}`);
+        }
+      },
+      scope: 'https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.events',
+      flow: 'auth-code',
+      prompt: 'consent',
+      access_type: 'offline',
+    });
+  
 
 
         const fetchApplicants = async () => {
@@ -202,9 +285,17 @@ const ViewApplicants = () => {
                 },
             });
 
+            const responseData = await response.json();
+
+                    
             if (!response.ok) {
-                throw new Error("Failed to add applicant to interview list");
+              if (responseData.error === 'invalid_scope' || responseData.code === 'CALENDAR_NEEDS_RECONNECT') {
+                setShowReconnectPopup(true);
+                return;
+              }
+              throw new Error(responseData.message || `HTTP error! status: ${response.status}`);
             }
+
 
             const data = await response.json();
             console.log("Interview Response:", data);
@@ -273,10 +364,13 @@ const ViewApplicants = () => {
           );
       
           if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            console.error("Backend error details:", errorData);
+            const errorData = await response.json();
+            if (errorData.error === 'invalid_scope') {
+              setShowReconnectPopup(true);
+              return;
+            }
             throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-        }
+          }
     
       
           alert("Interview scheduled successfully!");
@@ -480,6 +574,11 @@ const ViewApplicants = () => {
                 <div className="interview-info">
                   <p><strong>For:</strong> {jobTitle}</p>
                 </div>
+
+          (
+            <button onClick={connectCalendar} className="connect-button">
+              Connect Calendar
+            </button>)
       
                 <form onSubmit={handleSubmit}>
                   <div className="form-group">
