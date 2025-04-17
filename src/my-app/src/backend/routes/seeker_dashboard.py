@@ -23,10 +23,7 @@ def fetch_jobseeker_jobs(job_list):
         
         firestore_db = firestore.client()
         jobs_ref = firestore_db.collection(f'jobseekers/{uid}/{job_list}')
-
-        if job_ref exists:
-            jobs_snapshot = jobs_ref.get()
-        else return []
+        jobs_snapshot = jobs_ref.get()
 
         jobs = []
         for doc in jobs_snapshot:

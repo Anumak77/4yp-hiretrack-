@@ -45,20 +45,27 @@ def test_recruiter_job_lifecycle(mock_auth, mock_db, mock_firestore, client):
     assert response.get_json()["success"] is True
     job_doc_ref.set.assert_called_once()
     mock_db.reference.return_value.child.return_value.set.assert_called_once()
+    
+    with patch('routes.edit_job.firestore_db') as mock_fetch_firestore, \
+         patch('routes.edit_job.credentials'), \
+         patch('routes.edit_job.initialize_app'):
 
-    with patch('routes.edit_job.firestore_db') as mock_fetch_firestore:
         job_doc = MagicMock()
         job_doc.exists = True
         job_doc.to_dict.return_value = job_data
-        mock_fetch_firestore.collection.return_value.document.return_value.get.return_value = job_doc
+
+        mock_fetch_firestore.collection.return_value.document.return_value.collection.return_value.document.return_value.get.return_value = job_doc
 
         fetch_response = client.get("/fetch_job/recruiter123/test-job-id")
         assert fetch_response.status_code == 200
         assert fetch_response.get_json()["Title"] == "Software Engineer"
 
-    with patch('routes.edit_job.firestore_db') as mock_update_firestore:
+    with patch('routes.edit_job.firestore_db') as mock_update_firestore, \
+         patch('routes.edit_job.credentials'), \
+         patch('routes.edit_job.initialize_app'):
+
         job_ref = MagicMock()
-        mock_update_firestore.collection.return_value.document.return_value = job_ref
+        mock_update_firestore.collection.return_value.document.return_value.collection.return_value.document.return_value = job_ref
 
         update_response = client.put(
             "/update_job/recruiter123/test-job-id",
@@ -66,3 +73,4 @@ def test_recruiter_job_lifecycle(mock_auth, mock_db, mock_firestore, client):
         )
         assert update_response.status_code == 200
         job_ref.update.assert_called_once_with({"Location": "Hybrid"})
+

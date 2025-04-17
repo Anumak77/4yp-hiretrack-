@@ -1,5 +1,5 @@
 describe('Recruiter Job Postings Flow', () => {
-n 
+
     beforeEach(() => {
       cy.visit('/login');
       cy.get('input#email-address').type('recruiter@gmail.com');
