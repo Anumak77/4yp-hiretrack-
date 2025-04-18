@@ -482,6 +482,7 @@ const ViewApplicants = () => {
           if (!response.ok) throw new Error("Failed to fetch match score");
       
           const data = await response.json();
+          console.log(data)
           if (data.success) {
             const applicant = applicants.find(app => app.uid === applicantId);
             setMatchScoreDetails({

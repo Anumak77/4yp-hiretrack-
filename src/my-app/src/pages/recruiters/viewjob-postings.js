@@ -209,19 +209,6 @@ const handleDeleteConfirm = async () => {
           <h2 className="vj-card-title">{job.Title}</h2>
           <p className="vj-card-subtitle">{job.Company} - {job.Location}</p>
         </div>
-        <div className="vj-tags">
-          {job.tags?.map((tag, index) => (
-            <span key={index} className="vj-tag">
-              {tag} <span className="vj-remove-tag" onClick={() => handleRemoveTag(job.id, tag)}></span>
-            </span>
-          ))}
-          <input
-            type="text"
-            placeholder="Add a tag..."
-            className="vj-tag-input"
-            onKeyDown={(e) => handleTagInput(job.id, e)}
-          />
-        </div>
       </div>
     
       <div className="vj-right">

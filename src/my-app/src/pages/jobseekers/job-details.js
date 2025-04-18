@@ -114,17 +114,25 @@ const JobDetails = () => {
       console.log("Please select a job to save.");
       return;
     }
+
+      const user = auth.currentUser;
+      if (!user) {
+        alert('Please sign in to save jobs');
+        return;}
+
+
     try {
       const response = await fetch("http://127.0.0.1:5000/save-job", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          userId: "currentUserId",
+          userId: user.uid,
           job: job,
         }),
       });
   
       const result = await response.json();
+      console.log(result)
       if (response.ok) {
         console.log("Job saved successfully:", result.message);
         setPopupMessage("Job saved successfully!"); 
@@ -179,6 +187,8 @@ const JobDetails = () => {
         matchScore: matchScore
       };
 
+      console.log(payload)
+
       if (matchScore === null) {
         await compareWithDescription(); 
         await new Promise(resolve => setTimeout(resolve, 500));
@@ -192,6 +202,7 @@ const JobDetails = () => {
       });
 
       const result = await response.json();
+      console.log(matchScore)
       if (response.ok) {
         console.log("Job applied successfully:", result.message);
         setPopupMessage("Job applied successfully!"); 

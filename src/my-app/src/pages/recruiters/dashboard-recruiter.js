@@ -147,11 +147,6 @@ const DashRecruiter = () => {
               data: jobs.map((job) => job.applicantsnum || 0),
               backgroundColor: '#1f3a52', // Dark Green
             },
-            {
-              label: 'Views',
-              data: jobs.map((job) => job.views || 0),
-              backgroundColor: '#3F7D5D',
-            },
           ],
         };
   
@@ -220,7 +215,6 @@ const handleChat = () => {
           <div className="recruiter-insights-panel">
             <div className="recruiter-insight-card">Total Job Postings: {numJobPostings}</div>
             <div className="recruiter-insight-card">Total Applications: {numApplicants}</div>
-            <div className="recruiter-insight-card">Avg. Views per Job: {avgViewsPerJob}</div>
           </div>
 
           <div className="recruiter-chart-container">

@@ -129,6 +129,7 @@ def apply_job():
         job = data.get('job')
         recruiter_id = job.get('recruiterId')
         match_score = data.get('matchScore')
+        cv_data = None
 
         if not user_id or not job:
             return jsonify({"error": "User ID, job data, and recruiter ID are required"}), 400
@@ -144,13 +145,21 @@ def apply_job():
         if applicant_doc.exists:
             return jsonify({"error": "User has already applied for this job"}), 200
 
-        # Fetch the users CV
-        cv_base64, error = fetch_user_cv(firestore_db, user_id)
-        if error:
-            return jsonify(error), 404
-
-        # Process CV data
-        cv_data = process_cv_data(cv_base64)
+        if match_score is None:
+            cv_base64, error = fetch_user_cv(firestore_db, user_id)
+            if error:
+                return jsonify(error), 404
+            cv_data = process_cv_data(cv_base64)
+            match_score = compare_cv_with_job_description(
+                job.get('Description', ''),
+                job.get('Requirements', ''),
+                job.get('RequiredQual', ''),
+                cv_data
+            )
+        try:
+            match_score = float(match_score)
+        except (ValueError, TypeError):
+            match_score = 0.0
 
         # Save job application
         save_job_application(firestore_db, user_id, job, match_score, job_id)
@@ -160,7 +169,7 @@ def apply_job():
 
         return jsonify({"success": True, "message": "Job applied successfully", "matchScore": match_score}), 200
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": str(e), "matchScore": match_score}), 500
 
     
 @seekeractions_bp.route('/withdraw-job', methods=['POST'])
