@@ -9,10 +9,21 @@ from PyPDF2 import PdfReader
 from flask import Flask, request, jsonify
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+import spacy
+from sentence_transformers import SentenceTransformer
+import numpy as np
+from rake_nltk import Rake
+import re
 import base64
 from io import BytesIO
 from PyPDF2 import PdfReader
+import nltk
+nltk.download('stopwords')
+nltk.download('punkt_tab')
 
+nlp = spacy.load("en_core_web_sm")  
+sbert_model = SentenceTransformer('all-MiniLM-L6-v2')
+rake = Rake()
 
 cv_bp = Blueprint('cv', __name__)
 
@@ -131,12 +142,75 @@ def compare_with_description():
         # Validate extracted text
         if not user_cv_text.strip() or not combined_job_description.strip():
             return jsonify({"error": "Job description or CV is empty"}), 400
+        
+        # More advanced preprocessing
+        def preprocess_text(text):
+            doc = nlp(text)
+            cleaned = [
+                token.lemma_.lower() for token in doc 
+                if not token.is_stop and token.is_alpha
+            ]
+            return " ".join(cleaned)
+
+        job_desc_cleaned = preprocess_text(combined_job_description)
+        cv_text_cleaned = preprocess_text(user_cv_text)
+
+        # Extracct keywords 
+        def extract_keywords(text):
+            rake.extract_keywords_from_text(text)
+            return rake.get_ranked_phrases()[:10]  # Top 10 keywords
+
+        job_keywords = extract_keywords(combined_job_description)
+        cv_keywords = extract_keywords(user_cv_text)
 
         # Calculate cosine similarity
-        vectorizer = TfidfVectorizer().fit_transform([user_cv_text, combined_job_description])
-        similarity_score = cosine_similarity(vectorizer[0], vectorizer[1])[0][0]
+        try:
+            # 1. TF-IDF Cosine Similarity
+            vectorizer = TfidfVectorizer()
+            tfidf_matrix = vectorizer.fit_transform([cv_text_cleaned, job_desc_cleaned])
+            tfidf_score = cosine_similarity(tfidf_matrix[0], tfidf_matrix[1])[0][0]
+        except Exception as e:
+            print(f"TF-IDF error: {str(e)}")
+            tfidf_score = 0.0
 
-        return jsonify({"cosine_similarity": similarity_score}), 200
+        #SBERT (semantic similarity)
+        job_embedding = sbert_model.encode([combined_job_description])[0]
+        cv_embedding = sbert_model.encode([user_cv_text])[0]
+        sbert_score = cosine_similarity([job_embedding], [cv_embedding])[0][0]
+
+        # keyword overlap score
+        keyword_overlap = len(set(job_keywords) & set(cv_keywords)) / max(len(set(job_keywords)), 1)
+
+        def check_experience(job_desc, cv_text):
+            match = re.search(r'(\d+)\+? years?', job_desc, re.IGNORECASE)
+            if not match:
+                return 1.0  # No explicit requirement assume they match
+            required_years = int(match.group(1))
+            cv_years = sum(int(num) for num in re.findall(r'(\d+) years?', cv_text, re.IGNORECASE))
+            return min(cv_years / required_years, 1.0)
+
+        experience_score = check_experience(combined_job_description, user_cv_text)
+
+        final_score = (
+            0.5 * sbert_score +  
+            0.3 * tfidf_score + 
+            0.1 * keyword_overlap + 
+            0.1 * experience_score 
+        ) #this all can be adjusted by the recruiter depending on their preferences 
+
+        response = {
+            "score": float(final_score),
+            "score_breakdown": {
+                "tfidf_cosine_similarity": float(tfidf_score),
+                "semantic_similarity": float(sbert_score),
+                "keyword_overlap": float(keyword_overlap),
+                "experience_match": float(experience_score)
+            },
+            "matching_keywords": list(set(job_keywords) & set(cv_keywords)),
+            "missing_keywords": list(set(job_keywords) - set(cv_keywords))
+        }
+
+        return jsonify({"cosine_similarity": final_score}), 200
 
     except Exception as e:
         print(f"Error in compare_with_description: {str(e)}")
