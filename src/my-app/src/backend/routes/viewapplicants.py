@@ -200,12 +200,24 @@ def matchscore_applicants(recruiter_id, jobposting_id):
 
         applicant_data = applicant_data.to_dict()
 
-        if 'matchScore' not in applicant_data:
-            return jsonify({"error": "matchScore field not found in applicant data"}), 404
+        if 'application_data' not in applicant_data:
+            return jsonify({
+            "error": "Application data not found",
+            "debug": "Document exists but missing application_data field"
+        }), 404
+        
+        application_data = applicant_data['application_data']
+
+        if 'match_score' not in application_data:
+            return jsonify({"error": "match_score field not found in applicant data",
+            "applicant_data": applicant_data}), 404
 
         return jsonify({
             "success": True,
-            "matchscore": applicant_data['matchScore'],
+            "match_score": application_data['match_score'],
+            "score_breakdown": application_data['score_breakdown'],
+            "matching_keywords": application_data['matching_keywords'],
+            "missing_keywords": application_data['missing_keywords']
         }), 200
 
     except Exception as e:

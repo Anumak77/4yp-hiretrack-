@@ -88,7 +88,7 @@ const JobDetails2 = () => {
       }
   
       const data = await response.json();
-      const similarityScore = data.cosine_similarity;
+      const similarityScore = data.matchscore;
       const matchScorePercentage = (similarityScore * 100).toFixed(2);
   
       setMatchScore(matchScorePercentage);

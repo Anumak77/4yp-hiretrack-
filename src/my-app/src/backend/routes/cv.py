@@ -199,7 +199,7 @@ def compare_with_description():
         ) #this all can be adjusted by the recruiter depending on their preferences 
 
         response = {
-            "score": float(final_score),
+            "match_score": float(final_score),
             "score_breakdown": {
                 "tfidf_cosine_similarity": float(tfidf_score),
                 "semantic_similarity": float(sbert_score),
@@ -210,7 +210,7 @@ def compare_with_description():
             "missing_keywords": list(set(job_keywords) - set(cv_keywords))
         }
 
-        return jsonify({"cosine_similarity": final_score}), 200
+        return jsonify(response), 200
 
     except Exception as e:
         print(f"Error in compare_with_description: {str(e)}")

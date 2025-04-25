@@ -95,7 +95,8 @@ const JobDetails = () => {
       }
   
       const data = await response.json();
-      const similarityScore = data.cosine_similarity || 0;
+      console.log(data)
+      const similarityScore = data.match_score || 0;
       const matchScorePercentage = (similarityScore * 100).toFixed(2);
   
       setMatchScore(matchScorePercentage);
