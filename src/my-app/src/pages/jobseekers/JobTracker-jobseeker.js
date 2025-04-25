@@ -15,6 +15,10 @@ import { getFirestore, collection, getDoc, doc } from "firebase/firestore";
 import "../../components/style.css";
 import { auth } from '../../components/firebaseconfigs'; 
 import { useGoogleLogin } from '@react-oauth/google';
+import FullCalendar from '@fullcalendar/react';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import interactionPlugin from '@fullcalendar/interaction';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
@@ -393,13 +397,28 @@ const JobTrackerJobseeker = () => {
       </section>
 
       
-  <section className="google-calendar-integration">
-  <h2>Google Calendar Integration (Coming Soon)</h2>
-  <p>Sync your job application deadlines with Google Calendar to stay on top of your applications.</p>
-  <button onClick={connectCalendar} className="google-connect-button">
-      Connect Google Calendar
-    </button>
-  </section>
+      <section className="google-calendar-integration">
+          <h2>Google Calendar Integration</h2>
+          {!isConnected ? (
+            <button onClick={connectCalendar} className="google-connect-button">
+              Connect Google Calendar
+            </button>
+          ) : (
+            <FullCalendar
+              plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+              initialView="timeGridWeek"
+              headerToolbar={{
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay'
+              }}
+              eventColor="#0f5411"
+              height="auto"
+              nowIndicator={true}
+              events={events}
+            />
+          )}
+        </section>
 
     </main>
   );

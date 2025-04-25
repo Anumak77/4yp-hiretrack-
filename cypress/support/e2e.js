@@ -8,3 +8,13 @@
 // ***********************************************************
 
 import './commands'
+
+beforeEach(() => {
+    cy.log('Starting test: ' + Cypress.currentTest.title);
+  });
+  
+  afterEach(() => {
+    if (Cypress.currentTest.state === 'failed') {
+      Cypress.runner.stop();
+    }
+  });

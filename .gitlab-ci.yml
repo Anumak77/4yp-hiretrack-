@@ -1,28 +1,61 @@
 stages:
-  - test
+  - test-frontend
+  - test-backend
+  - test-e2e
 
-e2e-tests:
-  stage: test
-  image: cypress/included:14.3.0
+# Frontend Unit Tests with Jest
+test-frontend:
+  stage: test-frontend
+  image: node:18
   script:
-    - |
-      cd src/my-app
-      npm start &
-      FRONT_PID=$!
-      cd src/backend
-      python3 app.py &
-      BACK_PID=$!
-      cd ../../..
-      npx wait-on http://localhost:3000 http://localhost:5000/ping
-      cd src/my-app
-      # Run in a clean subshell to prevent environment contamination
-      (npx cypress run)
-      kill $BACK_PID
-      kill $FRONT_PID
-    
+    - cd src/my-app
+    - npm ci
+    - npm run test -- --coverage
+  artifacts:
+    paths:
+      - src/my-app/coverage/
+    expire_in: 1 week
+
+# Backend Unit + Integration Tests with Pytest
+test-backend:
+  stage: test-backend
+  image: python:3.11
+  before_script:
+    - cd src/my-app/src/backend
+    - pip install --upgrade pip
+    - pip install -r requirements.txt
+  script:
+    - pytest tests/unit
+    - pytest tests/integration
+  artifacts:
+    paths:
+      - src/my-app/src/backend/.pytest_cache/
+    expire_in: 1 week
+
+# E2E Tests with Cypress
+test-e2e:
+  stage: test-e2e
+  image: cypress/included:14.1.0
+  services:
+    - name: docker:dind
+      alias: docker
+  variables:
+    CYPRESS_baseUrl: http://localhost:3000
+  before_script:
+    - apt-get update && apt-get install -y curl
+    - cd src/my-app
+    - npm ci
+    - npm run start &     # Start React app
+    - cd src/backend
+    - pip install -r requirements.txt
+    - python app.py &     # Start Flask app
+    - sleep 15            # Wait for servers
+  script:
+    - cd ../../../..      # Back to project root
+    - npx cypress run
   artifacts:
     when: always
     paths:
-      - src/my-app/cypress/videos/
-      - src/my-app/cypress/screenshots/
+      - cypress/screenshots
+      - cypress/videos
     expire_in: 1 week
