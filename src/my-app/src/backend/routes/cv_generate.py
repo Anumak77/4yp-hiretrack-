@@ -23,10 +23,10 @@ def generate_cv():
         doc.add_paragraph(data["contact"])
     
     def add_section(title, content):
-        if content:
+        if content is not None and str(content).strip() != "":
             doc.add_heading(title, level=1)
             doc.add_paragraph(content)
-
+     
     add_section("Education", data.get("education"))
     add_section("Experience", data.get("experience"))
     add_section("Projects", data.get("projects"))

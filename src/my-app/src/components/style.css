@@ -4117,3 +4117,49 @@ main::after {
 .google-connect-button:hover {
   background-color: #3367d6;
 }
+
+.small-note {
+  font-size: 0.9rem;
+  color: #666;
+  margin-top: 0.25rem;
+}
+
+.cv-edit__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  margin-left: 400px;
+}
+
+.suggestions {
+  text-align: right;
+}
+
+.small-note {
+  font-size: 0.8rem;
+  color: #666;
+  margin-top: 0.25rem;
+}
+
+.cv-edit__top-bar {
+  display: flex;
+  justify-content: space-between; 
+  align-items: center;
+  margin-bottom: 2rem;
+  width: 100%;
+}
+
+.cv-edit__title {
+  margin: 0;
+}
+
+.suggestions {
+  text-align: right;
+}
+
+.small-note {
+  font-size: 0.8rem;
+  color: #666;
+  margin-top: 0.25rem;
+}

@@ -199,13 +199,12 @@ function CVEditMock() {
     }
   };
   
-
   const handleChange = (field, value) => {
     setCvData(prev => ({ ...prev, [field]: value }));
   };
 
   const handleDownload = async () => {
-    const res = await fetch("http://localhost:3000/generate-cv", {
+    const res = await fetch("http://localhost:5000/generate-cv", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(cvData)
@@ -224,7 +223,21 @@ function CVEditMock() {
       <br /><br /><br /><br />
       <button className="edit-jobseeker-profile__back-button" onClick={() => navigate(-1)}>Go Back</button>
 
-      <h2 className="mb-4">Upload & Edit Your CV</h2>
+      <h2 className="cv-edit__title">Upload & Edit Your CV</h2>
+
+      <br>
+      </br>
+
+      <div className="upload-and-suggest">
+        <input type="file" ref={fileInputRef} onChange={handleUpload} />
+
+        <Button 
+          onClick={handleGetSuggestions} 
+          disabled={!cvBase64} 
+        >
+          Get Suggestions to Improve!
+        </Button>
+      </div>
 
 
       {showNote && gptSuggestions && (
@@ -247,7 +260,6 @@ function CVEditMock() {
 <br>
 </br>
 
-      <input type="file" ref={fileInputRef} onChange={handleUpload} className="hidden" />
       <label className="cv-edit__file-info">{fileName && `Uploaded: ${fileName}`}</label>
       {status && <p className="cv-edit__status-message">{status}</p>}
 
@@ -265,26 +277,6 @@ function CVEditMock() {
           </div>
         </div>
       )}
-
-
-<div className="suggestions">
-<Button onClick={handleGetSuggestions}>Get Suggestions to Improve!</Button>
-</div>
-
-<br>
-</br>
-<br>
-</br>
-
-<div className="mb-4">
-        <label className="cv-edit__label">Pick a Job for Suggestions</label>
-        <select value={selectedJobId} onChange={(e) => setSelectedJobId(e.target.value)} className="cv-edit__input-base">
-          <option value="">Select a job...</option>
-          {appliedJobs.map((job) => (
-            <option key={job.id} value={job.id}>{job.Title || job.id}</option>
-          ))}
-        </select>
-      </div>
     </div>
   );
 }
