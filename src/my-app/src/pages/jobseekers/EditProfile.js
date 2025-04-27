@@ -7,6 +7,10 @@ const EditProfile = () => {
   const navigate = useNavigate();
   const auth = getAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showUpdateSuccess, setShowUpdateSuccess] = useState(false);
+  const [showUpdateError, setShowUpdateError] = useState(false);
+  const [updateErrorMessage, setUpdateErrorMessage] = useState('');
+
 
   const [formData, setFormData] = useState({
     first_name: "",
@@ -48,7 +52,7 @@ const EditProfile = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async(e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const user = auth.currentUser;
@@ -68,16 +72,16 @@ const EditProfile = () => {
         const errorData = await response.json();
         throw new Error(errorData.error || "Failed to update profile");
       }
+      
       console.log("Profile data to submit:", formData);
-      alert("Profile updated successfully! ");
-      navigate("/dashboard-jobseeker");}
-    catch (error) {
+      setShowUpdateSuccess(true);   
+    } catch (error) {
       console.error("Error updating profile:", error);
-      alert(`Error: ${error.message}`);
+      setUpdateErrorMessage(error.message || "Something went wrong.");
+      setShowUpdateError(true); 
     }
   };
-
-
+  
   return (
     <main className="edit-profile-container">
     <div className="edit-jobseeker-profile__card-container">
@@ -198,6 +202,45 @@ const EditProfile = () => {
         </div>
       </form>
     </div>
+
+                {showUpdateSuccess && (
+              <div className="confirmation-modal">
+                <div className="confirmation-content">
+                  <h2>Profile Updated Successfully!</h2>
+                  <p className="confirmation-message">Your changes have been saved. </p>
+                  <div className="confirmation-buttons">
+                    <button
+                      className="confirm-button"
+                      onClick={() => {
+                        setShowUpdateSuccess(false);
+                        navigate("/dashboard-jobseeker");
+                      }}
+                    >
+                      Go to Dashboard
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {showUpdateError && (
+              <div className="confirmation-modal">
+                <div className="confirmation-content">
+                  <h2>Update Failed</h2>
+                  <br></br>
+                  <p className="confirmation-message">{updateErrorMessage}</p>
+                  <div className="confirmation-buttons">
+                    <button
+                      className="confirm-button reject-btn"
+                      onClick={() => setShowUpdateError(false)}
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
   </main>
 );
 };

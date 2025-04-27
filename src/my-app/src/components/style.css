@@ -2343,20 +2343,7 @@ font-size: 14px;
 background-color: #2c3e50;
 }
 
-/* Confirmation Modal */
-.confirmation-modal {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 400px;
-  background-color: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-  padding: 20px;
-  z-index: 1000;
-  text-align: center;
-}
+
 
 /* Modal Overlay */
 .confirmation-overlay {
@@ -2369,23 +2356,10 @@ background-color: #2c3e50;
   z-index: 999;
 }
 
-/* Confirmation Content */
-.confirmation-content {
-  padding: 20px;
-}
 
-.confirmation-content h2 {
-  font-size: 20px;
-  font-weight: bold;
-  color: #1f3a52;
-  margin-bottom: 10px;
-}
 
-.confirmation-content p {
-  font-size: 16px;
-  color: #555;
-  margin-bottom: 20px;
-}
+
+
 
 /* Confirmation Buttons */
 .confirmation-buttons {
@@ -4162,4 +4136,325 @@ main::after {
   font-size: 0.8rem;
   color: #666;
   margin-top: 0.25rem;
+}
+
+/* .popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.interview-popup {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 30px;
+  width: 100%;
+  max-width: 450px;
+  position: relative;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.close-btn {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #555;
+  cursor: pointer;
+}
+
+.popup-heading {
+  font-size: 22px;
+  font-weight: bold;
+  color: #1c4b29;
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.popup-subheading {
+  font-size: 16px;
+  color: #777;
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.popup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.date-picker,
+.select-field,
+.notes-field {
+  margin-top: 6px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.popup-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.cancel-btn {
+  background-color: #e0e0e0;
+  color: #333;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.cancel-btn:hover {
+  background-color: #d5d5d5;
+}
+
+.schedule-btn {
+  background-color: #2e7d32;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 13px;
+}
+
+.schedule-btn:hover {
+  background-color: #256027;
+} */
+/* Interview Popup Styles */
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.interview-popup {
+  background: #fff;
+  border-radius: 12px;
+  padding: 30px;
+  width: 400px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  text-align: center;
+  position: relative;
+}
+
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 24px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.popup-heading {
+  font-size: 22px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #1c4b35;
+}
+
+.popup-subheading {
+  font-size: 16px;
+  margin-bottom: 20px;
+  color: #444;
+}
+
+.form-group {
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+.form-group label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.date-picker, .select-field, .notes-field {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+.notes-field {
+  height: 80px;
+  resize: vertical;
+}
+
+.popup-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.cancel-btn, .schedule-btn {
+  flex: 1;
+  margin: 0 5px;
+  padding: 10px 0;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.cancel-btn {
+  background: #ccc;
+  color: #333;
+}
+
+.schedule-btn {
+  background: #1c4b35;
+  color: white;
+}
+
+.connect-calendar-container {
+  margin-bottom: 20px;
+}
+
+.connect-calendar-btn {
+  background-color: #256027;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* Popup message */
+.popup-message {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.popup-message.success {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #e8f5e9; 
+  color: #256027; 
+  border: 2px solid #4caf50;
+  padding: 20px 30px;
+  font-size: 18px;
+  font-weight: bold;
+  border-radius: 10px;
+  box-shadow: 0px 4px 12px rgba(0,0,0,0.2);
+  z-index: 1002;
+}
+
+.popup-message.error {
+  border: 2px solid #f44336;
+  color: #f44336;
+}
+
+.popup-message button {
+  margin-top: 15px;
+  background: none;
+  border: none;
+  color: #1c4b35;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.confirm-button {
+  margin-top: 1rem;
+  background-color: #2e7d32;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.confirm-button.reject-btn {
+  background-color: #c62828;
+}
+
+.confirm-button {
+  margin-top: 20px;
+  padding: 8px 16px;
+  background-color: #256027; 
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.confirm-button.reject-btn {
+  background-color: #c0392b; 
+}
+
+.confirm-button {
+  background-color: #256027; 
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  margin-top: 15px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.confirm-button.reject-btn {
+  background-color: #e74c3c; 
+}
+
+.confirmation-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5); 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000; 
+}
+
+.confirmation-content {
+  background: white;
+  padding: 30px 40px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0px 4px 12px rgba(0,0,0,0.25);
+  max-width: 400px;
+  width: 90%;
 }

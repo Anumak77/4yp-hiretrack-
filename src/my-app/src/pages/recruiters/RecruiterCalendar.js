@@ -1,14 +1,3 @@
-import { Bar, Pie } from "react-chartjs-2";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  ArcElement,
-} from "chart.js";
 import { getAuth } from "firebase/auth";
 import React, { useState, useEffect } from "react";
 import "../../components/style.css";
@@ -27,19 +16,8 @@ const locales = {
   'en-US': require('date-fns/locale/en-US')
 };
 
-const localizer = dateFnsLocalizer({
-  format,
-  parse,
-  startOfWeek,
-  getDay,
-  locales,
-});
 
 const RecruiterCalendar = () => {
-  const [selectedJob, setSelectedJob] = useState("");
-  const [jobApplications, setJobApplications] = useState([]);
-  const [dueDate, setDueDate] = useState("");
-  const [jobStatus, setJobStatus] = useState("Applied");
   const [events, setEvents] = useState([]);
   const auth = getAuth();
   const user = auth.currentUser;
@@ -47,8 +25,12 @@ const RecruiterCalendar = () => {
   const [view, setView] = useState('week'); 
   const [height, setHeight] = useState(400);
   const [isConnected, setIsConnected] = useState(false);
-const GOOGLE_CLIENT_ID = "714625690444-bjnr3aumebso58niqna7613rtvmc5e6f.apps.googleusercontent.com"
-const GOOGLE_CLIENT_SECRET = "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"
+  const GOOGLE_CLIENT_ID = "714625690444-bjnr3aumebso58niqna7613rtvmc5e6f.apps.googleusercontent.com"
+  const GOOGLE_CLIENT_SECRET = "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"
+  const [showConnectSuccess, setShowConnectSuccess] = useState(false);
+  const [showConnectError, setShowConnectError] = useState(false);
+  const [connectErrorMessage, setConnectErrorMessage] = useState('');
+
 
 
   const connectCalendar = useGoogleLogin({
@@ -102,9 +84,11 @@ const GOOGLE_CLIENT_SECRET = "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"
           };
         }
   
-        alert('Google Calendar connected successfully!');
+        setShowConnectSuccess(true);
       } catch (error) {
-        console.error('Full error:', error);
+        setConnectErrorMessage(error.message || "Failed to connect calendar");
+        setShowConnectError(true);
+
         
         let errorDetails = '';
         try {
@@ -292,7 +276,6 @@ const GOOGLE_CLIENT_SECRET = "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"
           <h2>Application Schedule</h2>
           {!isConnected ? (
             <button onClick={connectCalendar} className="connect-button">
-              <img src="/google-calendar-icon.png" alt="Google Calendar" />
               Connect Calendar
             </button>
           ) : (
@@ -335,6 +318,37 @@ const GOOGLE_CLIENT_SECRET = "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"
             )}
           </div>
         )}
+
+               
+        {showConnectSuccess && (
+          <div className="confirmation-modal">
+            <div className="confirmation-content">
+              <h2>Google Calendar Connected!</h2>
+              <br></br>
+              <p className="confirmation-message">Your calendar has been successfully linked! </p>
+              <div className="confirmation-buttons">
+                <button className="confirm-button" onClick={() => setShowConnectSuccess(false)}>
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showConnectError && (
+          <div className="confirmation-modal">
+            <div className="confirmation-content">
+              <h2>Failed to Connect</h2>
+              <p className="confirmation-message">{connectErrorMessage}</p>
+              <div className="confirmation-buttons">
+                <button className="confirm-button reject-btn" onClick={() => setShowConnectError(false)}>
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
       </section>
     </main>
   );
