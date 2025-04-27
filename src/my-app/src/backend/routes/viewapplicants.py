@@ -127,55 +127,15 @@ def rejected_applicants(recruiter_id, jobposting_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@viewapplicants_bp.route('/fetch-interview-applicants/<recruiter_id>/<jobposting_id>', methods=['GET'])
-def fetch_interview_applicants(recruiter_id, jobposting_id):
-    try:
-        # Fetch applicants in the "Interview" status
-        interview_applicants_ref = firestore_db.collection(f'recruiters/{recruiter_id}/jobposting/{jobposting_id}/interviewapplicants')
-        interview_applicants = interview_applicants_ref.stream()
-
-        applicants_list = []
-        for applicant in interview_applicants:
-            applicant_data = applicant.to_dict()
-            applicants_list.append(applicant_data)
-
-        return jsonify({
-            "success": True,
-            "applicants": applicants_list,
-        }), 200
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@viewapplicants_bp.route('/fetch-rejected-applicants/<recruiter_id>/<jobposting_id>', methods=['GET'])
-def fetch_rejected_applicants(recruiter_id, jobposting_id):
+@viewapplicants_bp.route('/fetch-collection-applicants/<recruiter_id>/<jobposting_id>/<collection>', methods=['GET'])
+def fetch_collection_applicants(recruiter_id, jobposting_id, collection):
     try:
         
-        rejected_applicants_ref = firestore_db.collection(f'recruiters/{recruiter_id}/jobposting/{jobposting_id}/rejectedapplicants')
-        rejected_applicants = rejected_applicants_ref.stream()
+        collection_applicants_ref = firestore_db.collection(f'recruiters/{recruiter_id}/jobposting/{jobposting_id}/{collection}')
+        collection_applicants = collection_applicants_ref.stream()
 
         applicants_list = []
-        for applicant in rejected_applicants:
-            applicant_data = applicant.to_dict()
-            applicants_list.append(applicant_data)
-
-        return jsonify({
-            "success": True,
-            "applicants": applicants_list,
-        }), 200
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@viewapplicants_bp.route('/fetch-offered-applicants/<recruiter_id>/<jobposting_id>', methods=['GET'])
-def fetch_offered_applicants(recruiter_id, jobposting_id):
-    try:
-        
-        offered_applicants_ref = firestore_db.collection(f'recruiters/{recruiter_id}/jobposting/{jobposting_id}/offeredapplicants')
-        offered_applicants = offered_applicants_ref.stream()
-
-        applicants_list = []
-        for applicant in rejected_applicants:
+        for applicant in collection_applicants:
             applicant_data = applicant.to_dict()
             applicants_list.append(applicant_data)
 
@@ -246,13 +206,13 @@ def offer_applicants(recruiter_id, jobposting_id):
         if not job_posting_data.exists:
             return jsonify({"error": "Job posting not found"}), 404
 
-        offered_applicant_ref = firestore_db.collection('recruiters').document(recruiter_id).collection('jobposting').document(jobposting_id).collection('offeredpplicants').document(applicant_id)
+        offered_applicant_ref = firestore_db.collection('recruiters').document(recruiter_id).collection('jobposting').document(jobposting_id).collection('offeredapplicants').document(applicant_id)
         offered_applicant_ref.set(applicant_data.to_dict())
 
         offered_job_ref = firestore_db.collection('jobseekers').document(applicant_id).collection('offeredjobs').document(jobposting_id)
         offered_job_ref.set(job_posting_data.to_dict())
 
-        create_notification(applicant_id, f"You have been scheduled for an interview for Job ID: {job_id}.", job_id)
+        #create_notification(applicant_id, f"You have been scheduled for an interview for Job ID: {job_id}.", job_id)
 
         return jsonify({
             "success": True,
