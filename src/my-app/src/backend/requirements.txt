@@ -1,0 +1,9 @@
+firebase_admin==6.6.0
+Flask==3.1.0
+Flask_Cors==5.0.0
+fuzzywuzzy==0.18.0
+pandas==1.5.3
+PyPDF2==3.0.1
+rapidfuzz==3.12.2
+Requests==2.32.3
+scikit_learn==1.4.0
