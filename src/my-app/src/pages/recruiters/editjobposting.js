@@ -32,7 +32,13 @@ const EditJob = () => {
     StartDate: '',
     Title: '',
     date: '',
-    jobpost: ''
+    jobpost: '',
+    weights: {
+      semantic: 0.5,
+      tfidf: 0.3,
+      keywords: 0.1,
+      experience: 0.1,
+    },
   });
 
   const [alertMessage, setAlertMessage] = useState(null);
@@ -81,7 +87,16 @@ const EditJob = () => {
   };
 
   const handleChange = (e) => {
-    setJobData({ ...jobData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+  
+    if (name in jobData.weights) {
+      setJobData({
+        ...jobData,
+        weights: { ...jobData.weights, [name]: parseFloat(value) },
+      });
+    } else {
+      setJobData({ ...jobData, [name]: value });
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -175,6 +190,61 @@ const EditJob = () => {
                 <input type="date" name="Deadline" value={jobData.Deadline} onChange={handleChange} required />
               </div>
             </div>
+
+            <div className="weights-container">
+            <h3>Matching Weights (Optional)</h3>
+            <div className="input-group">
+              <label>Semantic Similarity Weight</label>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                max="1"
+                name="semantic"
+                value={jobData.weights.semantic}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="input-group">
+              <label>TF-IDF Similarity Weight</label>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                max="1"
+                name="tfidf"
+                value={jobData.weights.tfidf}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="input-group">
+              <label>Keyword Overlap Weight</label>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                max="1"
+                name="keywords"
+                value={jobData.weights.keywords}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="input-group">
+              <label>Experience Match Weight</label>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                max="1"
+                name="experience"
+                value={jobData.weights.experience}
+                onChange={handleChange}
+              />
+            </div>
+          </div>
 
             <button type="submit" className="post-job-button">Update Job</button>
           </form>

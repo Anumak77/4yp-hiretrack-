@@ -122,7 +122,46 @@ def compare_with_description():
         job_description = data.get('JobDescription', '')
         job_requirements = data.get('JobRequirment', '')
         requirement_qual = data.get('RequiredQual', '')
+        weights = data.get('weights', '')
+        job_id = data.get('jobId')
+        recruiter_id = data.get('recruiterId')
+
         cv_base64 = data.get('cv')
+
+
+        default_weights = {
+            'semantic': 0.5,
+            'tfidf': 0.3,
+            'keywords': 0.1,
+            'experience': 0.1
+        }
+        weights = default_weights
+
+        if job_id and recruiter_id:
+            firestore_db = firestore.client()
+            weights_ref = firestore_db.collection(
+                f'recruiters/{recruiter_id}/jobposting/{job_id}/matchingWeights')
+
+            weights_docs = weights_ref.get()
+
+            if weights_docs:
+                weights_doc = weights_docs[0] 
+                custom_weights = weights_doc.to_dict()
+
+                if all(key in custom_weights for key in default_weights.keys()):
+                    weights = {
+                        'semantic': float(custom_weights.get('semantic', 0.5)),
+                        'tfidf': float(custom_weights.get('tfidf', 0.3)),
+                        'keywords': float(custom_weights.get('keywords', 0.1)),
+                        'experience': float(custom_weights.get('experience', 0.1))
+                    }
+                    total = sum(weights.values())
+                    if total > 0:
+                        weights = {k: v/total for k, v in weights.items()}
+            else:
+                # default weight
+                weights = default_weights
+
 
         # Handle CV data splitting safely
         cv_parts = cv_base64.split(',')
@@ -192,14 +231,15 @@ def compare_with_description():
         experience_score = check_experience(combined_job_description, user_cv_text)
 
         final_score = (
-            0.5 * sbert_score +  
-            0.3 * tfidf_score + 
-            0.1 * keyword_overlap + 
-            0.1 * experience_score 
+            weights['semantic'] * sbert_score +  
+            weights['tfidf'] * tfidf_score + 
+            weights['keywords'] * keyword_overlap + 
+            weights['experience'] * experience_score
         ) #this all can be adjusted by the recruiter depending on their preferences 
 
         response = {
             "match_score": float(final_score),
+            "weights_used": weights,
             "score_breakdown": {
                 "tfidf_cosine_similarity": float(tfidf_score),
                 "semantic_similarity": float(sbert_score),
