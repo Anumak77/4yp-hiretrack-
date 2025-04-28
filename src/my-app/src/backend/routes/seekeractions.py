@@ -52,13 +52,15 @@ def process_cv_data(cv_base64):
         return cv_parts[1]  # Use the part after the comma
     return cv_base64  # Use the entire string if no comma is found
 
-def compare_cv_with_job_description(job_description, job_requirements, required_qual, cv_data):
+def compare_cv_with_job_description(job_description, job_requirements, required_qual, cv_data, jobId, recruiterId):
 
     response = requests.post('http://127.0.0.1:5000/compare_with_description', json={
         "JobDescription": job_description,
         "JobRequirment": job_requirements,
         "RequiredQual": required_qual,
         "cv": cv_data,
+        "jobId": jobId,
+        "recruiterId": recruiterId
     })
 
     if response.status_code != 200:
@@ -66,7 +68,8 @@ def compare_cv_with_job_description(job_description, job_requirements, required_
                 "error": f"Comparison service returned {response.status_code}",
                 "debug": response.text
             }, None
-        
+    
+    print(response)
     result = response.json()
     return None, result
     
@@ -133,11 +136,13 @@ def apply_job():
     try:
         firestore_db = firestore.client()
         data = request.json
+        print(data)
         user_id = data.get('userId')
         job = data.get('job')
         recruiter_id = job.get('recruiterId')
         application_data = data.get('application_data')
         cv_data = None
+
 
         if not user_id or not job:
             return jsonify({"error": "User ID, job data, and recruiter ID are required"}), 400
@@ -162,8 +167,15 @@ def apply_job():
                 job.get('Description', ''),
                 job.get('Requirements', ''),
                 job.get('RequiredQual', ''),
-                cv_data
+                cv_data,
+                job_id,
+                recruiter_id,
             )
+
+            print(comparison_result)
+
+            if error:
+                return jsonify(error), 500
 
             application_data_temp = {
                 "match_score": comparison_result.get('match_score', 0.0),
