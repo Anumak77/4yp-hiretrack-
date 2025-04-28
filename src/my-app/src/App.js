@@ -39,6 +39,9 @@ import EditProfile from './pages/jobseekers/EditProfile';
 import RecruiterCalendar from './pages/recruiters/RecruiterCalendar';
 import CVEditPage from './pages/jobseekers/CVEditPage';
 import JobDetails3 from './pages/jobseekers/job-details3';
+import IncomingCollabRequests from './pages/jobseekers/IncomingCollabRequests';
+import RecruiterPreviewCV from './pages/recruiters/RecruiterPreviewCV'
+
 
 function App() {
   return (
@@ -146,7 +149,8 @@ function MainApp() {
         <Route path="/viewapplicants/:id" element={<ViewApplicants />} />
         <Route path="/job-details3" element={<JobDetails3 />} />
         <Route path="*" element={<h1>404 - Page Not Found</h1>} />
-        
+        <Route path="/incoming-requests" element={<IncomingCollabRequests />} />
+        <Route path="/recruiter_preview_cv" element={<RecruiterPreviewCV />} />
       </Routes>
     </>
   );

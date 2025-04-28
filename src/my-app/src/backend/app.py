@@ -33,6 +33,8 @@ from routes.chat import chat_bp
 from routes.google_cal import google_cal_bp
 from routes.cors import init_cors
 from routes.editprofile import edit_profile_bp
+from routes.collab_routes import collab
+
 app = Flask(__name__)
 init_cors(app)
 
@@ -53,6 +55,7 @@ def add_security_headers(response):
 
 '''
 
+app.register_blueprint(collab)
 app.register_blueprint(train_resume_bp)
 app.register_blueprint(auth_bp)
 app.register_blueprint(cv_bp)
