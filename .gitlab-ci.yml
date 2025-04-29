@@ -41,10 +41,6 @@ test-frontend:
 test-e2e:
   stage: test-e2e
   image: cypress/included:14.1.0
-  services:
-    - name: docker:dind
-      command: ["--tls=false"]
-  privileged: true   # ✅ Move this here!
   variables:
     CYPRESS_baseUrl: http://localhost:3000
   before_script:
