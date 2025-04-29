@@ -44,7 +44,7 @@ test-e2e:
   services:
     - name: docker:dind
       command: ["--tls=false"]
-      privileged: true
+  privileged: true   # ✅ Move this here!
   variables:
     CYPRESS_baseUrl: http://localhost:3000
   before_script:
