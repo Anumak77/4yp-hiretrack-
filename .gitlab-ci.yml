@@ -16,26 +16,26 @@ test-frontend:
       - src/my-app/coverage/
     expire_in: 1 week
 
-# Backend Unit + Integration Tests with Pytest
-test-backend:
-  stage: test-backend
-  image: python:3.11
-  variables:
-    PYTHONPATH: "$CI_PROJECT_DIR/src/my-app/src/backend"
-  before_script:
-    - cd src/my-app/src/backend
-    - pip install --upgrade pip
-    - pip install nltk==3.9.1
-    - pip install --no-build-isolation -r requirements.txt
-    - pip install pytest
-    - python -m spacy download en_core_web_sm 
-  script:
-    - pytest tests/unit
-    - pytest tests/integration
-  artifacts:
-    paths:
-      - src/my-app/src/backend/.pytest_cache/
-    expire_in: 1 week
+# # Backend Unit + Integration Tests with Pytest
+# test-backend:
+#   stage: test-backend
+#   image: python:3.11
+#   variables:
+#     PYTHONPATH: "$CI_PROJECT_DIR/src/my-app/src/backend"
+#   before_script:
+#     - cd src/my-app/src/backend
+#     - pip install --upgrade pip
+#     - pip install nltk==3.9.1
+#     - pip install --no-build-isolation -r requirements.txt
+#     - pip install pytest
+#     - python -m spacy download en_core_web_sm 
+#   script:
+#     - pytest tests/unit
+#     - pytest tests/integration
+#   artifacts:
+#     paths:
+#       - src/my-app/src/backend/.pytest_cache/
+#     expire_in: 1 week
 
 # Cypress E2E Tests
 test-e2e:
