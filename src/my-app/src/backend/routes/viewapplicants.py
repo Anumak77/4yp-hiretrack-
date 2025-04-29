@@ -74,7 +74,7 @@ def interview_applicants(recruiter_id, jobposting_id):
         interview_job_ref = firestore_db.collection('jobseekers').document(applicant_id).collection('interviewjobs').document(jobposting_id)
         interview_job_ref.set(job_posting_data.to_dict())
 
-        create_notification(applicant_id, f"You have been scheduled for an interview for Job ID: {job_id}.", job_id)
+        # create_notification(applicant_id, f"You have been scheduled for an interview for Job ID: {jobposting_id}.", jobposting_id)
 
         return jsonify({
             "success": True,
@@ -212,7 +212,7 @@ def offer_applicants(recruiter_id, jobposting_id):
         offered_job_ref = firestore_db.collection('jobseekers').document(applicant_id).collection('offeredjobs').document(jobposting_id)
         offered_job_ref.set(job_posting_data.to_dict())
 
-        #create_notification(applicant_id, f"You have been scheduled for an interview for Job ID: {job_id}.", job_id)
+        #create_notification(applicant_id, f"You have been scheduled for an interview for Job ID: {jobposting_id}.", job_id)
 
         return jsonify({
             "success": True,

@@ -150,7 +150,8 @@ def get_calendar_events():
 @google_cal_bp.route('/schedule-interview/<recruiter_id>/<job_id>/<applicant_id>', methods=['POST'])
 def schedule_interview(recruiter_id, job_id, applicant_id):
     try:
-        data = request.json
+        data = request.get_json(force=True)
+        print("Received data:", data)
         interview_time = datetime.fromisoformat(data['date'])
         applicant_email = data['applicantEmail']
         job_title = data['jobTitle']
