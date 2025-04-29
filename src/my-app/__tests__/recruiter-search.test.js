@@ -1,7 +1,8 @@
 import React from 'react';
+import 'whatwg-fetch';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-// import RecruiterSearch from '../src/pages/recruiters/RecruiterSearch';
-import RecruiterSearch from '../src/pages/recruiters/RecruiterSearch'
+import RecruiterSearch from '../src/pages/recruiters/RecruiterSearch';
+// import RecruiterSearch from '../pages/recruiters/RecruiterSearch'
 import { MemoryRouter } from 'react-router-dom';
 import '@testing-library/jest-dom';
 

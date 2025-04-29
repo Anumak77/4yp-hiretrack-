@@ -83,9 +83,9 @@
     "babel-jest": "^29.7.0",
     "cypress": "^14.2.0",
     "identity-obj-proxy": "^3.0.0",
-    "jest": "^29.7.0",
-    "jest-mock-axios": "^4.8.0",
+    "jsdom": "^26.1.0",
     "webpack-dev-server": "^5.2.0",
+    "whatwg-fetch": "^3.6.20",
     "worker-loader": "^3.0.8"
   },
   "transformIgnorePatterns": [
