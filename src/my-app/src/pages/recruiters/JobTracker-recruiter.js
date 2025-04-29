@@ -19,6 +19,9 @@ const JobTrackerRecruiter = () => {
   const [selectedJob, setSelectedJob] = useState('');
   const [applications, setApplications] = useState('');
   const [month, setMonth] = useState('');
+  const [customNotes, setCustomNotes] = useState('');
+  const [customTags, setCustomTags] = useState([]);
+  const [visibility, setVisibility] = useState('Active');
   const [error, setError] = useState('');
 
   const handleAddJobTrend = () => {
@@ -32,12 +35,25 @@ const JobTrackerRecruiter = () => {
       jobTitle: selectedJob,
       applications: parseInt(applications),
       month,
+      customNotes,
+      customTags,
+      visibility,
     };
 
     setJobTrends([...jobTrends, newJobTrend]);
     setSelectedJob('');
     setApplications('');
     setMonth('');
+    setCustomNotes('');
+    setCustomTags([]);
+    setVisibility('Active');
+  };
+
+  const handleTagInput = (e) => {
+    if (e.key === 'Enter' && e.target.value.trim()) {
+      setCustomTags([...customTags, e.target.value.trim()]);
+      e.target.value = '';
+    }
   };
 
   useEffect(() => {
@@ -99,6 +115,29 @@ const JobTrackerRecruiter = () => {
               onChange={(e) => setApplications(e.target.value)}
             />
 
+
+            <label>Custom Tags (Press Enter to Add)</label>
+            <input type="text" placeholder="Add tags..." onKeyDown={handleTagInput} />
+            <div className="custom-tags">
+              {customTags.map((tag, index) => (
+                <span key={index} className="tag">{tag}</span>
+              ))}
+            </div>
+            
+            <label>Job Posting Visibility</label>
+              <div className="visibility-toggle">
+                {["Active", "Paused", "Featured"].map((status) => (
+                  <button
+                    key={status}
+                    className={`visibility-button ${visibility === status ? "selected" : ""}`}
+                    onClick={() => setVisibility(status)}
+                  >
+                    {status}
+                  </button>
+                ))}
+              </div>
+
+
             <button onClick={handleAddJobTrend}>Add Job Trend</button>
 
             {error && <div className="error-message">{error}</div>}
@@ -106,7 +145,7 @@ const JobTrackerRecruiter = () => {
 
           <div className="job-tracker__chart">
             <h2>Line Chart - Job Trends</h2>
-            <Line data={lineChartData} />
+            <Line data={lineChartData} /> 
           </div>
         </div>
       </section>

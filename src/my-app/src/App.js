@@ -8,13 +8,17 @@ import {
 } from 'react-router-dom';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { GoogleOAuthProvider } from '@react-oauth/google';
+
 
 import NavbarJobseeker from './pages/jobseekers/NavbarJobseeker';
 import NavbarRecruiters from './pages/recruiters/NavbarRecruiters';
 import NavbarAdmin from './pages/admin/navbar-admin';
 
-import Login from './pages/SignUp/Login';
-import Signup from './pages/SignUp/Signup';
+import Login from './pages/auth/Login';
+import Signup from './pages/auth/Signup';
 import JobDetails from './pages/jobseekers/job-details';
 import JobSearch from './pages/jobseekers/JobSearch';
 import DashJobseeker from './pages/jobseekers/dashboard-jobseeker';
@@ -27,12 +31,38 @@ import JobSeekerChat from './pages/chat/jobseekerchat';
 import PostJob from './pages/recruiters/postjob';
 import EditJob from './pages/recruiters/editjobposting';
 import ViewJobPostings from './pages/recruiters/viewjob-postings';
+import ViewApplicants from './pages/recruiters/ViewApplicants';
+import JobDetails2 from './pages/jobseekers/job-details2';
+import RecruiterChat from './pages/chat/recruiterchat';
+import ViewAllAppliedJobs from './pages/recruiters/View-all-applied-jobs';
+import EditProfile from './pages/jobseekers/EditProfile';
+import RecruiterCalendar from './pages/recruiters/RecruiterCalendar';
+import CVEditPage from './pages/jobseekers/CVEditPage';
+import JobDetails3 from './pages/jobseekers/job-details3';
+import IncomingCollabRequests from './pages/jobseekers/IncomingCollabRequests';
+import RecruiterPreviewCV from './pages/recruiters/RecruiterPreviewCV'
+
 
 function App() {
   return (
+    <GoogleOAuthProvider clientId="714625690444-bjnr3aumebso58niqna7613rtvmc5e6f.apps.googleusercontent.com">
+    <div>
     <Router>
       <MainApp />
     </Router>
+
+    <ToastContainer
+                position="top-right"
+                autoClose={5000} 
+                hideProgressBar={false}
+                newestOnTop={true}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover />
+    </div>
+    </GoogleOAuthProvider>
   );
 }
 
@@ -98,17 +128,29 @@ function MainApp() {
         <Route path="/dashboard-jobseeker" element={<DashJobseeker />} />
         <Route path="/dashboard-recruiter" element={<DashRecruiter />} />
         <Route path="/job-details" element={<JobDetails />} />
+        <Route path="/job-details2" element={<JobDetails2 />} />
         <Route path="/job-search" element={<JobSearch />} />
         <Route path="/jobtracker-jobseeker" element={<JobTrackerJobseeker />} />
         <Route path="/jobtracker-recruiter" element={<JobTrackerRecruiter />} />
         <Route path="/recruiter-search" element={<RecruiterSearch />} />
         <Route path="/jobseeker-details" element={<JobSeekerDetails />} />
+
+        <Route path="/view-all-applied-jobs" element={<ViewAllAppliedJobs/>} />
+
         <Route path="/jobseekerchat" element={<JobSeekerChat />} />
+        <Route path="/recruiterchat" element={<RecruiterChat />} />
+        <Route path="/recruiterchat/:applicantId" element={<RecruiterChat />} />
         <Route path="/createpost" element={<PostJob />} />
         <Route path="/viewjobpostings" element={<ViewJobPostings jobPostings={jobPostings} setJobPostings={setJobPostings} />} />
-        <Route path="/editjobpostings/:id" element={<EditJob jobPostings={jobPostings} setJobPostings={setJobPostings} />} />
         <Route path="/edit-job/:id" element={<EditJob />} />
+        <Route path="/edit-profile" element={<EditProfile />} />
+        <Route path="/CV-Edit-Page" element={<CVEditPage />} />
+        <Route path="/recruiter-calendar" element={<RecruiterCalendar />} />
+        <Route path="/viewapplicants/:id" element={<ViewApplicants />} />
+        <Route path="/job-details3" element={<JobDetails3 />} />
         <Route path="*" element={<h1>404 - Page Not Found</h1>} />
+        <Route path="/incoming-requests" element={<IncomingCollabRequests />} />
+        <Route path="/recruiter_preview_cv" element={<RecruiterPreviewCV />} />
       </Routes>
     </>
   );

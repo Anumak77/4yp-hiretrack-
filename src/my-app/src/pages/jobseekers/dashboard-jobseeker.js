@@ -3,24 +3,42 @@ import { onAuthStateChanged, signOut, getAuth } from "firebase/auth";
 import { firebaseapp } from "../../components/firebaseconfigs";
 import "../../components/style.css";
 import NavbarJobseeker from './NavbarJobseeker';
-import axios from 'axios';
-import NavbarAdmin from '../admin/navbar-admin';
+// import axios from 'axios';
+import { getFirestore, collection, query, orderBy, onSnapshot } from "firebase/firestore";
+import "react-toastify/dist/ReactToastify.css";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useNavigate } from "react-router-dom";
 
 const DashJobseeker = () => {
-  // ================= Auth / Profile =================
+  // Auth / Profile
   const [name, setName] = useState("Guest");
   const [profileImage, setProfileImage] = useState(null);
-  const [userRole, setUserRole] = useState(localStorage.getItem('userRole') || null);
   const auth = getAuth(firebaseapp);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    auth.onAuthStateChanged((user) => {
-      if (user) {
-        const storedRole = localStorage.getItem('userRole');
-        setUserRole(storedRole);
-      }
+    onAuthStateChanged(auth, (user) => {
+      if (user) setName(user.displayName || "Guest");
     });
-  }, []);
+  }, [auth]);
+
+  const logIdToken = async () => {
+    try {
+      const user = getAuth().currentUser; 
+      if (!user) {
+        console.log('No user is currently signed in.');
+        return;
+      }  
+      // Get the Firebase ID token
+      const idToken = await user.getIdToken();
+      console.log('Firebase ID Token:', idToken); 
+    } catch (error) {
+      console.error('Error fetching ID token:', error);
+    }
+  };
+
+  logIdToken();
 
   const handleLogout = () => {
     signOut(auth)
@@ -64,30 +82,29 @@ const DashJobseeker = () => {
       setErrorMessage("Please select a PDF to upload.");
       return;
     }
-  
     try {
-      const idToken = await auth.currentUser.getIdToken();
-  
+      const user = auth.currentUser;
+      if (!user) {
+        console.log("No user is currently signed in.");
+        return;
+      }
+      const idToken = await user.getIdToken();
+
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onload = async () => {
-        const base64File = reader.result.split(",")[1]; 
-  
-        
-        console.log("Base64 file data:", base64File);
-  
-        
-        const response = await axios.post(
-          "http://127.0.0.1:5000/save-pdf",
-          { file: base64File },
-          {
-            headers: {
-              Authorization: idToken, 
-            },
-          }
-        );
-  
-        if (response.status === 200) {
+        const base64File = reader.result.split(",")[1];
+
+        const response = await fetch("http://127.0.0.1:5000/save-pdf", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: idToken,
+          },
+          body: JSON.stringify({ file: base64File }),
+        });
+
+        if (response.ok) {
           setSuccessMessage("CV uploaded successfully!");
         } else {
           setErrorMessage("Error uploading CV.");
@@ -101,29 +118,32 @@ const DashJobseeker = () => {
 
   const viewCV = async () => {
     try {
-      const idToken = await auth.currentUser.getIdToken();
-  
-      const response = await axios.get("http://127.0.0.1:5000/fetch-pdf", {
-        headers: {
-          Authorization: idToken, 
-        },
+      const user = auth.currentUser;
+      if (!user) return alert("No user is signed in.");
+
+      const idToken = await user.getIdToken();
+
+      const response = await fetch("http://127.0.0.1:5000/fetch-pdf", {
+        method: "GET",
+        headers: { Authorization: idToken },
       });
-  
-      if (response.data.fileData) {
-        const byteCharacters = atob(response.data.fileData);
+
+      if (!response.ok) {
+        throw new Error("Could not fetch PDF");
+      }
+      const data = await response.json();
+
+      if (data.fileData) {
+        const byteCharacters = atob(data.fileData);
         const byteNumbers = new Array(byteCharacters.length);
         for (let i = 0; i < byteCharacters.length; i++) {
           byteNumbers[i] = byteCharacters.charCodeAt(i);
         }
         const byteArray = new Uint8Array(byteNumbers);
         const blob = new Blob([byteArray], { type: "application/pdf" });
-  
-        // Create a Blob URL
+
         const blobUrl = URL.createObjectURL(blob);
-  
-        // Open the PDF in a new tab
         window.open(blobUrl, "_blank");
-  
         URL.revokeObjectURL(blobUrl);
       } else {
         alert("No CV found. Please upload a CV.");
@@ -135,34 +155,65 @@ const DashJobseeker = () => {
   };
 
 
+
   // ================= DRAG AND DROP STATES =================
-  //"Offered" separate and NOT included in drag & drop.
   const [jobColumns, setJobColumns] = useState({
-    saved: [
-      { id: 1, title: "Front-End Developer" },
-      { id: 2, title: "Data Analyst" },
-      { id: 3, title: "Business Analyst" },
-    ],
-    interviewed: [
-      { id: 4, title: "Software Developer" },
-      { id: 5, title: "Back-End Developer" },
-    ],
-    applied: [
-      { id: 6, title: "Quality Assurance Engineer" },
-      { id: 7, title: "Scrum Master" },
-    ],
-    unapply: [
-      { id: 8, title: "Product Owner" },
-      { id: 9, title: "Solutions Architect" },
-      { id: 10, title: "DevOps Engineer" },
-    ],
+    saved: [],
+    applied: [],
+    unapply: [],
+    interviewed: [],
   });
 
-  // Offered jobs (non-draggable)
-  const [offeredJobs] = useState([
-    { id: 11, title: "Marketing Specialist" },
-    { id: 12, title: "Project Manager" },
-  ]);
+  const [offeredJobs, setOfferedJobs] = useState([]);
+  // const [interviewJobs, setInterviewJobs] = useState([]);
+
+  const fetchJobs = async (jobList) => {
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        console.error("User is not authenticated");
+        return [];
+      }
+      const idToken = await user.getIdToken();
+
+      const response = await fetch(`http://127.0.0.1:5000/fetch-jobseeker-jobs/${jobList}`, {
+        headers: { Authorization: idToken },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        return Array.isArray(data) ? data : [];
+      } else {
+        console.error(`Error fetching ${jobList} jobs:`, response.statusText);
+        return [];
+      }
+    } catch (error) {
+      console.error(`Error fetching ${jobList} jobs:`, error);
+      return [];
+    }
+  };
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const loadJobs = async () => {
+          const savedJobs = await fetchJobs("savedjobs");
+          const appliedJobs = await fetchJobs("appliedjobs");
+          const interviewJobs = await fetchJobs("interviewjobs");
+          const unapplyJobs = await fetchJobs("unapplyjobs");
+          const offeredJobs = await fetchJobs("offeredjobs");
+  
+          setJobColumns({ saved: savedJobs, applied: appliedJobs, unapply: unapplyJobs, interviewed: interviewJobs });
+          // setInterviewJobs(interviewedJobs);
+          setOfferedJobs(offeredJobs);
+        };
+        loadJobs();
+      } else {
+        console.error("User is not authenticated");
+      }
+    });
+    return () => unsubscribe();
+  }, [auth]);
 
   // Drag & Drop Handlers
   const handleDragStart = (e, job, sourceColumn) => {
@@ -174,31 +225,107 @@ const DashJobseeker = () => {
     e.preventDefault();
   };
 
-  const handleDrop = (e, targetColumn) => {
+  const columnToCollectionMap = {
+    saved: "savedjobs",       
+    applied: "appliedjobs",   
+    interviewed: "interviewjobs", 
+    withdraw: "unapplyjobs",  
+    offered: "offeredjobs",
+  };
+
+  const handleDrop = async (e, targetColumn) => {
     e.preventDefault();
     const data = e.dataTransfer.getData("jobData");
-    if (data) {
-      const { job, sourceColumn } = JSON.parse(data);
-      if (sourceColumn === targetColumn) return; // No change if same column
+    if (!data) return;
 
-      setJobColumns((prev) => {
-        // Remove from source
-        const sourceJobs = prev[sourceColumn].filter((j) => j.id !== job.id);
-        // Add to target
-        const targetJobs = [...prev[targetColumn], job];
-        return {
-          ...prev,
-          [sourceColumn]: sourceJobs,
-          [targetColumn]: targetJobs,
-        };
+    const { job, sourceColumn } = JSON.parse(data);
+    if (sourceColumn === targetColumn) return; // no-op if same column
+
+    // update local state first (optimistic)
+    setJobColumns((prev) => {
+      const sourceJobs = prev[sourceColumn] ? prev[sourceColumn].filter((j) => j.id !== job.id): [];
+      const targetJobs = prev[targetColumn] ? [...prev[targetColumn], job] : [job];
+      return {
+        ...prev,
+        [sourceColumn]: sourceJobs,
+        [targetColumn]: targetJobs,
+      };
+    });
+
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        console.error("User is not authenticated");
+        return;
+      }
+      const idToken = await user.getIdToken();
+
+      const sourceCollection = columnToCollectionMap[sourceColumn];
+      const targetCollection = columnToCollectionMap[targetColumn];
+
+      await fetch("http://localhost:5000/move-job", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: idToken,
+        },
+        body: JSON.stringify({
+          job_id: job.id,
+          source_collection: sourceCollection,
+          target_collection: targetCollection,
+        }),
       });
+      console.log("Job moved successfully");
+    } catch (error) {
+      console.error("Error moving job:", error);
+      // revert local state if needed
     }
   };
+
+
+  const handleMoreInfoClick = (job) => {
+    navigate("/job-details2", { state: job });
+  };
+
+  const listenForNotifications = () => {
+    const auth = getAuth();
+    const user = auth.currentUser;
+
+    if (!user) {
+        throw new Error("User not authenticated");
+    }
+
+    const db = getFirestore();
+    const notificationsRef = collection(db, `jobseekers/${user.uid}/notifications`);
+    const q = query(notificationsRef, orderBy("timestamp", "desc")); 
+
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        querySnapshot.docChanges().forEach((change) => {
+            if (change.type === "added") {
+                const notification = change.doc.data();
+                toast.info(notification.message); 
+            }
+        });
+    });
+
+    return unsubscribe; 
+};
+
+useEffect(() => {
+    const unsubscribe = listenForNotifications();
+
+    return () => unsubscribe();
+}, []);
+
+const handleChat = () => {
+  navigate(`/jobseekerchat`);
+};
 
   return (
     <div className="dash-jobseeker__container">
       <NavbarJobseeker />
       <aside className="dash-jobseeker__sidebar">
+        
         <div className="dash-jobseeker__profile">
           <label
             htmlFor="profile-upload"
@@ -249,11 +376,27 @@ const DashJobseeker = () => {
         </div>
 
         <button
-          onClick={() => (window.location.href = "/jobseekerchat")}
+          onClick={() => (window.location.href = "/CV-Edit-Page")}
+          className="dash-jobseeker__button"
+        >
+          Edit CV
+        </button>
+
+                <button
+          onClick={() => navigate("/edit-profile")}
+          className="dash-jobseeker__button"
+        >
+          Edit Profile
+        </button>
+
+
+        <button
+          onClick={() => handleChat()}
           className="dash-jobseeker__button"
         >
           Inbox
         </button>
+
 
         <button className="dash-jobseeker__logout" onClick={handleLogout}>
           Logout
@@ -282,7 +425,14 @@ const DashJobseeker = () => {
                   onDragStart={(e) => handleDragStart(e, job, "saved")}
                 >
                   <div className="dash-jobseeker__job-info">
-                    <h3>{job.title}</h3>
+                  <h3 className="job-title">{job.Title || 'No title'}</h3>
+                  <p className="job-meta">{job.Company || 'Unknown company'} – {job.Location || 'Unknown location'}</p>
+                    <button
+                    className="more-info-button"
+                    onClick={() => handleMoreInfoClick(job)}
+                  >
+                    More Info
+                  </button>
                   </div>
                 </div>
               ))}
@@ -305,7 +455,14 @@ const DashJobseeker = () => {
                   onDragStart={(e) => handleDragStart(e, job, "interviewed")}
                 >
                   <div className="dash-jobseeker__job-info">
-                    <h3>{job.title}</h3>
+                  <h3 className="job-title">{job.Title || 'No title'}</h3>
+                  <p className="job-meta">{job.Company || 'Unknown company'} – {job.Location || 'Unknown location'}</p>
+                    <button
+                    className="more-info-button"
+                    onClick={() => handleMoreInfoClick(job)}
+                  >
+                    More Info
+                  </button>
                   </div>
                 </div>
               ))}
@@ -328,7 +485,14 @@ const DashJobseeker = () => {
                   onDragStart={(e) => handleDragStart(e, job, "applied")}
                 >
                   <div className="dash-jobseeker__job-info">
-                    <h3>{job.title}</h3>
+                  <h3 className="job-title">{job.Title || 'No title'}</h3>
+                  <p className="job-meta">{job.Company || 'Unknown company'} – {job.Location || 'Unknown location'}</p>
+                    <button
+                    className="more-info-button"
+                    onClick={() => handleMoreInfoClick(job)}
+                  >
+                    More Info
+                  </button>
                   </div>
                 </div>
               ))}
@@ -351,7 +515,14 @@ const DashJobseeker = () => {
                   onDragStart={(e) => handleDragStart(e, job, "unapply")}
                 >
                   <div className="dash-jobseeker__job-info">
-                    <h3>{job.title}</h3>
+                  <h3 className="job-title">{job.Title || 'No title'}</h3>
+                  <p className="job-meta">{job.Company || 'Unknown company'} – {job.Location || 'Unknown location'}</p>
+                    <button
+                    className="more-info-button"
+                    onClick={() => handleMoreInfoClick(job)}
+                  >
+                    More Info
+                  </button>
                   </div>
                 </div>
               ))}
@@ -365,14 +536,33 @@ const DashJobseeker = () => {
           <div className="dash-jobseeker__job-list">
             {offeredJobs.map((job) => (
               <div key={job.id} className="dash-jobseeker__job-card">
-                <div className="dash-jobseeker__job-info">
-                  <h3>{job.title}</h3>
+                <div className="dash-jobseeker__job-info p-4">
+                <h3 className="job-title">{job.Title || 'No title'}</h3>
+                <p className="job-meta">{job.Company || 'Unknown company'} – {job.Location || 'Unknown location'}</p>
+                  <button
+                    className="more-info-button"
+                    onClick={() => handleMoreInfoClick(job)}
+                  >
+                    More Info
+                  </button>
                 </div>
               </div>
             ))}
           </div>
         </div>
       </main>
+
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={true}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </div>
   );
 };

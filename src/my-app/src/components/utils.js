@@ -1,7 +1,6 @@
 import { getFirestore, doc, setDoc, getDoc, collection, getDocs, deleteDoc, updateDoc, arrayUnion, increment  } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
-import axios from 'axios';
-import { getDatabase, ref, push, set } from "firebase/database";
+import { getDatabase, ref, push, set } from 'firebase/database';
 
 export const savePdfToFirestore = async (file) => {
     try {
@@ -65,29 +64,40 @@ export const fetchPdfFromFirestore = async () => {
       let applicationstatus;
 
       const jobSnap = await getDoc(JobRef);
-    if (jobSnap.exists()) {
-      console.log("Job already exists in Firestore.");
-      return { success: false, message: "Job already applied to." };
-    }
+      if (jobSnap.exists()) {
+        console.log("Job already exists in Firestore.");
+        return { success: false, message: "Job already applied to." };
+      }
 
-    const cvBase64 = await fetchPdfFromFirestore();
-    if (!cvBase64) {
-      console.log("No CV found for the user. Please upload a CV.");
-      return { success: false, message: "No CV found" };
-    }
+      const cvBase64 = await fetchPdfFromFirestore();
+      if (!cvBase64) {
+        console.log("No CV found for the user. Please upload a CV.");
+        return { success: false, message: "No CV found" };
+      }
 
-    const response = await axios.post('http://127.0.0.1:500/compare_with_description', {
-      JobDescription: job.JobDescription,
-      JobRequirment: job.JobRequirment || "", 
-      RequiredQual: job.RequiredQual || "",
-      cv: cvBase64.split(',')[1],
-    });
-
-    if (firebasecollection == "appliedjobs"){
-      await setDoc(recruiterJobRef, {
-        userId: user.uid,
-        appliedAt: new Date().toISOString(),
+      const response = await fetch('http://127.0.0.1:500/compare_with_description', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          JobDescription: job.JobDescription,
+          JobRequirment: job.JobRequirment || "",
+          RequiredQual: job.RequiredQual || "",
+          cv: cvBase64.split(',')[1], 
+        }),
       });
+
+      if (!response.ok) {
+        throw new Error(`Failed to compare CV with job description: ${response.statusText}`);
+      }
+
+      // Parse the JSON from the response
+      const responseData = await response.json();
+
+      if (firebasecollection == "appliedjobs"){
+        await setDoc(recruiterJobRef, {
+          userId: user.uid,
+          appliedAt: new Date().toISOString(),
+        });
 
       // Increment the number of applicants for the recruiter
       await updateDoc(recruiterRef, {
@@ -106,10 +116,10 @@ export const fetchPdfFromFirestore = async () => {
     }
 
 
-    const similarityScore = response.data['cosine similarity'];
+    const similarityScore = responseData['cosine similarity'];
     const matchScore = (similarityScore * 100).toFixed(2);
 
-  console.log("Calculated Match Score:", matchScore);
+    console.log("Calculated Match Score:", matchScore);
   
       await setDoc(JobRef, {
         ...job,

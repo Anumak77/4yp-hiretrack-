@@ -12,91 +12,72 @@ import firebase_admin
 from firebase_admin import credentials, db
 from PyPDF2 import PdfReader
 import io
+from flask_cors import cross_origin
+
 from routes.auth import auth_bp  
 from routes.cv import cv_bp 
 from routes.seekersearch import seekersearch_bp 
 from routes.seekeractions import seekeractions_bp
 from routes.recruiterdashboard import recruiterdash_bp
 from routes.recruitersearch import recruitersearch_bp
-from routes.edit_job import edit_job_bp
+from routes.viewapplicants import viewapplicants_bp
+from routes.create_job import create_job_bp
+from routes.view_jobpostings import view_jobpostings_bp
+from routes.seeker_dashboard import seeker_dashboard_bp
+from routes.notifications import notifications_bp
+from routes.cv_extract import cv_extract_bp
+from routes.train_resume_data import train_resume_bp
+from routes.cv_suggestions import cv_suggestions_bp
+from routes.cv_generate import cv_generate_bp
+from routes.chat import chat_bp
+from routes.google_cal import google_cal_bp
+from routes.cors import init_cors
+from routes.editprofile import edit_profile_bp
+from routes.collab_routes import collab
 
 app = Flask(__name__)
-CORS(app)
+init_cors(app)
 
+'''
+@app.before_request
+def handle_cookies():
+    if request.method == "OPTIONS":
+        response = jsonify({'status': 'preflight'})
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add("Access-Control-Allow-Headers", "*")
+        response.headers.add("Access-Control-Allow-Methods", "*")
+        return response
+
+@app.after_request
+def add_security_headers(response):
+    response.headers['Cross-Origin-Opener-Policy'] = 'same-origin-allow-popups'
+    return response
+
+'''
+
+app.register_blueprint(collab)
+app.register_blueprint(train_resume_bp)
 app.register_blueprint(auth_bp)
 app.register_blueprint(cv_bp)
 app.register_blueprint(seekersearch_bp)
 app.register_blueprint(seekeractions_bp)
 app.register_blueprint(recruiterdash_bp)
 app.register_blueprint(recruitersearch_bp)
-app.register_blueprint(edit_job_bp)
+app.register_blueprint(view_jobpostings_bp)
+app.register_blueprint(viewapplicants_bp)
+app.register_blueprint(create_job_bp)
+app.register_blueprint(seeker_dashboard_bp)
+app.register_blueprint(notifications_bp)
+app.register_blueprint(cv_extract_bp)
+app.register_blueprint(cv_suggestions_bp)
+app.register_blueprint(cv_generate_bp)
+app.register_blueprint(chat_bp)
+app.register_blueprint(google_cal_bp)
+app.register_blueprint(edit_profile_bp)
 
 
 FIREBASE_DATABASE_URL = "https://hiretrack-7b035-default-rtdb.europe-west1.firebasedatabase.app/"
-import base64
 
-import base64
-from io import BytesIO
-from PyPDF2 import PdfReader
 
-def decode_pdf(base64_pdf):
-    try:
-        # Add padding if necessary
-        padding = len(base64_pdf) % 4
-        if padding:
-            base64_pdf += '=' * (4 - padding)
-
-        # Decode the base64 string
-        pdf_bytes = base64.b64decode(base64_pdf)
-
-        # Verify the PDF file
-        pdf_reader = PdfReader(BytesIO(pdf_bytes))
-        if not pdf_reader.pages:
-            raise ValueError("PDF file is empty or invalid")
-
-        # Extract text from all pages
-        text = ''
-        for page in pdf_reader.pages:
-            text += page.extract_text()
-
-        return text.strip(), jsonify({base64_pdf})
-    except Exception as e:
-        raise ValueError(f"Error decoding PDF: {str(e)}")
-
-@app.route('/compare_with_description', methods=['GET','POST'])
-def compare_with_description():
-    if request.method == 'POST':
-        try:
-            data = request.json
-            job_description = data.get('JobDescription') 
-            job_requirements = data.get('JobRequirment', '')
-            requirement_qual = data.get('RequiredQual', '')
-            cv_base64 = data.get('cv')  
-
-            combined_job_description = f"{job_description}\n\n{job_requirements}\n\n{requirement_qual}"
-
-            if not combined_job_description or not cv_base64:
-                return jsonify({"error": "Job description and CV are required"}), 400
-            
-            try:
-                user_cv_text = decode_pdf(cv_base64)
-            except ValueError as e:
-                return jsonify({"error": str(e)}), 400
-            
-            if not user_cv_text.strip() or not combined_job_description.strip():
-                    return jsonify({"error": "Job description or CV is empty"}), 400
-
-            vectorizer = TfidfVectorizer().fit_transform([user_cv_text, combined_job_description])
-            similarity_score = cosine_similarity(vectorizer[0], vectorizer[1])[0][0]
-
-            return jsonify({"cosine similarity": similarity_score}), 200
-
-        except Exception as e:
-            print(f"Error in compare_with_description: {str(e)}")
-            return jsonify({"error": "Internal Server Error"}), 500
-    elif request.method == 'GET':
-        # Handle GET request (for debugging)
-        return jsonify({"message": "GET request received. Use POST to compare CV with job description."}), 200
-
-if __name__ == '__main__':
-    app.run(port=5000)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)

@@ -1,0 +1,14 @@
+Flask
+flask_cors
+firebase_admin
+scikit-learn>=1.3.0
+spacy
+fuzzywuzzy
+python-docx
+fitz
+PyMuPDF
+pandas
+requests
+PyPDF2
+rapidfuzz
+docx2txt

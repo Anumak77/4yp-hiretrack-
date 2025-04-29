@@ -3,25 +3,36 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@testing-library/jest-dom": "^5.17.0",
-    "@testing-library/react": "^13.4.0",
+    "@craco/craco": "^7.1.0",
+    "@fullcalendar/daygrid": "^6.1.15",
+    "@fullcalendar/google-calendar": "^6.1.15",
+    "@fullcalendar/interaction": "^6.1.15",
+    "@fullcalendar/react": "^6.1.15",
+    "@fullcalendar/timegrid": "^6.1.15",
+    "@react-oauth/google": "^0.12.1",
     "@testing-library/user-event": "^13.5.0",
-    "axios": "^1.7.9",
+    "axios": "^1.9.0",
     "chart.js": "^4.4.7",
+    "core-js": "^3.41.0",
     "cors": "^2.8.5",
     "csv-parser": "^3.1.0",
+    "date-fns": "^4.1.0",
+    "docx": "^9.3.0",
     "express": "^4.21.2",
     "file-saver": "^2.0.5",
     "firebase": "^11.0.1",
     "fuse.js": "^7.0.0",
-    "jspdf": "^2.5.2",
+    "googleapis": "^148.0.0",
+    "jspdf": "^3.0.1",
     "ng2-charts": "^8.0.0",
     "papaparse": "^5.4.1",
     "pdf-lib": "^1.17.1",
-    "pdfjs-dist": "^2.16.105",
+    "pdfjs-dist": "^5.0.375",
     "react": "^18.3.1",
+    "react-big-calendar": "^1.18.0",
     "react-chartjs-2": "^5.3.0",
     "react-contenteditable": "^3.3.7",
+    "react-datepicker": "^8.2.1",
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^18.3.1",
@@ -29,14 +40,24 @@
     "react-pdf": "^9.2.1",
     "react-router-dom": "^6.28.0",
     "react-scripts": "^5.0.1",
+    "react-toastify": "^11.0.5",
+    "socket.io-client": "^4.8.1",
     "sqlite3": "^5.1.7",
     "web-vitals": "^2.1.4"
   },
+  "jest": {
+    "setupFilesAfterEnv": [
+      "<rootDir>/src/setupTests.js"
+    ]
+  },
+  "browser": {
+    "axios": "^1.6.0"
+  },
   "scripts": {
+    "eject": "react-scripts eject",
     "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "build": "craco build",
+    "test": "react-scripts test"
   },
   "eslintConfig": {
     "extends": [
@@ -58,12 +79,21 @@
   },
   "devDependencies": {
     "@babel/core": "^7.26.8",
-    "@babel/preset-env": "^7.26.8",
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "@babel/preset-env": "^7.26.9",
     "@babel/preset-react": "^7.26.3",
+    "@playwright/test": "^1.51.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.2.0",
     "babel-jest": "^29.7.0",
+    "cypress": "^14.2.0",
+    "identity-obj-proxy": "^3.0.0",
     "jest": "^29.7.0",
     "jest-mock-axios": "^4.8.0",
     "webpack-dev-server": "^5.2.0",
     "worker-loader": "^3.0.8"
-  }
+  },
+  "transformIgnorePatterns": [
+    "node_modules/(?!(axios)/)"
+  ]
 }

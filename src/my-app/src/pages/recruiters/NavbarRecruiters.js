@@ -2,7 +2,7 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import '../../components/style.css'; 
 
-const NavbarRecruiters = () => {
+const NavbarRecruiters = () => { 
   return (
     <nav className="navbar">
       <ul className="nav-menu">
@@ -14,8 +14,8 @@ const NavbarRecruiters = () => {
         </li>
 
         <li className="nav-item">
-          <NavLink to="/jobtracker-recruiter" className="nav-link">
-            Job Tracker Recruiter
+          <NavLink to="/viewjobpostings" className="nav-link">
+            View Job Posting
           </NavLink>
         </li>
 
@@ -24,6 +24,13 @@ const NavbarRecruiters = () => {
             Recruiter Search
           </NavLink>
         </li>
+
+        <li className="nav-item">
+          <NavLink to="/recruiter-calendar" className="nav-link">
+            Recruiter Calendar
+          </NavLink>
+        </li>
+
       </ul>
 
     </nav>
