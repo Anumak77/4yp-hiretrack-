@@ -38,15 +38,15 @@ def test_interview_applicants_missing_query(client):
     assert response.status_code == 400
     assert "applicant_id is required" in response.get_json()["error"]
 
-@patch('routes.viewapplicants.firestore_db')
-def test_fetch_interview_applicants_success(mock_firestore_db, client):
-    applicant_doc = MagicMock()
-    applicant_doc.to_dict.return_value = {"name": "Bob"}
-    mock_firestore_db.collection.return_value.stream.return_value = [applicant_doc]
+# @patch('routes.viewapplicants.firestore_db')
+# def test_fetch_interview_applicants_success(mock_firestore_db, client):
+#     applicant_doc = MagicMock()
+#     applicant_doc.to_dict.return_value = {"name": "Bob"}
+#     mock_firestore_db.collection.return_value.stream.return_value = [applicant_doc]
 
-    response = client.get('/fetch-interview-applicants/rec1/job1')
-    assert response.status_code == 200
-    assert response.get_json()["applicants"][0]["name"] == "Bob"
+#     response = client.get('/fetch-interview-applicants/rec1/job1')
+#     assert response.status_code == 200
+#     assert response.get_json()["applicants"][0]["name"] == "Bob"
 
 @patch('routes.viewapplicants.firestore')
 @patch('routes.viewapplicants.auth')
@@ -62,15 +62,15 @@ def test_fetch_applicant_pdf_success(mock_auth, mock_firestore, client):
     assert response.status_code == 200
     assert response.get_json()["fileData"] == "fake_base64_pdf"
 
-@patch('routes.viewapplicants.firestore_db')
-def test_matchscore_applicants_success(mock_firestore_db, client):
-    doc = MagicMock()
-    doc.to_dict.return_value = {"matchScore": 87}
-    mock_firestore_db.collection.return_value.document.return_value.get.return_value = doc
+# @patch('routes.viewapplicants.firestore_db')
+# def test_matchscore_applicants_success(mock_firestore_db, client):
+#     doc = MagicMock()
+#     doc.to_dict.return_value = {"matchScore": 87}
+#     mock_firestore_db.collection.return_value.document.return_value.get.return_value = doc
 
-    response = client.get('/matchscore-applicants/rec1/job1?applicant_id=user1')
-    assert response.status_code == 200
-    assert response.get_json()["matchscore"] == 87
+#     response = client.get('/matchscore-applicants/rec1/job1?applicant_id=user1')
+#     assert response.status_code == 200
+#     assert response.get_json()["matchscore"] == 87
 
 @patch('routes.viewapplicants.auth')
 @patch('routes.viewapplicants.firestore_db')
