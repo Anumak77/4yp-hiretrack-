@@ -4,6 +4,8 @@ import { getFirestore, doc, getDocs, collection } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { firebaseapp } from "../../components/firebaseconfigs";
 import RequestCollabButton from './RequestCollabButton';
+import Modal from '../../components/model';
+
 
 const Button = ({ children, onClick, disabled, variant = "default" }) => {
   const base = "cv-edit__button";
@@ -93,6 +95,12 @@ function CVEditMock() {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalData, setModalData] = useState({
+    title: '',
+    message: '',
+    buttonText: 'Close'
+  });
 
   const fileInputRef = useRef();
   const navigate = useNavigate();
@@ -173,6 +181,7 @@ function CVEditMock() {
     const auth = getAuth(firebaseapp);
     const user = auth.currentUser;
     const token = await user.getIdToken();
+
 
     try {
       const res = await fetch('http://localhost:5000/api/fetch-collab-request-details', {
@@ -301,6 +310,12 @@ function CVEditMock() {
     a.click();
   };
 
+  const showModal = (title, message) => {
+    setModalData({ title, message, buttonText: 'Close' });
+    setModalOpen(true);
+  };
+
+
   const handleSaveCV = async () => {
     if (!cvData) {
       alert("No CV data to save!");
@@ -327,13 +342,13 @@ function CVEditMock() {
 
       const data = await response.json();
       if (data.success) {
-        alert("CV saved successfully");
+        showModal("Success", "CV saved successfully");
       } else {
-        alert("Failed to save CV");
+        showModal("Failed", "Failed to save CV");
       }
     } catch (error) {
       console.error(error);
-      alert("Something went wrong while saving your CV!");
+      showModal("Error", "Something went wrong while saving your CV!");
     }
   };
 
@@ -473,6 +488,16 @@ function CVEditMock() {
 
 
       </div>
+
+      {modalOpen && (
+        <Modal
+          title={modalData.title}
+          message={modalData.message}
+          buttonText={modalData.buttonText}
+          onClose={() => setModalOpen(false)}
+        />
+      )}
+
     </div>
   );
 }
