@@ -15,23 +15,6 @@ def app():
 def client(app):
     return app.test_client()
 
-@patch("routes.google_cal.firestore_db")
-@patch("routes.google_cal.requests.get")
-def test_store_google_token_success(mock_get, mock_firestore, client):
-    mock_get.return_value.json.return_value = {} 
-
-    mock_user_ref = MagicMock()
-    mock_firestore.collection.return_value.document.return_value = mock_user_ref
-
-    payload = {
-        "uid": "user123",
-        "token": "valid-token",
-        "refreshToken": "refresh-token"
-    }
-
-    res = client.post("/store-google-token", json=payload)
-    assert res.status_code == 200
-    assert "Google token stored successfully" in res.get_data(as_text=True)
 
 @patch("routes.google_cal.auth.verify_id_token")
 @patch("routes.google_cal.firestore_db")

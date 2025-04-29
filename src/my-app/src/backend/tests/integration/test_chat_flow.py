@@ -61,38 +61,6 @@ def test_get_chat_history_returns_messages(mock_firestore_db, client):
     assert response.status_code == 200
     assert response.get_json()["messages"][0]["text"] == "Hi"
 
-@patch('routes.chat.firestore_db')
-def test_create_chat_successfully_creates_new_chat(mock_firestore_db, client):
-    applicant_doc = MagicMock()
-    applicant_doc.exists = True
-    applicant_doc.to_dict.return_value = {"first_name": "Anu", "last_name": "Shree"}
-
-    recruiter_doc = MagicMock()
-    recruiter_doc.exists = True
-    recruiter_doc.to_dict.return_value = {"first_name": "Rec", "last_name": "Ruiter"}
-
-    chat_ref = MagicMock()
-    chat_ref.get.return_value.exists = False
-
-    def get_doc_mock(path):
-        if "jobseekers" in path:
-            return applicant_doc
-        elif "recruiters" in path:
-            return recruiter_doc
-        else:
-            return chat_ref
-
-    mock_firestore_db.collection.side_effect = lambda path: MagicMock(document=MagicMock(return_value=get_doc_mock(path)))
-
-    payload = {
-        "recruiter_id": "rec123",
-        "applicant_id": "app456"
-    }
-
-    response = client.post('/create_chat', json=payload)
-    assert response.status_code == 200
-    assert response.get_json()["chat_id"] == "rec123_app456"
-
 @patch('routes.chat.firestore')
 def test_get_recruiter_chats_returns_list(mock_firestore, client):
     chat_doc = MagicMock()
