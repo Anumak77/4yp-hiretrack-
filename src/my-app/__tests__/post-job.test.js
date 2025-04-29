@@ -69,7 +69,7 @@ describe('PostJob Form', () => {
     fireEvent.change(screen.getByLabelText('Job Requirements'), {
       target: { value: '5+ years experience' },
     });
-    
+
     fireEvent.change(screen.getByLabelText('Required Qualifications'), {
       target: { value: "Bachelor's in CS" },
     });
@@ -90,9 +90,9 @@ describe('PostJob Form', () => {
 
     await screen.findByText(/confirm job posting/i);
 
-    
+
     fireEvent.click(screen.getByText('Cancel'));
-    
+
     await waitFor(() => {
       expect(screen.queryByRole('heading', { name: /confirm job posting/i })).not.toBeInTheDocument();
     });

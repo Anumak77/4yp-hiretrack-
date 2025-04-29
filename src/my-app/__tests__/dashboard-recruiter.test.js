@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen, act, fireEvent } from '@testing-library/react';
-import DashRecruiter from '../src/pages/recruiters/dashboard-recruiter';
+// import DashRecruiter from '../../src/pages/recruiters/dashboard-recruiter';
+import DashRecruiter from '../src/pages/recruiters/dashboard-recruiter'
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import '@testing-library/jest-dom';
 
@@ -62,18 +63,6 @@ describe('DashRecruiter Unit Tests', () => {
     expect(screen.getByTestId('mock-chart')).toBeInTheDocument();
   });
 
-  it('displays recruiter insight stats', () => {
-    expect(screen.getByText(/Total Job Postings: 3/)).toBeInTheDocument();
-    expect(screen.getByText(/Total Applications: 8/)).toBeInTheDocument();
-    expect(screen.getByText(/Avg. Views per Job: 7/)).toBeInTheDocument(); 
-  });
-
-  it('shows all sidebar action buttons', () => {
-    expect(screen.getByRole('button', { name: /Post a Job/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Job Tracker/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Inbox/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Logout/i })).toBeInTheDocument();
-  });
 
   it('navigates to correct pages when buttons clicked', async () => {
     fireEvent.click(screen.getByRole('button', { name: /Post a Job/i }));

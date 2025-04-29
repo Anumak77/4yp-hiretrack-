@@ -49,10 +49,10 @@
     "axios": "^1.6.0"
   },
   "scripts": {
-    "eject": "react-scripts eject",
     "start": "react-scripts start",
-    "build": "craco build",
-    "test": "react-scripts test"
+    "build": "react-scripts build",
+    "test": "jest",
+    "eject": "react-scripts eject"
   },
   "eslintConfig": {
     "extends": [
