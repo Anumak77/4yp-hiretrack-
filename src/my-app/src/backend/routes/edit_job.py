@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, Blueprint
 from firebase_admin import firestore
 from flask_cors import CORS, cross_origin
 from config import firestore_db, realtime_db 
+from firebase_admin import credentials
 
 cred = credentials.Certificate('firebase_service_account_key.json')
 
