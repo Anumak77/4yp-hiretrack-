@@ -25,7 +25,8 @@ test-backend:
   before_script:
     - cd src/my-app/src/backend
     - pip install --upgrade pip
-    - pip install -r requirements.txt
+    - pip install nltk==3.9.1
+    - pip install --no-build-isolation -r requirements.txt
     - pip install pytest
   script:
     - pytest tests/unit
@@ -34,7 +35,6 @@ test-backend:
     paths:
       - src/my-app/src/backend/.pytest_cache/
     expire_in: 1 week
-
 
 # Cypress E2E Tests
 test-e2e:
@@ -50,8 +50,10 @@ test-e2e:
     - cd src/my-app
     - npm ci
     - npm run start &             # Start React app in background
+    - sleep 5                     # Optional: give React some warm-up time
     - cd src/backend
-    - pip install -r requirements.txt
+    - pip install nltk==3.9.1
+    - pip install --no-build-isolation -r requirements.txt
     - python app.py &             # Start Flask app in background
     - sleep 15                    # Wait for both to start up
   script:
