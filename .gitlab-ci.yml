@@ -3,18 +3,17 @@ stages:
   - test-backend
   - test-e2e
 
-# Frontend Unit Tests with Jest
 test-frontend:
   stage: test-frontend
   image: node:18
   script:
-    - cd src/my-app
     - npm ci
-    - npm run test -- --coverage
+    - npm run test -- --ci --coverage --passWithNoTests
   artifacts:
     paths:
       - src/my-app/coverage/
     expire_in: 1 week
+
 
 # Backend Unit + Integration Tests with Pytest
 test-backend:

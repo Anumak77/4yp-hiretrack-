@@ -1,47 +1,47 @@
-image: node:18 # Use Node.js 18 image
+# image: node:18 # Use Node.js 18 image
 
-stages:
-  - install
-  - test
-  - build
-  - deploy
+# stages:
+#   - install
+#   - test
+#   - build
+#   - deploy
 
-cache:
-  paths:
-    - node_modules/ # Cache dependencies to speed up builds
+# cache:
+#   paths:
+#     - node_modules/ # Cache dependencies to speed up builds
 
-before_script:
-  - echo "Installing dependencies..."
-  - npm install
+# before_script:
+#   - echo "Installing dependencies..."
+#   - npm install
 
-test:
-  stage: test
-  script:
-    - echo "Running Jest tests..."
-    - npm test -- --ci --coverage # Run Jest with coverage
-  artifacts:
-    paths:
-      - coverage/ # Save test coverage reports
-    when: always # Save even if tests fail
+# test:
+#   stage: test
+#   script:
+#     - echo "Running Jest tests..."
+#     - npm test -- --ci --coverage # Run Jest with coverage
+#   artifacts:
+#     paths:
+#       - coverage/ # Save test coverage reports
+#     when: always # Save even if tests fail
 
-build:
-  stage: build
-  script:
-    - echo "Building React App..."
-    - npm run build
-  artifacts:
-    paths:
-      - build/ # Save the build folder
+# build:
+#   stage: build
+#   script:
+#     - echo "Building React App..."
+#     - npm run build
+#   artifacts:
+#     paths:
+#       - build/ # Save the build folder
 
-deploy:
-  stage: deploy
-  script:
-    - echo "Deploying application..."
-    - npm install -g serve
-    - serve -s build
-  only:
-    - main # Run this only when pushing to main branch
-    - new-branch
+# deploy:
+#   stage: deploy
+#   script:
+#     - echo "Deploying application..."
+#     - npm install -g serve
+#     - serve -s build
+#   only:
+#     - main # Run this only when pushing to main branch
+#     - new-branch
 
-include:
-  - local: "src/my-app/.gitlab-ci.yml"
+# include:
+#   - local: "src/my-app/.gitlab-ci.yml"
