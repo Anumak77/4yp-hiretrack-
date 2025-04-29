@@ -28,6 +28,7 @@ test-backend:
     - pip install nltk==3.9.1
     - pip install --no-build-isolation -r requirements.txt
     - pip install pytest
+    - python -m spacy download en_core_web_sm 
   script:
     - pytest tests/unit
     - pytest tests/integration
