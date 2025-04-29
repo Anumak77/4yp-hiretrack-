@@ -3,6 +3,7 @@ stages:
   - test-backend
   - test-e2e
 
+# Frontend Unit Tests with React Scripts
 test-frontend:
   stage: test-frontend
   image: node:18
@@ -23,6 +24,7 @@ test-backend:
     - cd src/my-app/src/backend
     - pip install --upgrade pip
     - pip install -r requirements.txt
+    - pip install pytest
   script:
     - pytest tests/unit
     - pytest tests/integration
@@ -31,7 +33,7 @@ test-backend:
       - src/my-app/src/backend/.pytest_cache/
     expire_in: 1 week
 
-# E2E Tests with Cypress
+# Cypress E2E Tests
 test-e2e:
   stage: test-e2e
   image: cypress/included:14.1.0
@@ -44,13 +46,13 @@ test-e2e:
     - apt-get update && apt-get install -y curl
     - cd src/my-app
     - npm ci
-    - npm run start &     # Start React app
+    - npm run start &             # Start React app in background
     - cd src/backend
     - pip install -r requirements.txt
-    - python app.py &     # Start Flask app
-    - sleep 15            # Wait for servers
+    - python app.py &             # Start Flask app in background
+    - sleep 15                    # Wait for both to start up
   script:
-    - cd ../../../..      # Back to project root
+    - cd ../../../..              # Back to root before Cypress
     - npx cypress run
   artifacts:
     when: always
