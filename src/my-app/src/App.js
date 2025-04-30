@@ -24,7 +24,7 @@ import JobSearch from './pages/jobseekers/JobSearch';
 import DashJobseeker from './pages/jobseekers/dashboard-jobseeker';
 import DashRecruiter from './pages/recruiters/dashboard-recruiter';
 import JobTrackerJobseeker from './pages/jobseekers/JobTracker-jobseeker';
-import JobTrackerRecruiter from './pages/recruiters/JobTracker-recruiter';
+import JobTrackerRecruiter from './pages/recruiters/job-tracker-recruiter';
 import RecruiterSearch from './pages/recruiters/RecruiterSearch';
 import JobSeekerDetails from './pages/recruiters/jobseeker-details';
 import JobSeekerChat from './pages/chat/jobseekerchat';
@@ -39,26 +39,29 @@ import EditProfile from './pages/jobseekers/EditProfile';
 import RecruiterCalendar from './pages/recruiters/RecruiterCalendar';
 import CVEditPage from './pages/jobseekers/CVEditPage';
 import JobDetails3 from './pages/jobseekers/job-details3';
+import IncomingCollabRequests from './pages/jobseekers/IncomingCollabRequests';
+import RecruiterPreviewCV from './pages/recruiters/RecruiterPreviewCV'
+
 
 function App() {
   return (
     <GoogleOAuthProvider clientId="714625690444-bjnr3aumebso58niqna7613rtvmc5e6f.apps.googleusercontent.com">
-    <div>
-    <Router>
-      <MainApp />
-    </Router>
+      <div>
+        <Router>
+          <MainApp />
+        </Router>
 
-    <ToastContainer
-                position="top-right"
-                autoClose={5000} 
-                hideProgressBar={false}
-                newestOnTop={true}
-                closeOnClick
-                rtl={false}
-                pauseOnFocusLoss
-                draggable
-                pauseOnHover />
-    </div>
+        <ToastContainer
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={true}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover />
+      </div>
     </GoogleOAuthProvider>
   );
 }
@@ -132,7 +135,7 @@ function MainApp() {
         <Route path="/recruiter-search" element={<RecruiterSearch />} />
         <Route path="/jobseeker-details" element={<JobSeekerDetails />} />
 
-        <Route path="/view-all-applied-jobs" element={<ViewAllAppliedJobs/>} />
+        <Route path="/view-all-applied-jobs" element={<ViewAllAppliedJobs />} />
 
         <Route path="/jobseekerchat" element={<JobSeekerChat />} />
         <Route path="/recruiterchat" element={<RecruiterChat />} />
@@ -146,7 +149,8 @@ function MainApp() {
         <Route path="/viewapplicants/:id" element={<ViewApplicants />} />
         <Route path="/job-details3" element={<JobDetails3 />} />
         <Route path="*" element={<h1>404 - Page Not Found</h1>} />
-        
+        <Route path="/incoming-requests" element={<IncomingCollabRequests />} />
+        <Route path="/recruiter_preview_cv" element={<RecruiterPreviewCV />} />
       </Routes>
     </>
   );

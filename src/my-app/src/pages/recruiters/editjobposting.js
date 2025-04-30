@@ -18,7 +18,7 @@ const countryOptions = [
 
 const EditJob = () => {
   const navigate = useNavigate();
-  const { id } = useParams(); 
+  const { id } = useParams();
   const [jobData, setJobData] = useState({
     AboutC: '',
     ApplicationP: '',
@@ -32,7 +32,13 @@ const EditJob = () => {
     StartDate: '',
     Title: '',
     date: '',
-    jobpost: ''
+    jobpost: '',
+    weights: {
+      semantic: 0.5,
+      tfidf: 0.3,
+      keywords: 0.1,
+      experience: 0.1,
+    },
   });
 
   const [alertMessage, setAlertMessage] = useState(null);
@@ -46,10 +52,10 @@ const EditJob = () => {
 
         const user = getAuth().currentUser;
         if (!user) throw new Error('User not authenticated');
-  
+
         const idToken = await user.getIdToken();
         if (!idToken) throw new Error('Failed to get ID token');
-  
+
         const user_id = user.uid; // Get the current user's ID
         const response = await fetch(`http://localhost:5000/fetch_job/${user_id}/${id}`, {
           method: 'GET',
@@ -58,11 +64,11 @@ const EditJob = () => {
             'Authorization': idToken,
           },
         });
-  
+
         if (!response.ok) {
           throw new Error('Failed to fetch job data');
         }
-  
+
         const job = await response.json();
         setJobData(job); // Pre-fill the form with the fetched job data
       } catch (error) {
@@ -70,7 +76,7 @@ const EditJob = () => {
         showAlert(error.message || 'An error occurred while fetching the job data.', 'error');
       }
     };
-  
+
     fetchJobData();
   }, [id]);
 
@@ -81,16 +87,25 @@ const EditJob = () => {
   };
 
   const handleChange = (e) => {
-    setJobData({ ...jobData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+
+    if (name in jobData.weights) {
+      setJobData({
+        ...jobData,
+        weights: { ...jobData.weights, [name]: parseFloat(value) },
+      });
+    } else {
+      setJobData({ ...jobData, [name]: value });
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     try {
       const user = getAuth().currentUser;
       if (!user) throw new Error('User not authenticated');
-  
+
       const idToken = await user.getIdToken();
       const user_id = user.uid;
       const response = await fetch(`http://localhost:5000/update_job/${user_id}/${id}`, {
@@ -101,10 +116,10 @@ const EditJob = () => {
         },
         body: JSON.stringify(jobData),
       });
-  
+
       if (!response.ok) throw new Error('Failed to update job');
-  
-      setShowSuccessModal(true); 
+
+      setShowSuccessModal(true);
     } catch (error) {
       console.error('Error updating job:', error);
       showAlert(error.message || 'An error occurred while updating the job.', 'error');
@@ -176,27 +191,82 @@ const EditJob = () => {
               </div>
             </div>
 
+            <div className="weights-container">
+              <h3>Matching Weights (Optional)</h3>
+              <div className="input-group">
+                <label>Semantic Similarity Weight</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="1"
+                  name="semantic"
+                  value={jobData.weights.semantic}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div className="input-group">
+                <label>TF-IDF Similarity Weight</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="1"
+                  name="tfidf"
+                  value={jobData.weights.tfidf}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div className="input-group">
+                <label>Keyword Overlap Weight</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="1"
+                  name="keywords"
+                  value={jobData.weights.keywords}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div className="input-group">
+                <label>Experience Match Weight</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="1"
+                  name="experience"
+                  value={jobData.weights.experience}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+
             <button type="submit" className="post-job-button">Update Job</button>
           </form>
         </section>
       </section>
       {showSuccessModal && (
-      <div className="confirmation-modal">
-        <div className="confirmation-content">
-          <h2>Job Updated Successfully!</h2>
-          <p>Your changes have been saved.</p>
-          <div className="confirmation-buttons">
-            <button 
-              className="confirm-button" 
-              onClick={() => navigate('/dashboard-recruiter')}
-            >
-              OK
-            </button>
+        <div className="confirmation-modal">
+          <div className="confirmation-content">
+            <h2>Job Updated Successfully!</h2>
+            <p>Your changes have been saved.</p>
+            <div className="confirmation-buttons">
+              <button
+                className="confirm-button"
+                onClick={() => navigate('/dashboard-recruiter')}
+              >
+                OK
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    )}
-  </main>
+      )}
+    </main>
 
   );
 };

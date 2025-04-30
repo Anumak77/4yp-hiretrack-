@@ -9,7 +9,7 @@ const JobDetails2 = () => {
   const job = location.state;
   const [showPopup, setShowPopup] = useState(false);
   const [matchScore, setMatchScore] = useState(null);
-  const[base64Data, setBase64Data] = useState(null);
+  const [base64Data, setBase64Data] = useState(null);
 
   const closePopup = () => {
     setShowPopup(false);
@@ -23,10 +23,10 @@ const JobDetails2 = () => {
     try {
       const user = auth.currentUser;
       if (!user) throw new Error('User not authenticated');
-  
+
       const idToken = await user.getIdToken();
       if (!idToken) throw new Error('Failed to get ID token');
-  
+
       console.log('Fetching CV from Flask backend...');
       const response = await fetch('http://localhost:5000/fetch-pdf', {
         method: 'GET',
@@ -35,16 +35,16 @@ const JobDetails2 = () => {
           'Authorization': idToken,
         },
       });
-  
+
       console.log('Response Status:', response.status);
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to fetch CV');
       }
-  
+
       const result = await response.json();
       console.log('CV Data from Backend:', result.fileData);
-  
+
       if (result.fileData) {
         return result.fileData;
       } else {
@@ -58,23 +58,23 @@ const JobDetails2 = () => {
   const compareWithDescription = async () => {
     try {
       let cvBase64 = base64Data || await fetchPdfFromFlaskBackend();
-  
+
       if (!cvBase64) {
         alert('No CV found for the user. Please upload a CV.');
         return;
       }
-  
+
       cvBase64 = cvBase64.trim();
-  
+
       const cv = cvBase64.startsWith('data:') ? cvBase64.split(',')[1] : cvBase64;
-  
+
       const payload = {
         JobDescription: job.JobDescription,
         JobRequirment: job.JobRequirment,
         RequiredQual: job.RequiredQual,
         cv: cv
       };
-  
+
       const response = await fetch('http://127.0.0.1:5000/compare_with_description', {
         method: 'POST',
         headers: {
@@ -82,15 +82,15 @@ const JobDetails2 = () => {
         },
         body: JSON.stringify(payload)
       });
-  
+
       if (!response.ok) {
         throw new Error('Failed to get match score from backend');
       }
-  
+
       const data = await response.json();
-      const similarityScore = data.cosine_similarity;
+      const similarityScore = data.matchscore;
       const matchScorePercentage = (similarityScore * 100).toFixed(2);
-  
+
       setMatchScore(matchScorePercentage);
       setShowPopup(true);
     } catch (error) {
@@ -98,7 +98,7 @@ const JobDetails2 = () => {
       alert('An error occurred. Please try again.');
     }
   };
-  
+
 
 
   return (
@@ -139,18 +139,18 @@ const JobDetails2 = () => {
 
 
 
-{showPopup && (
-  <div className="popup-overlay">
-    <div className="popup-content">
-      {matchScore !== null ? (
-        <p>Your match score with this job is: {matchScore}%</p>
-      ) : (
-        <p>You have successfully applied for this job.</p>
+      {showPopup && (
+        <div className="popup-overlay">
+          <div className="popup-content">
+            {matchScore !== null ? (
+              <p>Your match score with this job is: {matchScore}%</p>
+            ) : (
+              <p>You have successfully applied for this job.</p>
+            )}
+            <button className="popup-cancel-button" onClick={closePopup}>Cancel</button>
+          </div>
+        </div>
       )}
-      <button className="popup-cancel-button" onClick={closePopup}>Cancel</button>
-    </div>
-  </div>
-)}
 
     </main>
   );

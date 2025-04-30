@@ -25,14 +25,14 @@ const DashJobseeker = () => {
 
   const logIdToken = async () => {
     try {
-      const user = getAuth().currentUser; 
+      const user = getAuth().currentUser;
       if (!user) {
         console.log('No user is currently signed in.');
         return;
-      }  
+      }
       // Get the Firebase ID token
       const idToken = await user.getIdToken();
-      console.log('Firebase ID Token:', idToken); 
+      console.log('Firebase ID Token:', idToken);
     } catch (error) {
       console.error('Error fetching ID token:', error);
     }
@@ -199,11 +199,11 @@ const DashJobseeker = () => {
         const loadJobs = async () => {
           const savedJobs = await fetchJobs("savedjobs");
           const appliedJobs = await fetchJobs("appliedjobs");
-          const interviewedJobs = await fetchJobs("interviewedjobs");
+          const interviewJobs = await fetchJobs("interviewjobs");
           const unapplyJobs = await fetchJobs("unapplyjobs");
           const offeredJobs = await fetchJobs("offeredjobs");
-  
-          setJobColumns({ saved: savedJobs, applied: appliedJobs, unapply: unapplyJobs, interviewed: interviewedJobs });
+
+          setJobColumns({ saved: savedJobs, applied: appliedJobs, unapply: unapplyJobs, interviewed: interviewJobs });
           // setInterviewJobs(interviewedJobs);
           setOfferedJobs(offeredJobs);
         };
@@ -226,10 +226,10 @@ const DashJobseeker = () => {
   };
 
   const columnToCollectionMap = {
-    saved: "savedjobs",       
-    applied: "appliedjobs",   
-    interviewed: "interviewedjobs", 
-    withdraw: "unapplyjobs",  
+    saved: "savedjobs",
+    applied: "appliedjobs",
+    interviewed: "interviewjobs",
+    withdraw: "unapplyjobs",
     offered: "offeredjobs",
   };
 
@@ -243,7 +243,7 @@ const DashJobseeker = () => {
 
     // update local state first (optimistic)
     setJobColumns((prev) => {
-      const sourceJobs = prev[sourceColumn] ? prev[sourceColumn].filter((j) => j.id !== job.id): [];
+      const sourceJobs = prev[sourceColumn] ? prev[sourceColumn].filter((j) => j.id !== job.id) : [];
       const targetJobs = prev[targetColumn] ? [...prev[targetColumn], job] : [job];
       return {
         ...prev,
@@ -292,40 +292,40 @@ const DashJobseeker = () => {
     const user = auth.currentUser;
 
     if (!user) {
-        throw new Error("User not authenticated");
+      throw new Error("User not authenticated");
     }
 
     const db = getFirestore();
     const notificationsRef = collection(db, `jobseekers/${user.uid}/notifications`);
-    const q = query(notificationsRef, orderBy("timestamp", "desc")); 
+    const q = query(notificationsRef, orderBy("timestamp", "desc"));
 
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
-        querySnapshot.docChanges().forEach((change) => {
-            if (change.type === "added") {
-                const notification = change.doc.data();
-                toast.info(notification.message); 
-            }
-        });
+      querySnapshot.docChanges().forEach((change) => {
+        if (change.type === "added") {
+          const notification = change.doc.data();
+          toast.info(notification.message);
+        }
+      });
     });
 
-    return unsubscribe; 
-};
+    return unsubscribe;
+  };
 
-useEffect(() => {
+  useEffect(() => {
     const unsubscribe = listenForNotifications();
 
     return () => unsubscribe();
-}, []);
+  }, []);
 
-const handleChat = () => {
-  navigate(`/jobseekerchat`);
-};
+  const handleChat = () => {
+    navigate(`/jobseekerchat`);
+  };
 
   return (
     <div className="dash-jobseeker__container">
       <NavbarJobseeker />
       <aside className="dash-jobseeker__sidebar">
-        
+
         <div className="dash-jobseeker__profile">
           <label
             htmlFor="profile-upload"
@@ -382,7 +382,7 @@ const handleChat = () => {
           Edit CV
         </button>
 
-                <button
+        <button
           onClick={() => navigate("/edit-profile")}
           className="dash-jobseeker__button"
         >
@@ -425,14 +425,14 @@ const handleChat = () => {
                   onDragStart={(e) => handleDragStart(e, job, "saved")}
                 >
                   <div className="dash-jobseeker__job-info">
-                  <h3 className="job-title">{job.Title || 'No title'}</h3>
-                  <p className="job-meta">{job.Company || 'Unknown company'} – {job.Location || 'Unknown location'}</p>
+                    <h3 className="job-title">{job.Title || 'No title'}</h3>
+                    <p className="job-meta">{job.Company || 'Unknown company'} – {job.Location || 'Unknown location'}</p>
                     <button
-                    className="more-info-button"
-                    onClick={() => handleMoreInfoClick(job)}
-                  >
-                    More Info
-                  </button>
+                      className="more-info-button"
+                      onClick={() => handleMoreInfoClick(job)}
+                    >
+                      More Info
+                    </button>
                   </div>
                 </div>
               ))}
@@ -455,14 +455,14 @@ const handleChat = () => {
                   onDragStart={(e) => handleDragStart(e, job, "interviewed")}
                 >
                   <div className="dash-jobseeker__job-info">
-                  <h3 className="job-title">{job.Title || 'No title'}</h3>
-                  <p className="job-meta">{job.Company || 'Unknown company'} – {job.Location || 'Unknown location'}</p>
+                    <h3 className="job-title">{job.Title || 'No title'}</h3>
+                    <p className="job-meta">{job.Company || 'Unknown company'} – {job.Location || 'Unknown location'}</p>
                     <button
-                    className="more-info-button"
-                    onClick={() => handleMoreInfoClick(job)}
-                  >
-                    More Info
-                  </button>
+                      className="more-info-button"
+                      onClick={() => handleMoreInfoClick(job)}
+                    >
+                      More Info
+                    </button>
                   </div>
                 </div>
               ))}
@@ -485,14 +485,14 @@ const handleChat = () => {
                   onDragStart={(e) => handleDragStart(e, job, "applied")}
                 >
                   <div className="dash-jobseeker__job-info">
-                  <h3 className="job-title">{job.Title || 'No title'}</h3>
-                  <p className="job-meta">{job.Company || 'Unknown company'} – {job.Location || 'Unknown location'}</p>
+                    <h3 className="job-title">{job.Title || 'No title'}</h3>
+                    <p className="job-meta">{job.Company || 'Unknown company'} – {job.Location || 'Unknown location'}</p>
                     <button
-                    className="more-info-button"
-                    onClick={() => handleMoreInfoClick(job)}
-                  >
-                    More Info
-                  </button>
+                      className="more-info-button"
+                      onClick={() => handleMoreInfoClick(job)}
+                    >
+                      More Info
+                    </button>
                   </div>
                 </div>
               ))}
@@ -515,14 +515,14 @@ const handleChat = () => {
                   onDragStart={(e) => handleDragStart(e, job, "unapply")}
                 >
                   <div className="dash-jobseeker__job-info">
-                  <h3 className="job-title">{job.Title || 'No title'}</h3>
-                  <p className="job-meta">{job.Company || 'Unknown company'} – {job.Location || 'Unknown location'}</p>
+                    <h3 className="job-title">{job.Title || 'No title'}</h3>
+                    <p className="job-meta">{job.Company || 'Unknown company'} – {job.Location || 'Unknown location'}</p>
                     <button
-                    className="more-info-button"
-                    onClick={() => handleMoreInfoClick(job)}
-                  >
-                    More Info
-                  </button>
+                      className="more-info-button"
+                      onClick={() => handleMoreInfoClick(job)}
+                    >
+                      More Info
+                    </button>
                   </div>
                 </div>
               ))}
@@ -537,8 +537,8 @@ const handleChat = () => {
             {offeredJobs.map((job) => (
               <div key={job.id} className="dash-jobseeker__job-card">
                 <div className="dash-jobseeker__job-info p-4">
-                <h3 className="job-title">{job.Title || 'No title'}</h3>
-                <p className="job-meta">{job.Company || 'Unknown company'} – {job.Location || 'Unknown location'}</p>
+                  <h3 className="job-title">{job.Title || 'No title'}</h3>
+                  <p className="job-meta">{job.Company || 'Unknown company'} – {job.Location || 'Unknown location'}</p>
                   <button
                     className="more-info-button"
                     onClick={() => handleMoreInfoClick(job)}

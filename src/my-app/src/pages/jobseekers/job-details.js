@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { auth } from '../../components/firebaseconfigs'; 
+import { auth } from '../../components/firebaseconfigs';
 import '../../components/style.css';
 
 const JobDetails = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const job = location.state; 
+  const job = location.state;
   const [showPopup, setShowPopup] = useState(false);
-  const [popupMessage, setPopupMessage] = useState(""); 
-  const [popupType, setPopupType] = useState(""); 
+  const [popupMessage, setPopupMessage] = useState("");
+  const [popupType, setPopupType] = useState("");
   const [matchScore, setMatchScore] = useState(null);
-  const [base64Data, setBase64Data] = useState(null); 
+  const [base64Data, setBase64Data] = useState(null);
 
   const closePopup = () => {
     setShowPopup(false);
@@ -58,7 +58,7 @@ const JobDetails = () => {
     }
   };
 
-  const compareWithDescription = async () => {
+  const compareWithDescription = async (suppressPopup = false) => {
     try {
       let cvBase64 = base64Data;
       if (!cvBase64) {
@@ -68,15 +68,15 @@ const JobDetails = () => {
         alert("No CV found for the user. Please upload a CV.");
         return;
       }
-  
+
       if (cvBase64.startsWith("data:")) {
         cvBase64 = cvBase64.split(",")[1];
       }
-  
+
       const jobDescription = job.JobDescription || "";
       const jobRequirment = job.JobRequirment || "";
       const requiredQual = job.RequiredQual || "";
-  
+
       const response = await fetch("http://127.0.0.1:5000/compare_with_description", {
         method: "POST",
         headers: {
@@ -89,46 +89,61 @@ const JobDetails = () => {
           cv: cvBase64,
         }),
       });
-  
+
       if (!response.ok) {
         throw new Error(`Compare request failed: ${response.statusText}`);
       }
-  
+
       const data = await response.json();
-      const similarityScore = data.cosine_similarity || 0;
+      const similarityScore = data.match_score || 0;
       const matchScorePercentage = (similarityScore * 100).toFixed(2);
-  
       setMatchScore(matchScorePercentage);
-      setPopupMessage(""); 
-      setPopupType("match"); 
-      setShowPopup(true);
+
+      if (!suppressPopup) {
+        setPopupMessage("");
+        setPopupType("match");
+        setShowPopup(true);
+      }
     } catch (error) {
       console.error("Error comparing CV with job description:", error);
-      alert("An error occurred. Please try again.");
+      if (!suppressPopup) {
+        alert("An error occurred. Please try again.");
+      }
     }
   };
-  
+
   const handleSaveJob = async (e) => {
+    setMatchScore(null);
     e.preventDefault();
     if (!job) {
       console.log("Please select a job to save.");
       return;
     }
+
+    const user = auth.currentUser;
+    if (!user) {
+      alert('Please sign in to save jobs');
+      return;
+    }
+
+
     try {
       const response = await fetch("http://127.0.0.1:5000/save-job", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          userId: "currentUserId",
+          userId: user.uid,
           job: job,
         }),
       });
-  
+
       const result = await response.json();
+      console.log(result)
       if (response.ok) {
         console.log("Job saved successfully:", result.message);
-        setPopupMessage("Job saved successfully!"); 
-        setPopupType("save"); 
+        setMatchScore(null);
+        setPopupMessage("Job saved successfully!");
+        setPopupType("save");
         setShowPopup(true);
       } else {
         console.log("Error saving job:", result.error);
@@ -139,11 +154,11 @@ const JobDetails = () => {
     } catch (error) {
       console.log("Error saving job:", error);
       setPopupMessage("Error saving job. Please try again.");
-      setPopupType("save"); 
+      setPopupType("save");
       setShowPopup(true);
     }
   };
-  
+
   const handleApplyJob = async (e) => {
     e.preventDefault();
     if (!job) {
@@ -179,8 +194,10 @@ const JobDetails = () => {
         matchScore: matchScore
       };
 
+      console.log(payload)
+
       if (matchScore === null) {
-        await compareWithDescription(); 
+        await compareWithDescription(true);
         await new Promise(resolve => setTimeout(resolve, 500));
       }
 
@@ -192,10 +209,11 @@ const JobDetails = () => {
       });
 
       const result = await response.json();
+      console.log(matchScore)
       if (response.ok) {
         console.log("Job applied successfully:", result.message);
-        setPopupMessage("Job applied successfully!"); 
-        setPopupType("save"); 
+        setPopupMessage("Job applied successfully!");
+        setPopupType("save");
         setShowPopup(true);
       } else {
         console.log("Error applying for job:", result.error);
@@ -206,10 +224,16 @@ const JobDetails = () => {
     } catch (error) {
       console.log("Error applying job:", error);
       setPopupMessage("Error applying job. Please try again.");
-      setPopupType("save"); 
+      setPopupType("save");
       setShowPopup(true);
     }
   };
+
+  const handleGetMatchScore = async () => {
+    setMatchScore(null); // optional: forces re-check
+    await compareWithDescription(); // shows popup
+  };
+
 
   return (
     <main className="job-details__container">
@@ -258,27 +282,31 @@ const JobDetails = () => {
           <button className="job-details__button" onClick={handleApplyJob}>
             Apply for Job
           </button>
-          <button className="job-details__button" onClick={compareWithDescription}>
+          <button
+            className="job-details__button"
+            onClick={() => compareWithDescription(false)}
+          >
             Get Match Score
           </button>
+
         </div>
       </section>
 
       {/* Popup for match score */}
       {showPopup && (
-      <div className="popup-overlay">
-        <div className="popup-content">
-          {popupType === "match" ? (
-            <p>Your match score with this job is: {matchScore}%</p>
-          ) : (
-            <p>{popupMessage}</p>
-          )}
-          <button className="popup-cancel-button" onClick={closePopup}>
-            Close
-          </button>
+        <div className="popup-overlay">
+          <div className="popup-content">
+            {popupType === "match" ? (
+              <p>Your match score with this job is: {matchScore}%</p>
+            ) : (
+              <p>{popupMessage}</p>
+            )}
+            <button className="popup-cancel-button" onClick={closePopup}>
+              Close
+            </button>
+          </div>
         </div>
-      </div>
-    )}
+      )}
 
 
     </main>

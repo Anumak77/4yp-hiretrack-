@@ -22,11 +22,13 @@ def fetch_jobseeker_jobs(job_list):
         uid = decoded_token.get('uid')
         
         firestore_db = firestore.client()
-        jobs_ref = firestore_db.collection(f'jobseekers/{uid}/{job_list}')
-        jobs_snapshot = jobs_ref.get()
+
+        collection_ref = firestore_db.collection('jobseekers').document(uid).collection(job_list)
+
+        docs = collection_ref.stream()
 
         jobs = []
-        for doc in jobs_snapshot:
+        for doc in docs:
             jobs.append({ "id": doc.id, **doc.to_dict() })
 
         return jsonify(jobs), 200

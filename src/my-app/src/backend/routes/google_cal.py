@@ -23,6 +23,8 @@ import time
 import uuid 
 import logging
 logging.basicConfig(level=logging.INFO)
+import googleapiclient.discovery_cache
+
 
 cred = credentials.Certificate('firebase_service_account_key.json')
 google_cal_bp = Blueprint('google_cal', __name__)
@@ -36,6 +38,10 @@ def add_security_headers(response):
 # Google OAuth Config
 GOOGLE_CLIENT_ID = "714625690444-bjnr3aumebso58niqna7613rtvmc5e6f.apps.googleusercontent.com"
 GOOGLE_CLIENT_SECRET = "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"
+GOOGLE_SCOPES = [
+    "https://www.googleapis.com/auth/calendar",
+    "https://www.googleapis.com/auth/calendar.events",
+]
 
 @google_cal_bp.route('/store-google-token', methods=['POST'])
 def store_google_token():
@@ -45,7 +51,6 @@ def store_google_token():
         access_token = data['token']
         refresh_token = data.get('refreshToken')
 
-        # verify the access token
         token_info = requests.get(
             'https://www.googleapis.com/oauth2/v3/tokeninfo',
             params={'access_token': access_token}
@@ -53,14 +58,13 @@ def store_google_token():
 
         if 'error' in token_info:
             raise ValueError(token_info['error'])
-
-        token_info = requests.get(
-            'https://www.googleapis.com/oauth2/v3/tokeninfo',
-            params={'access_token': access_token}
-        ).json()
-
-        if 'error' in token_info:
-            raise ValueError(token_info['error'])
+        
+        granted_scopes = set(token_info.get('scope', '').split())
+        required_scopes = set(GOOGLE_SCOPES)
+        
+        if not required_scopes.issubset(granted_scopes):
+            missing = required_scopes - granted_scopes
+            raise ValueError(f"Missing required scopes: {missing}")
 
         # Store in firestore
         user_ref = firestore_db.collection('users').document(uid)
@@ -72,15 +76,16 @@ def store_google_token():
                 'clientId': GOOGLE_CLIENT_ID,
                 'clientSecret': GOOGLE_CLIENT_SECRET,
                 'tokenUri': 'https://oauth2.googleapis.com/token',
-                'scopes': ['https://www.googleapis.com/auth/calendar.events'],
+                'scopes': list(granted_scopes),
+                'lastRefresh': time.time()
             }
         })
 
-        return jsonify({'message': 'Google token stored successfully'}), 200
+        return jsonify({'success': True, 'scopes': list(granted_scopes)}), 200
 
     except Exception as e:
-        print(f'Error storing token: {str(e)}')
-        return jsonify({'error': str(e)}), 400
+        logging.error(f"Token storage error: {str(e)}")
+        return jsonify({'error': str(e), 'code': 'TOKEN_STORAGE_FAILED'}), 400
 
 @google_cal_bp.route('/get-calendar-events', methods=['GET'])
 def get_calendar_events():
@@ -111,7 +116,7 @@ def get_calendar_events():
             token_uri=tokens['tokenUri'],
             client_id=tokens['clientId'],
             client_secret=tokens['clientSecret'],
-            scopes=tokens['scopes']
+            scopes=GOOGLE_SCOPES
         )
 
          # Refresh token if expired
@@ -145,7 +150,8 @@ def get_calendar_events():
 @google_cal_bp.route('/schedule-interview/<recruiter_id>/<job_id>/<applicant_id>', methods=['POST'])
 def schedule_interview(recruiter_id, job_id, applicant_id):
     try:
-        data = request.json
+        data = request.get_json(force=True)
+        print("Received data:", data)
         interview_time = datetime.fromisoformat(data['date'])
         applicant_email = data['applicantEmail']
         job_title = data['jobTitle']
@@ -204,6 +210,7 @@ def schedule_interview(recruiter_id, job_id, applicant_id):
                 'recruiter_event_id': recruiter_event.get('id', '') if recruiter_event else '',
                 'applicant_event_id': applicant_event.get('id', '') if applicant_event else '',
                 'meet_link': recruiter_event.get('hangoutLink', '') if interview_type == 'video' else None,
+                "event_link": recruiter_event.get('htmlLink')
             }
         })
  
@@ -213,13 +220,24 @@ def schedule_interview(recruiter_id, job_id, applicant_id):
             "meet_link": recruiter_event.get('hangoutLink', '')
         })
 
+    except ValueError as e:
+        if "Invalid OAuth scope" in str(e):
+            return jsonify({
+                "error": "invalid_scope",
+                "message": "Calendar access needs reauthentication",
+                "code": "CALENDAR_NEEDS_RECONNECT"
+            }), 403
+        return jsonify({"error": str(e)}), 400
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 def create_calendar_event(user_data, title, description, start_time, end_time, attendee_emails, interview_type):
     try:
         if 'googleTokens' not in user_data:
             raise ValueError("Google account not connected")
+        
+        tokens = user_data['googleTokens']
         
         creds = Credentials(
             token=user_data['googleTokens']['accessToken'],
@@ -227,16 +245,27 @@ def create_calendar_event(user_data, title, description, start_time, end_time, a
             token_uri=user_data['googleTokens']['tokenUri'],
             client_id=user_data['googleTokens']['clientId'],
             client_secret=user_data['googleTokens']['clientSecret'],
-            scopes=user_data['googleTokens']['scopes']
+            scopes=tokens.get('scopes', GOOGLE_SCOPES)
         )
-        service = build('calendar', 'v3', credentials=creds)
+        
+        if creds.expired:
+            creds.refresh(google_requests.Request())
+            user_ref = firestore_db.collection('users').document(user_data['uid'])
+            user_ref.update({
+                'googleTokens.accessToken': creds.token,
+                'googleTokens.expiryDate': time.time() + 3600
+            })
+        service = build('calendar', 'v3', credentials=creds, cache_discovery=False)
 
         event = {
             'summary': title,
             'description': description,
             'start': {'dateTime': start_time.isoformat(), 'timeZone': 'UTC'},
             'end': {'dateTime': end_time.isoformat(), 'timeZone': 'UTC'},
-            'attendees': [{'email': email} for email in attendee_emails]
+            'attendees': [{'email': email} for email in attendee_emails],
+            'reminders': {
+                'useDefault': True
+            }
         }
 
         if interview_type == 'video':
@@ -247,13 +276,24 @@ def create_calendar_event(user_data, title, description, start_time, end_time, a
                 }
             }
 
-        created_event = service.events().insert(
-            calendarId='primary',
-            body=event,
-            conferenceDataVersion=1 if interview_type == 'video' else 0
-        ).execute()
+        try:
+            created_event = service.events().insert(
+                calendarId='primary',
+                body=event,
+                conferenceDataVersion=1 if interview_type == 'video' else 0,
+                sendUpdates='all'
+            ).execute()
+            return created_event
+        except Exception as api_error:
+            error_msg = str(api_error).lower()
+            if 'invalid_grant' in error_msg or 'invalid_scope' in error_msg or 'token expired' in error_msg:
+                user_ref = firestore_db.collection('users').document(user_data['uid'])
+                user_ref.update({
+                    'googleTokens': firestore.DELETE_FIELD
+                })
+                raise ValueError("Session expired. Please reconnect Google Calendar.")
+            raise
 
-        return created_event
     except Exception as e:
-        logging.error(f"Error creating calendar event: {str(e)}")
-        raise 
+        logging.error(f"Calendar event creation failed: {str(e)}")
+        raise

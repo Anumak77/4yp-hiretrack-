@@ -27,12 +27,15 @@ from routes.seeker_dashboard import seeker_dashboard_bp
 from routes.notifications import notifications_bp
 from routes.cv_extract import cv_extract_bp
 from routes.train_resume_data import train_resume_bp
+from routes.jobseekertracker import jobseekertracker_bp
 from routes.cv_suggestions import cv_suggestions_bp
 from routes.cv_generate import cv_generate_bp
 from routes.chat import chat_bp
 from routes.google_cal import google_cal_bp
 from routes.cors import init_cors
 from routes.editprofile import edit_profile_bp
+from routes.collab_routes import collab
+
 app = Flask(__name__)
 init_cors(app)
 
@@ -53,7 +56,9 @@ def add_security_headers(response):
 
 '''
 
+app.register_blueprint(collab)
 app.register_blueprint(train_resume_bp)
+app.register_blueprint(jobseekertracker_bp)
 app.register_blueprint(auth_bp)
 app.register_blueprint(cv_bp)
 app.register_blueprint(seekersearch_bp)
@@ -71,6 +76,11 @@ app.register_blueprint(cv_generate_bp)
 app.register_blueprint(chat_bp)
 app.register_blueprint(google_cal_bp)
 app.register_blueprint(edit_profile_bp)
+
+
+print("[INIT] Flask is starting. Registered routes:")
+for rule in app.url_map.iter_rules():
+    print(rule)
 
 
 FIREBASE_DATABASE_URL = "https://hiretrack-7b035-default-rtdb.europe-west1.firebasedatabase.app/"

@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import '../../components/style.css'; 
+import '../../components/style.css';
 
 const NavbarAdmin = () => {
   return (
@@ -21,7 +21,7 @@ const NavbarAdmin = () => {
             Job Search
           </NavLink>
         </li>
-        
+
         <li className="nav-item">
           <NavLink to="/dashboard-recruiter" className="nav-link">
             Dashboard Recruiter

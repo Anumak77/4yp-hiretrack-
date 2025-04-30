@@ -52,28 +52,39 @@ def process_cv_data(cv_base64):
         return cv_parts[1]  # Use the part after the comma
     return cv_base64  # Use the entire string if no comma is found
 
-def compare_cv_with_job_description(job_description, job_requirements, required_qual, cv_data):
+def compare_cv_with_job_description(job_description, job_requirements, required_qual, cv_data, jobId, recruiterId):
+
     response = requests.post('http://127.0.0.1:5000/compare_with_description', json={
         "JobDescription": job_description,
         "JobRequirment": job_requirements,
         "RequiredQual": required_qual,
         "cv": cv_data,
+        "jobId": jobId,
+        "recruiterId": recruiterId
     })
 
-    similarity_score = response.json().get('cosine similarity', 0)
-    return round(similarity_score * 100, 2)
+    if response.status_code != 200:
+            return {
+                "error": f"Comparison service returned {response.status_code}",
+                "debug": response.text
+            }, None
+    
+    print(response)
+    result = response.json()
+    return None, result
+    
 
-def save_job_application(firestore_db, user_id, job, match_score, job_id):
+def save_job_application(firestore_db, user_id, job, application_data, job_id):
     job_ref = firestore_db.collection(f'jobseekers/{user_id}/appliedjobs').document(job_id)
     job_ref.set({
         **job,
         "savedAt": datetime.now().isoformat(),
-        "matchScore": match_score,
+        "application_data": application_data,
         "applicationstatus": "applied"
     })
     return job_id
 
-def update_recruiter_metadata(firestore_db, recruiter_id, job_id, user_id, match_score):
+def update_recruiter_metadata(firestore_db, recruiter_id, job_id, user_id, application_data):
     try:
 
         user_ref = firestore_db.collection('jobseekers').document(user_id)
@@ -86,7 +97,7 @@ def update_recruiter_metadata(firestore_db, recruiter_id, job_id, user_id, match
         recruiter_job_ref.set({
             **user_data.to_dict(),
             "appliedAt": datetime.now().isoformat(),
-            "matchScore": match_score
+            "application_data": application_data
         })
         recruiter_ref = firestore_db.collection(f'recruiters/{recruiter_id}/applicantsum').document('metadata')
 
@@ -125,10 +136,13 @@ def apply_job():
     try:
         firestore_db = firestore.client()
         data = request.json
+        print(data)
         user_id = data.get('userId')
         job = data.get('job')
         recruiter_id = job.get('recruiterId')
-        match_score = data.get('matchScore')
+        application_data = data.get('application_data')
+        cv_data = None
+
 
         if not user_id or not job:
             return jsonify({"error": "User ID, job data, and recruiter ID are required"}), 400
@@ -144,23 +158,50 @@ def apply_job():
         if applicant_doc.exists:
             return jsonify({"error": "User has already applied for this job"}), 200
 
-        # Fetch the users CV
-        cv_base64, error = fetch_user_cv(firestore_db, user_id)
-        if error:
-            return jsonify(error), 404
+        if application_data is None:
+            cv_base64, error = fetch_user_cv(firestore_db, user_id)
+            if error:
+                return jsonify(error), 404
+            cv_data = process_cv_data(cv_base64)
+            error, comparison_result = compare_cv_with_job_description(
+                job.get('Description', ''),
+                job.get('Requirements', ''),
+                job.get('RequiredQual', ''),
+                cv_data,
+                job_id,
+                recruiter_id,
+            )
 
-        # Process CV data
-        cv_data = process_cv_data(cv_base64)
+            print(comparison_result)
+
+            if error:
+                return jsonify(error), 500
+
+            application_data_temp = {
+                "match_score": comparison_result.get('match_score', 0.0),
+                "score_breakdown": comparison_result.get('score_breakdown', {}),
+                "matching_keywords": comparison_result.get('matching_keywords', []),
+                "missing_keywords": comparison_result.get('missing_keywords', [])
+            }
+        else:
+            application_data = data.get('application_data')
+
+        application_data = {
+            "savedAt": datetime.now().isoformat(),
+            "applicationstatus": "applied",
+            **application_data_temp
+        }
+
 
         # Save job application
-        save_job_application(firestore_db, user_id, job, match_score, job_id)
+        save_job_application(firestore_db, user_id, job, application_data, job_id)
 
         # Update recruiter metadata
-        update_recruiter_metadata(firestore_db, recruiter_id, job_id, user_id, match_score)
+        update_recruiter_metadata(firestore_db, recruiter_id, job_id, user_id, application_data)
 
-        return jsonify({"success": True, "message": "Job applied successfully", "matchScore": match_score}), 200
+        return jsonify({"success": True, "message": "Job applied successfully", "application_data": application_data}), 200
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": str(e), "application_data": application_data}), 500
 
     
 @seekeractions_bp.route('/withdraw-job', methods=['POST'])

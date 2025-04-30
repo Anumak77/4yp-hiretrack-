@@ -5,12 +5,9 @@ import { firebaseapp } from '../../components/firebaseconfigs';
 import { getFirestore, doc, setDoc } from 'firebase/firestore';
 import '../../components/style.css';
 
-// Remove this line:
-// import axios from 'axios';
-
 const countryOptions = [
   "United States", "United Kingdom", "India", "Canada", "Germany",
-  "France", "Australia", "Armenia", "Singapore", "United Arab Emirates"
+  "France", "Australia", "Armenia", "Singapore", "United Arab Emirates", "Ireland"
 ];
 
 const Signup = () => {
@@ -41,7 +38,6 @@ const Signup = () => {
         company_name: userType === 'Recruiter' ? companyName : '',
       };
 
-      // Replaced axios.post with fetch:
       const response = await fetch('http://127.0.0.1:5000/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -49,7 +45,6 @@ const Signup = () => {
       });
 
       if (!response.ok) {
-        // The server responded with a 4xx or 5xx code
         throw new Error(`Signup failed: ${response.statusText}`);
       }
 
@@ -96,17 +91,6 @@ const Signup = () => {
                   onChange={(e) => setUserType(e.target.value)}
                 />
                 Recruiter
-              </label>
-
-              <label className="signup-radio-label">
-                <input
-                  type="radio"
-                  name="userType"
-                  value="Admin"
-                  checked={userType === 'Admin'}
-                  onChange={(e) => setUserType(e.target.value)}
-                />
-                Admin
               </label>
             </div>
           </div>

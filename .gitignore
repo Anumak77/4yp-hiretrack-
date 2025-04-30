@@ -1,1 +1,8 @@
 node_modules/
+*.csv
+*.pdf
+*.zip
+*.json
+*.mp4
+*.jpg
+*.csv
