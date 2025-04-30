@@ -194,7 +194,7 @@ const JobDetails = () => {
       console.log(payload)
 
       if (matchScore === null) {
-        await compareWithDescription();
+        await compareWithDescription(true);
         await new Promise(resolve => setTimeout(resolve, 500));
       }
 

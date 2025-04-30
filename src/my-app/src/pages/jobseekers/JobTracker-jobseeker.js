@@ -11,18 +11,18 @@ import {
 } from "chart.js";
 import { getAuth } from "firebase/auth";
 import React, { useState, useEffect } from "react";
-import { getFirestore, collection, getDoc, doc } from "firebase/firestore";
+import { getFirestore, collection, getDoc, getDocs, doc } from "firebase/firestore";
 import "../../components/style.css";
-import { auth } from '../../components/firebaseconfigs'; 
+import { auth } from '../../components/firebaseconfigs';
 import { useGoogleLogin } from '@react-oauth/google';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
+import { onAuthStateChanged } from "firebase/auth";
+
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
-
-const jobOptions = ["Software Engineer", "Data Analyst", "Project Manager", "Product Designer", "Marketing Specialist"];
 
 const JobTrackerJobseeker = () => {
   const [selectedJob, setSelectedJob] = useState("");
@@ -36,69 +36,113 @@ const JobTrackerJobseeker = () => {
   const auth = getAuth();
   const user = auth.currentUser;
   const [loading, setLoading] = useState("")
-  const [view, setView] = useState('week'); 
+  const [view, setView] = useState('week');
   const [height, setHeight] = useState(400);
   const [showConnectSuccess, setShowConnectSuccess] = useState(false);
   const [showConnectError, setShowConnectError] = useState(false);
   const [connectErrorMessage, setConnectErrorMessage] = useState('');
 
-  
-  useEffect(() => {
-  const fetchAppliedJobs = async () => {
+
+  const fetchJobTitle = async (recruiterId, jobId) => {
     try {
-      const auth = getAuth();
-      const user = auth.currentUser;
-
-      if (!user) {
-        console.log("User not authenticated");
-        return;
-      }
-
-      const idToken = await user.getIdToken();
-
-      const [appliedResponse, rejectedResponse, interviewResponse] = await Promise.all([
-        fetch(`http://localhost:5000/fetch-jobseeker-jobs/appliedjobs`, {
-          method: "GET",
-          headers: {
-            "Authorization": idToken,
-          },
-        }),
-        fetch(`http://localhost:5000/fetch-jobseeker-jobs/rejectedjobs`, {
-          method: "GET",
-          headers: {
-            "Authorization": idToken,
-          },
-        }),
-        fetch(`http://localhost:5000/fetch-jobseeker-jobs/interviewjobs`, {
-          method: "GET",
-          headers: {
-            "Authorization": idToken,
-          },
-        }),
-      ]);
-
-      if (!appliedResponse.ok || !rejectedResponse.ok || !interviewResponse.ok) {
-        throw new Error("Failed to fetch jobs");
-      }
-
-      const appliedJobs = await appliedResponse.json();
-      const rejectedJobs = await rejectedResponse.json();
-      const interviewJobs = await interviewResponse.json();
-
-      const jobs = [
-        ...appliedJobs.map((job) => ({ ...job, status: "Applied" })),
-        ...rejectedJobs.map((job) => ({ ...job, status: "Rejected" })),
-        ...interviewJobs.map((job) => ({ ...job, status: "Interviewed" })),
-      ];
-
-      setJobApplications(jobs);
-    } catch (error) {
-      console.error("Error fetching jobs", error);
+      const response = await fetch(`http://localhost:5000/fetch_job/${recruiterId}/${jobId}`);
+      if (!response.ok) throw new Error("Job not found");
+      const jobData = await response.json();
+      return jobData.Title || "Untitled Job";
+    } catch (err) {
+      console.error(`Failed to fetch job title for job ID ${jobId}:`, err);
+      return "Unknown Job";
     }
   };
 
-  fetchAppliedJobs();
-}, []);
+
+  useEffect(() => {
+    const fetchAppliedJobs = async () => {
+      try {
+        const auth = getAuth();
+        const user = auth.currentUser;
+
+        if (!user) {
+          console.log("User not authenticated");
+          return;
+        }
+
+        const idToken = await user.getIdToken();
+
+        const [appliedResponse, rejectedResponse, interviewResponse] = await Promise.all([
+          fetch(`http://localhost:5000/fetch-jobseeker-jobs/appliedjobs`, {
+            method: "GET",
+            headers: {
+              "Authorization": idToken,
+            },
+          }),
+          fetch(`http://localhost:5000/fetch-jobseeker-jobs/rejectedjobs`, {
+            method: "GET",
+            headers: {
+              "Authorization": idToken,
+            },
+          }),
+          fetch(`http://localhost:5000/fetch-jobseeker-jobs/interviewjobs`, {
+            method: "GET",
+            headers: {
+              "Authorization": idToken,
+            },
+          }),
+        ]);
+
+        if (!appliedResponse.ok || !rejectedResponse.ok || !interviewResponse.ok) {
+          throw new Error("Failed to fetch jobs");
+        }
+
+        const appliedJobs = await appliedResponse.json();
+        const rejectedJobs = await rejectedResponse.json();
+        const interviewJobs = await interviewResponse.json();
+
+        const jobs = [
+          ...appliedJobs.map((job) => ({ ...job, status: "Applied" })),
+          ...rejectedJobs.map((job) => ({ ...job, status: "Rejected" })),
+          ...interviewJobs.map((job) => ({ ...job, status: "Interviewed" })),
+        ];
+
+        // 🧠 Enrich each job with its title from recruiter data
+        const jobsWithTitles = await Promise.all(
+          jobs.map(async (job) => {
+            const title = await fetchJobTitle(job.recruiter_id, job.id); // recruiter_id must be present
+            return { ...job, jobTitle: title };
+          })
+        );
+
+        setJobApplications(jobsWithTitles);
+      } catch (error) {
+        console.error("Error fetching jobs", error);
+      }
+    };
+
+
+    fetchAppliedJobs();
+  }, []);
+
+
+  useEffect(() => {
+    const auth = getAuth();
+    const db = getFirestore();
+
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const uid = user.uid;
+        const jobsRef = collection(db, `jobseekers/${uid}/appliedjobs`);
+        try {
+          const snapshot = await getDocs(jobsRef);
+          const jobs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), status: "Applied" }));
+          setJobApplications(jobs);
+        } catch (err) {
+          console.error("Error fetching applied jobs:", err);
+        }
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const handleAddApplication = () => {
     if (!selectedJob || !dueDate) {
@@ -122,24 +166,24 @@ const JobTrackerJobseeker = () => {
   };
 
   const barChartData = {
-    labels: ["Applied", "Interviewed", "Rejected"], 
+    labels: ["Applied", "Interviewed", "Rejected"],
     datasets: [
       {
         label: "Number of Applications",
         data: [
           jobApplications.filter((app) => app.status === "Applied").length,
-          jobApplications.filter((app) => app.status === "Interviewed").length, 
-          jobApplications.filter((app) => app.status === "Rejected").length, 
+          jobApplications.filter((app) => app.status === "Interviewed").length,
+          jobApplications.filter((app) => app.status === "Rejected").length,
         ],
         backgroundColor: [
-          "#c0b283", 
-          "#404a42", 
-          "#192231", 
+          "#c0b283",
+          "#404a42",
+          "#192231",
         ],
-        borderColor: "f4f4f4", 
+        borderColor: "f4f4f4",
         borderWidth: 1,
       },
-    ],    
+    ],
   };
 
   const chartOptions = {
@@ -147,15 +191,15 @@ const JobTrackerJobseeker = () => {
     maintainAspectRatio: false,
     scales: {
       y: {
-        beginAtZero: true, 
+        beginAtZero: true,
         ticks: {
-          stepSize: 1, 
+          stepSize: 1,
         },
       },
     },
   };
-  
-  
+
+
   const pieChartData = {
     labels: ["Applied", "Interviewed", "Rejected"],
     datasets: [
@@ -181,7 +225,7 @@ const JobTrackerJobseeker = () => {
       try {
         const user = auth.currentUser;
         if (!user) throw new Error('Not authenticated');
-  
+
         console.log("Google OAuth Response:", tokenResponse);
 
         const tokenResponseWithRefresh = await fetch(
@@ -192,46 +236,46 @@ const JobTrackerJobseeker = () => {
               'Content-Type': 'application/x-www-form-urlencoded',
             },
             body: new URLSearchParams({
-              code: tokenResponse.code, 
+              code: tokenResponse.code,
               client_id: GOOGLE_CLIENT_ID,
               client_secret: GOOGLE_CLIENT_SECRET,
-              redirect_uri: 'http://localhost:3000', 
+              redirect_uri: 'http://localhost:3000',
               grant_type: 'authorization_code',
             }),
           }
         ).then(res => res.json());
-  
+
         const payload = {
           uid: user.uid,
           token: tokenResponseWithRefresh.access_token,
           refreshToken: tokenResponseWithRefresh.refresh_token
         };
         console.log("Sending payload to backend:", JSON.stringify(payload, null, 2));
-        
+
         const response = await fetch('http://localhost:5000/store-google-token', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': await user.getIdToken()
           },
-          body: JSON.stringify(payload) 
+          body: JSON.stringify(payload)
         });
-  
+
         const responseClone = response.clone();
         const data = await response.json();
-        
+
         if (!response.ok) {
-          throw { 
+          throw {
             message: data.error || 'Failed to store token',
             response: responseClone
           };
         }
-  
+
         setShowConnectSuccess(true);
       } catch (error) {
         setConnectErrorMessage(error.message || "Failed to connect to Google Calendar");
         setShowConnectError(true);
-        
+
         let errorDetails = '';
         try {
           const errorResponse = error.response || await fetch(error.url);
@@ -239,7 +283,7 @@ const JobTrackerJobseeker = () => {
         } catch (e) {
           errorDetails = error.message;
         }
-        
+
         console.error('Error details:', errorDetails);
         alert(`Connection failed: ${error.message}\nDetails: ${errorDetails.substring(0, 100)}`);
       }
@@ -252,65 +296,66 @@ const JobTrackerJobseeker = () => {
 
   useEffect(() => {
     if (isConnected) {
-    const fetchEvents = async () => {      
-      setLoading(true);
+      const fetchEvents = async () => {
+        setLoading(true);
 
-      try {
-        const idToken = await user.getIdToken();
+        try {
+          const idToken = await user.getIdToken();
 
-        console.log('Successfully obtained ID token:', idToken);
+          console.log('Successfully obtained ID token:', idToken);
 
-        const response = await fetch('http://localhost:5000/get-calendar-events', {
-          headers: {
-            'Authorization': `Bearer ${idToken}`
+          const response = await fetch('http://localhost:5000/get-calendar-events', {
+            headers: {
+              'Authorization': `Bearer ${idToken}`
+            }
+          });
+
+          console.log('Response status:', response.status, response.statusText);
+
+          if (!response.ok) throw new Error('Failed to fetch events');
+
+          const data = await response.json();
+
+          console.log(data)
+
+          const sourceArray = Array.isArray(data)
+            ? data
+            : data?.items && Array.isArray(data.items)
+              ? data.items
+              : null;
+
+          if (!sourceArray) {
+            console.warn('Unexpected data format from backend:', data);
+            throw new Error('Invalid events data format');
           }
-        });
 
-        console.log('Response status:', response.status, response.statusText);
-        
-        if (!response.ok) throw new Error('Failed to fetch events');
-        
-        const data = await response.json();
+          const formattedEvents = sourceArray.map(event => {
+            try {
+              return {
+                id: event.id || Math.random().toString(36).substring(2, 9),
+                title: event.summary || event.title || 'No Title',
+                start: new Date(event.start?.dateTime || event.start?.date || new Date()),
+                end: new Date(event.end?.dateTime || event.end?.date || new Date(Date.now() + 3600000)),
+                allDay: !event.start?.dateTime,
+              };
+            } catch (e) {
+              console.error('Error processing event:', event, e);
+              return null;
+            }
+          }).filter(Boolean);
 
-        console.log(data)
-
-        const sourceArray = Array.isArray(data) 
-          ? data 
-          : data?.items && Array.isArray(data.items) 
-            ? data.items 
-            : null;
-
-        if (!sourceArray) {
-          console.warn('Unexpected data format from backend:', data);
-          throw new Error('Invalid events data format');
+          setEvents(formattedEvents);
+        } catch (error) {
+          console.error('Error fetching events:', error);
+        } finally {
+          setLoading(false);
         }
+      };
 
-        const formattedEvents = sourceArray.map(event => {
-          try {
-            return {
-              id: event.id || Math.random().toString(36).substring(2, 9),
-              title: event.summary || event.title || 'No Title',
-              start: new Date(event.start?.dateTime || event.start?.date || new Date()),
-              end: new Date(event.end?.dateTime || event.end?.date || new Date(Date.now() + 3600000)),
-              allDay: !event.start?.dateTime,
-            };
-          } catch (e) {
-            console.error('Error processing event:', event, e);
-            return null; 
-          }
-        }).filter(Boolean);
-        
-        setEvents(formattedEvents);
-      } catch (error) {
-        console.error('Error fetching events:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-  
-    fetchEvents();}
-  }, [user, isConnected]); 
-  
+      fetchEvents();
+    }
+  }, [user, isConnected]);
+
   useEffect(() => {
     const checkConnection = async () => {
       const userDoc = await getDoc(doc(getFirestore(), 'users', user.uid));
@@ -318,141 +363,148 @@ const JobTrackerJobseeker = () => {
     };
     if (user) checkConnection();
   }, [user]);
-  
+
   useEffect(() => {
     setHeight(view === 'month' ? 600 : view === 'week' ? 500 : 400);
   }, [view]);
-  
+
 
   const CustomEvent = ({ event }) => (
     <div>
-    <strong>{event?.title || "undefined"}</strong>
-        {event?.resource?.description && event.resource.description !== "undefined" && (
-          <div>{event.resource.description}</div>
-        )}  
+      <strong>{event?.title || "undefined"}</strong>
+      {event?.resource?.description && event.resource.description !== "undefined" && (
+        <div>{event.resource.description}</div>
+      )}
     </div>
   );
-  
+
   const CustomToolbar = (toolbar) => {
     const goToToday = () => {
       toolbar.onNavigate('TODAY');
-    };}
+    };
+  }
 
   return (
     <main>
 
-<h2 className="jobtracker-chart-title">Job Tracker Dashboard</h2>
+      <h2 className="jobtracker-chart-title">Job Tracker Dashboard</h2>
 
       <section className="jobtracker-container">
 
-      <section className="jobtracker-form">
-        <select className="jobtracker-select" value={selectedJob} onChange={(e) => setSelectedJob(e.target.value)}>
-          <option value="">Select a Job</option>
-          {jobOptions.map((job, index) => (
-            <option key={index} value={job}>
-              {job}
-            </option>
-          ))}
-        </select>
+        <section className="jobtracker-form">
+          <select
+            className="jobtracker-select"
+            value={selectedJob}
+            onChange={(e) => setSelectedJob(e.target.value)}
+          >
+            <option value="">Select a Job</option>
+            {jobApplications.map((job, index) => (
+              <option key={index} value={job.Title || job.jobTitle || job.id}>
+                {job.Title || job.jobTitle || job.id}
+              </option>
+            ))}
+          </select>
 
-        <input type="date" className="input-date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
-        <div className="jobtracker-status-buttons">
-  <button
-    onClick={() => handleStatusChange("Applied")}
-    className={`jobtracker-status-button applied ${jobStatus === "Applied" ? "active" : ""}`}
-  >
-    Applied
-  </button>
-  <button
-    onClick={() => handleStatusChange("Interviewed")}
-    className={`jobtracker-status-button interviewed ${jobStatus === "Interviewed" ? "active" : ""}`}
-  >
-    Interviewed
-  </button>
-  <button
-    onClick={() => handleStatusChange("Rejected")}
-    className={`jobtracker-status-button rejected ${jobStatus === "Rejected" ? "active" : ""}`}
-  >
-    Rejected
-  </button>
-</div>
-        <button onClick={handleAddApplication} className="jobtracker-add-button">
-          Add Application
-        </button>
-      
-      </section>
 
-      <div className="jobtracker-charts-container">
-      <div className="jobtracker-chart-container">
-        <h2 className="jobtracker-chart-heading">Bar Chart - Applications Per Status</h2>
-        <div className="jobtracker-bar-chart">
-        <div className="jobtracker-bar-chart" style={{ width: "400px", height: "400px" }}>
-          <Bar data={barChartData} options={chartOptions} />
-        </div>
-        </div>
-      </div>
 
-      <div className="jobtracker-chart-container">
-        <h2 className="jobtracker-chart-heading">Pie Chart - Job Status</h2>
-        <div className="jobtracker-pie-chart">
-          <Pie data={pieChartData} />
-        </div>
-      </div>
-      </div>
-      </section>
-
-      
-      <section className="google-calendar-integration">
-          <h2>Google Calendar Integration</h2>
-          <br></br>
-          {!isConnected ? (
-            <button onClick={connectCalendar} className="google-connect-button">
-              Connect Google Calendar
+          <input type="date" className="input-date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+          <div className="jobtracker-status-buttons">
+            <button
+              onClick={() => handleStatusChange("Applied")}
+              className={`jobtracker-status-button applied ${jobStatus === "Applied" ? "active" : ""}`}
+            >
+              Applied
             </button>
-          ) : (
-            <FullCalendar
-              plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-              initialView="timeGridWeek"
-              headerToolbar={{
-                left: 'prev,next today',
-                center: 'title',
-                right: 'dayGridMonth,timeGridWeek,timeGridDay'
-              }}
-              eventColor="#0f5411"
-              height="auto"
-              nowIndicator={true}
-              events={events}
-            />
-          )}
+            <button
+              onClick={() => handleStatusChange("Interviewed")}
+              className={`jobtracker-status-button interviewed ${jobStatus === "Interviewed" ? "active" : ""}`}
+            >
+              Interviewed
+            </button>
+            <button
+              onClick={() => handleStatusChange("Rejected")}
+              className={`jobtracker-status-button rejected ${jobStatus === "Rejected" ? "active" : ""}`}
+            >
+              Rejected
+            </button>
+          </div>
+          <button onClick={handleAddApplication} className="jobtracker-add-button">
+            Add Application
+          </button>
+
         </section>
 
-        {showConnectSuccess && (
-          <div className="confirmation-modal">
-            <div className="confirmation-content">
-              <h2>Google Calendar Connected!</h2>
-              <p className="confirmation-message">Your calendar has been successfully linked! </p>
-              <div className="confirmation-buttons">
-                <button className="confirm-button" onClick={() => setShowConnectSuccess(false)}>
-                  Close
-                </button>
+        <div className="jobtracker-charts-container">
+          <div className="jobtracker-chart-container">
+            <h2 className="jobtracker-chart-heading">Bar Chart - Applications Per Status</h2>
+            <div className="jobtracker-bar-chart">
+              <div className="jobtracker-bar-chart" style={{ width: "400px", height: "400px" }}>
+                <Bar data={barChartData} options={chartOptions} />
               </div>
             </div>
           </div>
-        )}
 
-        {showConnectError && (
-          <div className="confirmation-modal">
-            <div className="confirmation-content">
-              <h2>Failed to Connect</h2>
-              <p className="confirmation-message">{connectErrorMessage}</p>
-              <div className="confirmation-buttons">
-                <button className="confirm-button reject-btn" onClick={() => setShowConnectError(false)}>
-                  Close
-                </button>
-              </div>
+          <div className="jobtracker-chart-container">
+            <h2 className="jobtracker-chart-heading">Pie Chart - Job Status</h2>
+            <div className="jobtracker-pie-chart">
+              <Pie data={pieChartData} />
             </div>
           </div>
+        </div>
+      </section>
+
+
+      <section className="google-calendar-integration">
+        <h2>Google Calendar Integration</h2>
+        <br></br>
+        {!isConnected ? (
+          <button onClick={connectCalendar} className="google-connect-button">
+            Connect Google Calendar
+          </button>
+        ) : (
+          <FullCalendar
+            plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+            initialView="timeGridWeek"
+            headerToolbar={{
+              left: 'prev,next today',
+              center: 'title',
+              right: 'dayGridMonth,timeGridWeek,timeGridDay'
+            }}
+            eventColor="#0f5411"
+            height="auto"
+            nowIndicator={true}
+            events={events}
+          />
         )}
+      </section>
+
+      {showConnectSuccess && (
+        <div className="confirmation-modal">
+          <div className="confirmation-content">
+            <h2>Google Calendar Connected!</h2>
+            <p className="confirmation-message">Your calendar has been successfully linked! </p>
+            <div className="confirmation-buttons">
+              <button className="confirm-button" onClick={() => setShowConnectSuccess(false)}>
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showConnectError && (
+        <div className="confirmation-modal">
+          <div className="confirmation-content">
+            <h2>Failed to Connect</h2>
+            <p className="confirmation-message">{connectErrorMessage}</p>
+            <div className="confirmation-buttons">
+              <button className="confirm-button reject-btn" onClick={() => setShowConnectError(false)}>
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
 
     </main>

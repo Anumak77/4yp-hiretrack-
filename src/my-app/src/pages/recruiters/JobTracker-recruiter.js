@@ -1,154 +1,159 @@
 import React, { useState, useEffect } from 'react';
-import { Line } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
-import '../../components/style.css'; 
+import { Bar, Pie, Line } from 'react-chartjs-2';
+import { useNavigate } from 'react-router-dom';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+} from 'chart.js';
+import '../../components/style.css';
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
-
-const monthOrder = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
-];
-
-const mockJobOptions = [
-  'Software Engineer', 'Data Analyst', 'Project Manager', 'Product Designer', 'Marketing Specialist'
-];
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 const JobTrackerRecruiter = () => {
   const [jobTrends, setJobTrends] = useState([]);
-  const [selectedJob, setSelectedJob] = useState('');
-  const [applications, setApplications] = useState('');
-  const [month, setMonth] = useState('');
-  const [customNotes, setCustomNotes] = useState('');
-  const [customTags, setCustomTags] = useState([]);
-  const [visibility, setVisibility] = useState('Active');
-  const [error, setError] = useState('');
+  const [locationFilter, setLocationFilter] = useState('');
+  const [allLocations, setAllLocations] = useState([]);
 
-  const handleAddJobTrend = () => {
-    if (!selectedJob || !applications || !month) {
-      setError("Oops! Looks like you missed something. Please complete all fields.");
-      return;
-    }
-    setError("");
-
-    const newJobTrend = {
-      jobTitle: selectedJob,
-      applications: parseInt(applications),
-      month,
-      customNotes,
-      customTags,
-      visibility,
-    };
-
-    setJobTrends([...jobTrends, newJobTrend]);
-    setSelectedJob('');
-    setApplications('');
-    setMonth('');
-    setCustomNotes('');
-    setCustomTags([]);
-    setVisibility('Active');
-  };
-
-  const handleTagInput = (e) => {
-    if (e.key === 'Enter' && e.target.value.trim()) {
-      setCustomTags([...customTags, e.target.value.trim()]);
-      e.target.value = '';
-    }
-  };
+  const monthOrder = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December',
+  ];
 
   useEffect(() => {
-    if (error) {
-      const timer = setTimeout(() => {
-        setError('');
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [error]);
+    const fetchTrends = async () => {
+      const res = await fetch("http://localhost:5000/get-all-job-application-trends");
+      const data = await res.json();
+      const cleaned = data.map(d => ({
+        ...d,
+        location: d.location || 'Unknown',
+        month: d.month || 'Unknown'
+      }));
+      setJobTrends(cleaned);
 
-  const sortedJobTrends = jobTrends.sort(
-    (a, b) => monthOrder.indexOf(a.month) - monthOrder.indexOf(b.month)
-  );
+      const locations = [...new Set(cleaned.map(item => item.location))];
+      setAllLocations(locations);
+    };
+    fetchTrends();
+  }, []);
 
-  const lineChartData = {
-    labels: [...new Set(sortedJobTrends.map(trend => trend.month))],
-    datasets: mockJobOptions.map((job, index) => ({
-      label: job,
-      data: sortedJobTrends
-        .filter(trend => trend.jobTitle === job)
-        .map(trend => trend.applications),
-      borderColor: ['#192231', '#404a42', '#c0b283', '#eddbcd', '#6a0572'][index % 5], 
-      fill: false,
-    })),
-  };
+  const filtered = locationFilter
+    ? jobTrends.filter(trend => trend.location === locationFilter)
+    : jobTrends;
+
+  const locationCounts = filtered.reduce((acc, trend) => {
+    acc[trend.location] = (acc[trend.location] || 0) + trend.totalApplications;
+    return acc;
+  }, {});
+
+  const topTrends = [...filtered]
+    .sort((a, b) => b.totalApplications - a.totalApplications)
+    .slice(0, 7);
+
+  const monthlyCounts = filtered.reduce((acc, trend) => {
+    acc[trend.month] = (acc[trend.month] || 0) + trend.totalApplications;
+    return acc;
+  }, {});
+
+  const sortedMonths = monthOrder.filter(month => monthlyCounts[month]);
+  const navigate = useNavigate();
+
 
   return (
     <main>
-      <h1 className="job-tracker__title">Job Tracker</h1> 
-      <section className="job-tracker__container">
-        <div className="job-tracker__card">
-          <div className="job-tracker__form">
-            <div className="job-options-container">
-              {mockJobOptions.map((job, index) => (
-                <button 
-                  key={index} 
-                  className={`job-option-button ${selectedJob === job ? 'selected' : ''}`} 
-                  onClick={() => setSelectedJob(job)}
-                  style={{ margin: "1%" }} 
-                >
-                  {job}
-                </button>
-              ))}
-            </div>
+      <br></br><br></br><br></br>
+      <h1 className="job-tracker__title">Job Application Trends</h1>
 
-            <label>Application Date</label>
-            <input
-              type="text"
-              placeholder="Enter Month (e.g., January)"
-              value={month}
-              onChange={(e) => setMonth(e.target.value)}
-            />
+      <section className="job-tracker__card">
+        <button
+          className="back-button"
+          onClick={() => navigate('/dashboard-recruiter')}
+        >
+          Back to Dashboard
+        </button>
 
-            <input
-              type="number"
-              placeholder="Applications Count"
-              value={applications}
-              onChange={(e) => setApplications(e.target.value)}
-            />
-
-
-            <label>Custom Tags (Press Enter to Add)</label>
-            <input type="text" placeholder="Add tags..." onKeyDown={handleTagInput} />
-            <div className="custom-tags">
-              {customTags.map((tag, index) => (
-                <span key={index} className="tag">{tag}</span>
-              ))}
-            </div>
-            
-            <label>Job Posting Visibility</label>
-              <div className="visibility-toggle">
-                {["Active", "Paused", "Featured"].map((status) => (
-                  <button
-                    key={status}
-                    className={`visibility-button ${visibility === status ? "selected" : ""}`}
-                    onClick={() => setVisibility(status)}
-                  >
-                    {status}
-                  </button>
-                ))}
-              </div>
-
-
-            <button onClick={handleAddJobTrend}>Add Job Trend</button>
-
-            {error && <div className="error-message">{error}</div>}
-          </div>
-
-          <div className="job-tracker__chart">
-            <h2>Line Chart - Job Trends</h2>
-            <Line data={lineChartData} /> 
-          </div>
+        <h2>Applications by Location</h2>
+        <div className="chart-container pie-chart">
+          <Pie
+            data={{
+              labels: Object.keys(locationCounts),
+              datasets: [{
+                data: Object.values(locationCounts),
+                backgroundColor: ['#1A3E31', '#2C5C4A', '#324A6D', '#395E59', '#48624C']
+              }]
+            }}
+          />
         </div>
       </section>
+
+      <div className="filter-container">
+        <label>Filter by Location: </label>
+        <select value={locationFilter} onChange={(e) => setLocationFilter(e.target.value)}>
+          <option value="">All Locations</option>
+          {allLocations.map((loc, idx) => (
+            <option key={idx} value={loc}>{loc}</option>
+          ))}
+        </select>
+      </div>
+
+      <div className="trends-section">
+        <section className="job-tracker__card">
+          <h2>Top Jobs by Applications</h2>
+          <div className="chart-container bar-chart">
+            <Bar
+              data={{
+                labels: topTrends.map(t => t.jobTitle),
+                datasets: [{
+                  label: 'Applications',
+                  data: topTrends.map(t => t.totalApplications),
+                  backgroundColor: '#395E59'
+                }]
+              }}
+              options={{
+                responsive: true,
+                scales: {
+                  y: {
+                    beginAtZero: true,
+                    ticks: { stepSize: 1, precision: 0 }
+                  }
+                }
+              }}
+            />
+          </div>
+        </section>
+
+        <section className="job-tracker__card">
+          <h2>Monthly Application Trends</h2>
+          <div className="chart-container line-chart">
+            <Line
+              data={{
+                labels: sortedMonths,
+                datasets: [{
+                  label: 'Applications',
+                  data: sortedMonths.map(month => monthlyCounts[month]),
+                  borderColor: '#1A3E31',
+                  tension: 0.3
+                }]
+              }}
+            />
+          </div>
+        </section>
+      </div>
     </main>
   );
 };

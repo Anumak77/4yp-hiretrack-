@@ -29,6 +29,7 @@ from routes.cv_extract import cv_extract_bp
 from routes.train_resume_data import train_resume_bp
 from routes.cv_suggestions import cv_suggestions_bp
 from routes.cv_generate import cv_generate_bp
+from routes.jobseekertracker import jobseekertracker_bp 
 from routes.chat import chat_bp
 from routes.google_cal import google_cal_bp
 from routes.cors import init_cors
@@ -59,6 +60,7 @@ app.register_blueprint(collab)
 app.register_blueprint(train_resume_bp)
 app.register_blueprint(auth_bp)
 app.register_blueprint(cv_bp)
+app.register_blueprint(jobseekertracker_bp)
 app.register_blueprint(seekersearch_bp)
 app.register_blueprint(seekeractions_bp)
 app.register_blueprint(recruiterdash_bp)

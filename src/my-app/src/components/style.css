@@ -4997,3 +4997,69 @@ main::after {
 .active-button:hover {
   background-color: #059669;
 }
+
+.job-tracker__title {
+  text-align: center;
+  font-size: 2rem;
+  margin-top: 30px;
+  color: #1A3E31;
+}
+
+.job-tracker__card {
+  background-color: #EAF1ED;
+  padding: 20px;
+  margin: 20px auto;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  /* Removed max-width here */
+}
+
+.trends-section .job-tracker__card {
+  flex: 1 1 45%;
+  max-width: 48%;
+}
+
+
+.filter-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.filter-container label {
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+.filter-container select {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background-color: #f9f9f9;
+}
+
+.trends-section {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.chart-container {
+  margin: 0 auto;
+  width: 100%;
+}
+
+.pie-chart {
+  width: 350px;
+  height: 350px;
+  margin: auto;
+}
+
+.bar-chart,
+.line-chart {
+  width: 100%;
+  max-width: 600px;
+  height: 400px;
+}
