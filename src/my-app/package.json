@@ -45,9 +45,6 @@
     "sqlite3": "^5.1.7",
     "web-vitals": "^2.1.4"
   },
-  "jest": {
-  "setupFilesAfterEnv": ["<rootDir>/src/setupTests.js"]
-  },
   "browser": {
     "axios": "^1.6.0"
   },
@@ -93,5 +90,11 @@
   },
   "transformIgnorePatterns": [
     "node_modules/(?!(axios)/)"
-  ]
+  ],
+  "description": "This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).",
+  "main": "craco.config.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
 }
