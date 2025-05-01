@@ -95,6 +95,15 @@ function CVEditMock() {
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [modal, setModal] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
+  const auth = getAuth(firebaseapp);
+  const [name, setName] = useState("Guest");
+  const [jobColumns, setJobColumns] = useState({
+    saved: [],
+    applied: [],
+    unapply: [],
+    interviewed: [],
+  });
+  const [offeredJobs, setOfferedJobs] = useState([]);
   const [modalData, setModalData] = useState({
     title: '',
     message: '',
@@ -107,28 +116,50 @@ function CVEditMock() {
   const handleCloseSuggestions = () => {
     setShowNote(false);
   };
-
-  // Fetch applied jobs on mount
+  const [authLoaded, setAuthLoaded] = useState(false);
   useEffect(() => {
-    const auth = getAuth(firebaseapp);
-    const db = getFirestore(firebaseapp);
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) setName(user.displayName || "Guest");
+      setAuthLoaded(true);
+    });
+    return () => unsubscribe();
+  }, []);
 
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        const uid = user.uid;
-        const jobsRef = collection(db, `jobseekers/${uid}/appliedjobs`);
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (!user) return;
+
+      const loadJobs = async () => {
         try {
-          const snapshot = await getDocs(jobsRef);
-          const jobs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          setAppliedJobs(jobs);
+          const idToken = await user.getIdToken();
+          const fetchWithAuth = async (list) => {
+            const res = await fetch(`http://127.0.0.1:5000/fetch-jobseeker-jobs/${list}`, {
+              headers: { Authorization: idToken },
+            });
+            const data = await res.json();
+            return Array.isArray(data) ? data : [];
+          };
+
+          const [saved, applied, interviewed, unapply, offered] = await Promise.all([
+            fetchWithAuth("savedjobs"),
+            fetchWithAuth("appliedjobs"),
+            fetchWithAuth("interviewjobs"),
+            fetchWithAuth("unapplyjobs"),
+            fetchWithAuth("offeredjobs"),
+          ]);
+
+          setJobColumns({ saved, applied, interviewed, unapply });
+          setOfferedJobs(offered);
         } catch (err) {
-          console.error("Error fetching applied jobs:", err);
+          console.error("Failed to fetch jobs:", err);
         }
-      }
+      };
+
+      loadJobs();
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [authLoaded]);
 
   // Update selected job details
   useEffect(() => {
@@ -175,6 +206,7 @@ function CVEditMock() {
 
   };
 
+  if (!authLoaded) return <div>Loading...</div>;
 
   const handleSelectRequest = async (request) => {
     const auth = getAuth(firebaseapp);
@@ -421,7 +453,12 @@ function CVEditMock() {
 
         <div className="cv-edit__form-container">
 
-          <button className="edit-jobseeker-profile__back-button" onClick={() => navigate(-1)}>Go Back</button>
+          <button
+            className="edit-jobseeker-profile__back-button"
+            onClick={() => navigate(-1)}
+          >
+            Go Back
+          </button>
 
           <h2 className="cv-edit__title">Upload & Edit Your CV</h2>
 
