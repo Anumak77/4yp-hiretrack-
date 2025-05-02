@@ -333,7 +333,7 @@ const ViewApplicants = () => {
         throw new Error("Selected applicant has no email address");
       }
 
-      // await handleInterview(selectedApplicant.uid, jobId);
+      await handleInterview(selectedApplicant.uid, jobId);
 
       console.log("Scheduling interview for:", selectedApplicant.uid);
 
