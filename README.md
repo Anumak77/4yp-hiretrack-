@@ -104,5 +104,5 @@ Have questions, suggestions, or feedback?
 
 > _Project submitted as part of the 4th Year Computer Science Capstone (CSC1097) at Dublin City University._
 > **Developed by:**  
-> Anushree Umak (21343003)  
-> Siri Nandipaty (21449384)  
+> Anushree Umak  
+> Siri Nandipaty  
